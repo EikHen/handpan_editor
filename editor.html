@@ -156,6 +156,16 @@ body {
 
   <div id="sidebar">
 
+    <!-- Templates -->
+    <div class="panel">
+      <div class="panel-title">Template</div>
+      <div class="row">
+        <select id="template-select">
+          <option value="">— choose a template —</option>
+        </select>
+      </div>
+    </div>
+
     <!-- Note properties -->
     <div class="panel">
       <div class="panel-title">Note</div>
@@ -327,6 +337,23 @@ const CHORD_TYPES = {
   'Min6':     [0, 3, 7,  9],
 };
 
+const CHORD_SYMBOLS = {
+  'Major':    '△',
+  'Minor':    '−',
+  'Dim':      '°',
+  'Aug':      '+',
+  'Sus2':     'sus²',
+  'Sus4':     'sus⁴',
+  'Maj7':     '△⁷',
+  'Min7':     '−⁷',
+  'Dom7':     '⁷',
+  'Dim7':     '°⁷',
+  'HalfDim7': 'ø⁷',
+  'MinMaj7':  '−△⁷',
+  'Maj6':     '⁶',
+  'Min6':     '−⁶',
+};
+
 const ACCENT = '#5b8db8';
 
 const PALETTE = [
@@ -335,6 +362,124 @@ const PALETTE = [
   '#27ae60','#2ecc71','#16a085','#80cbc4',
   '#3498db','#2980b9','#6c5ce7','#a855f7',
   '#9c27b0','#e91e8c','#795548','#607d8b',
+];
+
+// ─── Default startup layout (D3 Kurd 18, hand-tuned positions) ───────────────
+const DEFAULT_STATE = {
+  pan: {"cx":500,"cy":500,"r":324},
+  notes: [
+    {"id":"n1", "x":502,"y":510,"r":80,"label":"D3"},
+    {"id":"n2", "x":585,"y":652,"r":62,"label":"A3"},
+    {"id":"n3", "x":417,"y":658,"r":62,"label":"Bb3"},
+    {"id":"n4", "x":688,"y":553,"r":50,"label":"C4"},
+    {"id":"n5", "x":305,"y":548,"r":50,"label":"D4"},
+    {"id":"n6", "x":695,"y":439,"r":50,"label":"E4"},
+    {"id":"n7", "x":309,"y":421,"r":50,"label":"F4"},
+    {"id":"n8", "x":635,"y":339,"r":50,"label":"G4"},
+    {"id":"n9", "x":388,"y":327,"r":50,"label":"A4"},
+    {"id":"n10","x":506,"y":295,"r":50,"label":"C4"},
+    {"id":"n15","x":647,"y":134,"r":43,"label":"F5"},
+    {"id":"n17","x":180,"y":774,"r":71,"label":"E3"},
+    {"id":"n18","x":842,"y":753,"r":77,"label":"Bb2"},
+    {"id":"n19","x":456,"y":386,"r":32,"label":"D5"},
+    {"id":"n20","x":548,"y":385,"r":32,"label":"E5"},
+    {"id":"n21","x":84, "y":531,"r":77,"label":"C3"},
+    {"id":"n22","x":909,"y":531,"r":71,"label":"F3"},
+    {"id":"n23","x":193,"y":206,"r":71,"label":"G3"},
+  ],
+  nextId: 24,
+};
+
+// Templates: satellite notes ordered so low-pitched notes land at the bottom
+// and high-pitched notes land at the top (bottom_angles starts lower-right,
+// goes counter-clockwise, so the middle indices end up near the top).
+const TEMPLATES = [
+  {
+    name: 'D3 Kurd 18',
+    state: DEFAULT_STATE,
+  },
+  {
+    name: 'F#2 Nordlys 15',
+    state: {
+      pan: {"cx":500,"cy":500,"r":320},
+      notes: [
+        {"id":"n1", "x":508,"y":488,"r":102,"label":"F#2"},
+        {"id":"n2", "x":500,"y":710,"r":56, "label":"F#3"},
+        {"id":"n3", "x":352,"y":648,"r":55, "label":"G#3"},
+        {"id":"n4", "x":648,"y":648,"r":54, "label":"Bb3"},
+        {"id":"n5", "x":290,"y":500,"r":52, "label":"C4"},
+        {"id":"n6", "x":710,"y":500,"r":52, "label":"C#4"},
+        {"id":"n7", "x":352,"y":352,"r":49, "label":"F4"},
+        {"id":"n8", "x":648,"y":352,"r":48, "label":"G#4"},
+        {"id":"n9", "x":500,"y":290,"r":45, "label":"C5"},
+        {"id":"n10","x":821,"y":795,"r":95, "label":"Bb2"},
+        {"id":"n11","x":180,"y":788,"r":84, "label":"C#3"},
+        {"id":"n12","x":297,"y":156,"r":46, "label":"F5"},
+        {"id":"n13","x":598,"y":128,"r":43, "label":"G#5"},
+        {"id":"n14","x":826,"y":276,"r":49, "label":"C#5"},
+        {"id":"n15","x":91, "y":508,"r":67, "label":"F3"},
+      ],
+      nextId: 16,
+    },
+  },
+  {
+    name: 'D3 Aegean 20',
+    state: {
+      pan: {"cx":500,"cy":500,"r":320},
+      notes: [
+        {"id":"n1", "x":500,"y":500,"r":80,"label":"D3"},
+        {"id":"n2", "x":500,"y":710,"r":56,"label":"F#3"},
+        {"id":"n3", "x":365,"y":661,"r":54,"label":"A3"},
+        {"id":"n4", "x":635,"y":661,"r":52,"label":"C#4"},
+        {"id":"n5", "x":293,"y":536,"r":51,"label":"D4"},
+        {"id":"n6", "x":707,"y":536,"r":49,"label":"F#4"},
+        {"id":"n7", "x":318,"y":395,"r":48,"label":"G#4"},
+        {"id":"n8", "x":682,"y":395,"r":47,"label":"A4"},
+        {"id":"n9", "x":428,"y":303,"r":45,"label":"C#5"},
+        {"id":"n10","x":572,"y":303,"r":44,"label":"D5"},
+        {"id":"n11","x":500,"y":372,"r":26,"label":"F#5"},
+        {"id":"n12","x":582,"y":402,"r":25,"label":"G#5"},
+        {"id":"n13","x":418,"y":402,"r":25,"label":"A5"},
+        {"id":"n14","x":819,"y":741,"r":62,"label":"G#3"},
+        {"id":"n15","x":900,"y":500,"r":56,"label":"E4"},
+        {"id":"n16","x":819,"y":259,"r":50,"label":"B4"},
+        {"id":"n17","x":500,"y":100,"r":70,"label":"B2"},
+        {"id":"n18","x":181,"y":259,"r":46,"label":"E5"},
+        {"id":"n19","x":100,"y":500,"r":60,"label":"B3"},
+        {"id":"n20","x":181,"y":741,"r":66,"label":"E3"},
+      ],
+      nextId: 21,
+    },
+  },
+  {
+    name: 'E3 Amara 20',
+    state: {
+      pan: {"cx":500,"cy":500,"r":320},
+      notes: [
+        {"id":"n1", "x":500,"y":500,"r":80,"label":"E3"},
+        {"id":"n2", "x":500,"y":710,"r":53,"label":"B3"},
+        {"id":"n3", "x":352,"y":648,"r":51,"label":"D4"},
+        {"id":"n4", "x":648,"y":648,"r":50,"label":"E4"},
+        {"id":"n5", "x":290,"y":500,"r":49,"label":"F#4"},
+        {"id":"n6", "x":710,"y":500,"r":48,"label":"G4"},
+        {"id":"n7", "x":352,"y":352,"r":47,"label":"A4"},
+        {"id":"n8", "x":648,"y":352,"r":44,"label":"D5"},
+        {"id":"n9", "x":500,"y":290,"r":43,"label":"E5"},
+        {"id":"n10","x":549,"y":382,"r":26,"label":"F#5"},
+        {"id":"n11","x":451,"y":382,"r":26,"label":"G5"},
+        {"id":"n12","x":618,"y":451,"r":25,"label":"A5"},
+        {"id":"n13","x":819,"y":741,"r":67,"label":"D3"},
+        {"id":"n14","x":900,"y":500,"r":59,"label":"C4"},
+        {"id":"n15","x":846,"y":300,"r":62,"label":"A3"},
+        {"id":"n16","x":688,"y":147,"r":50,"label":"B4"},
+        {"id":"n17","x":500,"y":100,"r":50,"label":"C5"},
+        {"id":"n18","x":243,"y":194,"r":63,"label":"G3"},
+        {"id":"n19","x":102,"y":535,"r":64,"label":"F#3"},
+        {"id":"n20","x":181,"y":741,"r":69,"label":"C3"},
+      ],
+      nextId: 21,
+    },
+  },
 ];
 
 // ─── Pitch class helpers ──────────────────────────────────────────────────────
@@ -350,6 +495,104 @@ function parsePitchClass(label) {
 
 function fmtLabel(s) {
   return (s || '').replace(/#/g, '♯').replace(/b(?=[0-9])/g, '♭');
+}
+
+// ─── Layout-from-string ───────────────────────────────────────────────────────
+
+// Convert a note label (e.g. "F#3", "Bb2") to a MIDI note number.
+function midiNote(label) {
+  const m = label.match(/^([A-G])([#b]?)(\d+)$/i);
+  if (!m) return 60;
+  const base = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 }[m[1].toUpperCase()] ?? 0;
+  const acc  = m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0;
+  return (parseInt(m[3]) + 1) * 12 + base + acc;
+}
+
+// Map MIDI pitch to a circle radius: lower pitch → larger circle.
+function pitchRadius(label, minR, maxR, midiLo = 44, midiHi = 84) {
+  const t = Math.max(0, Math.min(1, (midiNote(label) - midiLo) / (midiHi - midiLo)));
+  return Math.round(maxR - t * (maxR - minR));
+}
+
+function layoutFromString(s) {
+  const tokens = s.split(',').map(t => t.trim()).filter(Boolean);
+  let ding = null, ring = [], mutants = [], bottom = [];
+  for (const t of tokens) {
+    if      (t.startsWith('~')) bottom.push(t.slice(1));
+    else if (t.startsWith('*')) mutants.push(t.slice(1));
+    else if (ding === null)     ding = t;
+    else                        ring.push(t);
+  }
+
+  const cx = 500, cy = 500;
+  const ringOrbit   = 210;
+  const mutantOrbit = 128;
+  const bottomOrbit = 400;
+
+  // Correct handpan zigzag: bottom → bottom-LEFT → bottom-RIGHT → mid-LEFT → …
+  // (SVG: y-axis points down, so larger angle = left side)
+  function ringAngles(n) {
+    if (n === 0) return [];
+    const step = 2 * Math.PI / n;
+    return Array.from({ length: n }, (_, i) =>
+      Math.PI / 2 - ((-1) ** i) * Math.ceil(i / 2) * step
+    );
+  }
+
+  function mutantAngles(nRing, nMutants) {
+    if (nMutants === 0) return [];
+    if (nRing === 0) {
+      const step = 2 * Math.PI / Math.max(nMutants, 1);
+      return Array.from({ length: nMutants }, (_, i) => (3 * Math.PI / 2 + i * step) % (2 * Math.PI));
+    }
+    const step = 2 * Math.PI / nRing;
+    const gaps = Array.from({ length: nRing }, (_, k) =>
+      (Math.PI / 2 + (k + 0.5) * step) % (2 * Math.PI)
+    );
+    const top = 3 * Math.PI / 2;
+    const angDist = a => { const d = Math.abs(a - top) % (2 * Math.PI); return Math.min(d, 2 * Math.PI - d); };
+    gaps.sort((a, b) => {
+      const da = angDist(a), db = angDist(b);
+      if (Math.abs(da - db) > 1e-9) return da - db;
+      return (a > top ? 0 : 1) - (b > top ? 0 : 1);
+    });
+    return gaps.slice(0, nMutants);
+  }
+
+  function bottomAngles(n) {
+    if (n === 0) return [];
+    const start = Math.PI / 3;
+    const step  = 2 * Math.PI / n;
+    return Array.from({ length: n }, (_, i) => (start - i * step + 4 * Math.PI) % (2 * Math.PI));
+  }
+
+  const notes = [];
+  let id = 1;
+
+  if (ding) notes.push({ id: `n${id++}`, x: cx, y: cy, r: 80, label: ding });
+
+  ringAngles(ring.length).forEach((a, i) => {
+    notes.push({ id: `n${id++}`,
+      x: Math.round(cx + ringOrbit * Math.cos(a)),
+      y: Math.round(cy + ringOrbit * Math.sin(a)),
+      r: pitchRadius(ring[i], 38, 62), label: ring[i] });
+  });
+
+  mutantAngles(ring.length, mutants.length).forEach((a, i) => {
+    notes.push({ id: `n${id++}`,
+      x: Math.round(cx + mutantOrbit * Math.cos(a)),
+      y: Math.round(cy + mutantOrbit * Math.sin(a)),
+      r: pitchRadius(mutants[i], 24, 36), label: mutants[i] });
+  });
+
+  bottomAngles(bottom.length).forEach((a, i) => {
+    notes.push({ id: `n${id++}`,
+      x: Math.round(cx + bottomOrbit * Math.cos(a)),
+      y: Math.round(cy + bottomOrbit * Math.sin(a)),
+      r: pitchRadius(bottom[i], 40, 72), label: bottom[i] });
+  });
+
+  return { pan: { cx, cy, r: 320 }, notes, nextId: id };
 }
 
 // ─── State ────────────────────────────────────────────────────────────────────
@@ -442,13 +685,13 @@ function noteVisual(note, isSelected) {
 
   if (hpcs === 'all') {
     const col = pc >= 0 ? PC_COLORS[pc] : ACCENT;
-    return { stroke: col, strokeW: 3, opacity: 1, fill: 'white' };
+    return { stroke: col, strokeW: 5, opacity: 1, fill: 'white' };
   }
 
   // chord mode — use pitch-class color for chord notes, dim the rest
   if (hpcs.has(pc)) {
     const col = pc >= 0 ? PC_COLORS[pc] : ACCENT;
-    return { stroke: col, strokeW: 4, opacity: 1, fill: 'white' };
+    return { stroke: col, strokeW: 6, opacity: 1, fill: 'white' };
   }
   return { stroke: '#aaa', strokeW: 2, opacity: 0.3, fill: 'white' };
 }
@@ -520,7 +763,7 @@ function renderNotes() {
       'font-family': 'Arial, sans-serif', 'font-size': 30,
       'font-weight': 'bold', fill: '#333', 'pointer-events': 'none',
     });
-    lbl.textContent = `${PC_NAMES[hlChordRoot]} ${hlChordType}`;
+    lbl.textContent = `${CHORD_SYMBOLS[hlChordType] ?? ''} ${PC_NAMES[hlChordRoot]} ${hlChordType}`;
     notesLayer.appendChild(lbl);
   }
 }
@@ -896,6 +1139,28 @@ panR.addEventListener('input', () => {
 });
 panR.addEventListener('change', pushHistory);
 
+// Templates dropdown
+const templateSelect = document.getElementById('template-select');
+TEMPLATES.forEach((tpl, i) => {
+  const o = document.createElement('option');
+  o.value = i; o.textContent = tpl.name;
+  templateSelect.appendChild(o);
+});
+templateSelect.addEventListener('change', e => {
+  const idx = e.target.value;
+  if (idx === '') return;
+  const tpl    = TEMPLATES[+idx];
+  const layout = tpl.state
+    ? { pan: tpl.state.pan, notes: JSON.parse(JSON.stringify(tpl.state.notes)), nextId: tpl.state.nextId }
+    : layoutFromString(tpl.notes);
+  state.pan    = layout.pan;
+  state.notes  = layout.notes;
+  state.nextId = layout.nextId;
+  selectedIds.clear();
+  pushHistory(); render(); syncSidebar(); syncPanSlider();
+  templateSelect.value = '';
+});
+
 // Highlight mode
 document.getElementById('hl-mode').addEventListener('change', e => {
   hlMode = e.target.value; render(); updateHighlightPanel();
@@ -905,7 +1170,7 @@ document.getElementById('hl-mode').addEventListener('change', e => {
 const chordTypeEl = document.getElementById('hl-chord-type');
 Object.keys(CHORD_TYPES).forEach(name => {
   const o = document.createElement('option');
-  o.value = name; o.textContent = name;
+  o.value = name; o.textContent = `${CHORD_SYMBOLS[name] ?? ''} ${name}`;
   chordTypeEl.appendChild(o);
 });
 chordTypeEl.addEventListener('change', e => {
@@ -985,9 +1250,9 @@ function buildSVGString(highlightPcs = null, chordLabel = '') {
     let stroke = ACCENT, strokeW = 2.5, opacity = 1, fill = 'white';
 
     if (highlightPcs === 'all') {
-      stroke = pc >= 0 ? PC_COLORS[pc] : ACCENT; strokeW = 3;
+      stroke = pc >= 0 ? PC_COLORS[pc] : ACCENT; strokeW = 5;
     } else if (highlightPcs instanceof Set) {
-      if (highlightPcs.has(pc)) { stroke = pc >= 0 ? PC_COLORS[pc] : ACCENT; strokeW = 4; }
+      if (highlightPcs.has(pc)) { stroke = pc >= 0 ? PC_COLORS[pc] : ACCENT; strokeW = 6; }
       else                      { stroke = '#ccc'; strokeW = 2; opacity = 0.3; }
     }
 
@@ -1064,13 +1329,13 @@ document.getElementById('file-input').addEventListener('change', e => {
 
 function exportCurrentSVG() {
   const hpcs = getHighlightedPcs();
-  const label = hlMode === 'chord' ? `${PC_NAMES[hlChordRoot]} ${hlChordType}` : '';
+  const label = hlMode === 'chord' ? `${CHORD_SYMBOLS[hlChordType] ?? ''} ${PC_NAMES[hlChordRoot]} ${hlChordType}` : '';
   dlBlob(new Blob([buildSVGString(hpcs, label)], { type:'image/svg+xml' }), 'handpan-layout.svg');
 }
 
 function exportCurrentPNG() {
   const hpcs  = getHighlightedPcs();
-  const label = hlMode === 'chord' ? `${PC_NAMES[hlChordRoot]} ${hlChordType}` : '';
+  const label = hlMode === 'chord' ? `${CHORD_SYMBOLS[hlChordType] ?? ''} ${PC_NAMES[hlChordRoot]} ${hlChordType}` : '';
   svgToPngBlob(buildSVGString(hpcs, label)).then(blob => dlBlob(blob, 'handpan-layout.png'));
 }
 
@@ -1088,8 +1353,8 @@ function getAllChords(types) {
       const native = missing.length === 0;
       const missingStr = missing.map(p => PC_NAMES[p]).join(', ');
       const label = native
-        ? `${PC_NAMES[root]} ${type}`
-        : `${PC_NAMES[root]} ${type} (−${missingStr})`;
+        ? `${CHORD_SYMBOLS[type] ?? ''} ${PC_NAMES[root]} ${type}`
+        : `${CHORD_SYMBOLS[type] ?? ''} ${PC_NAMES[root]} ${type} (−${missingStr})`;
       result.push({ type, root, pcs: new Set(pcs), native, label,
         filename: `${ROOT_FILE[root]}_${type}.png` });
     }
@@ -1168,10 +1433,9 @@ function syncPanSlider() {
 // ─── Init: load saved layout ──────────────────────────────────────────────────
 
 (function () {
-  const DEFAULT = {"version":1,"pan":{"cx":500,"cy":500,"r":324},"notes":[{"id":"n1","x":502,"y":510,"r":80,"label":"D3"},{"id":"n2","x":585,"y":652,"r":62,"label":"A3"},{"id":"n3","x":417,"y":658,"r":62,"label":"Bb3"},{"id":"n4","x":688,"y":553,"r":50,"label":"C4"},{"id":"n5","x":305,"y":548,"r":50,"label":"D4"},{"id":"n6","x":695,"y":439,"r":50,"label":"E4"},{"id":"n7","x":309,"y":421,"r":50,"label":"F4"},{"id":"n8","x":635,"y":339,"r":50,"label":"G4"},{"id":"n9","x":388,"y":327,"r":50,"label":"A4"},{"id":"n10","x":506,"y":295,"r":50,"label":"C4"},{"id":"n15","x":647,"y":134,"r":43,"label":"F5"},{"id":"n17","x":180,"y":774,"r":71,"label":"E3"},{"id":"n18","x":842,"y":753,"r":77,"label":"Bb2"},{"id":"n19","x":456,"y":386,"r":32,"label":"D5"},{"id":"n20","x":548,"y":385,"r":32,"label":"E5"},{"id":"n21","x":84,"y":531,"r":77,"label":"C3"},{"id":"n22","x":909,"y":531,"r":71,"label":"F3"},{"id":"n23","x":193,"y":206,"r":71,"label":"G3"}]};
-  state.pan   = DEFAULT.pan;
-  state.notes = DEFAULT.notes;
-  state.nextId = 24;
+  state.pan    = DEFAULT_STATE.pan;
+  state.notes  = JSON.parse(JSON.stringify(DEFAULT_STATE.notes));
+  state.nextId = DEFAULT_STATE.nextId;
   pushHistory(); resizeCanvas(); render(); syncSidebar(); syncPanSlider();
 })();
 </script>
