@@ -199,6 +199,7 @@ body {
       <!-- By-note legend -->
       <div id="hl-note-opts" style="display:none;">
         <div id="note-legend"></div>
+        <div id="note-scale-table"></div>
       </div>
 
       <!-- By-chord options -->
@@ -229,6 +230,10 @@ body {
           <button class="btn" style="flex:1;font-size:11px;" onclick="checkAllChordTypes(true)">All</button>
           <button class="btn" style="flex:1;font-size:11px;" onclick="checkAllChordTypes(false)">None</button>
         </div>
+        <label style="display:flex;align-items:center;gap:6px;margin-top:7px;font-size:11px;color:#aab;cursor:pointer;">
+          <input type="checkbox" id="only-native-check" style="accent-color:#5b8db8;">
+          Only scale-native chords
+        </label>
         <button class="btn full" onclick="exportAllChordsZip()">⬇ Export ZIP</button>
         <div id="export-status"></div>
       </div>
@@ -423,9 +428,10 @@ function noteVisual(note, isSelected) {
     return { stroke: col, strokeW: 3, opacity: 1, fill: 'white' };
   }
 
-  // chord mode
+  // chord mode — use pitch-class color for chord notes, dim the rest
   if (hpcs.has(pc)) {
-    return { stroke: '#f39c12', strokeW: 4, opacity: 1, fill: '#fffbf0' };
+    const col = pc >= 0 ? PC_COLORS[pc] : ACCENT;
+    return { stroke: col, strokeW: 4, opacity: 1, fill: 'white' };
   }
   return { stroke: '#aaa', strokeW: 2, opacity: 0.3, fill: 'white' };
 }
@@ -487,6 +493,19 @@ function renderNotes() {
     g.addEventListener('mousedown', onNoteDown);
     g.addEventListener('dblclick',  onNoteDblClick);
     notesLayer.appendChild(g);
+  }
+
+  // Chord label below pan body when in chord mode
+  if (hlMode === 'chord') {
+    const { cx, cy, r } = state.pan;
+    const lbl = svgEl('text', {
+      x: cx, y: cy + r + 30,
+      'text-anchor': 'middle', 'dominant-baseline': 'hanging',
+      'font-family': 'Arial, sans-serif', 'font-size': 22,
+      'font-weight': 'bold', fill: '#333', 'pointer-events': 'none',
+    });
+    lbl.textContent = `${PC_NAMES[hlChordRoot]} ${hlChordType}`;
+    notesLayer.appendChild(lbl);
   }
 }
 
@@ -654,6 +673,46 @@ function buildNoteLegend() {
        <span>${name}</span>
      </div>`
   ).join('');
+  document.getElementById('note-scale-table').innerHTML = buildScaleNativeTable(new Set(pcs.keys()));
+}
+
+function buildScaleNativeTable(panPcs) {
+  const COLS = ['Major', 'Minor', 'Dim'];
+  const COL_LABELS = ['Maj', 'Min', 'Dim'];
+  const roots = [...panPcs].sort((a, b) => a - b);
+
+  const headerCells = COL_LABELS.map(l =>
+    `<th style="text-align:center;color:#5b8db8;padding:2px 4px;font-size:10px;font-weight:bold;">${l}</th>`
+  ).join('');
+
+  const rows = roots.map(root => {
+    const dotColor = PC_COLORS[root];
+    const cells = COLS.map(type => {
+      const ivs = CHORD_TYPES[type];
+      const missing = ivs.map(i => (root + i) % 12).filter(p => !panPcs.has(p));
+      if (missing.length === 0) {
+        return `<td style="text-align:center;color:#5d8;padding:2px 3px;">✓</td>`;
+      }
+      const names = missing.map(p => PC_NAMES[p]).join(',');
+      return `<td style="text-align:center;color:#c44;padding:2px 3px;font-size:9px;" title="Missing: ${names}">–${names}</td>`;
+    }).join('');
+    return `<tr>
+      <td style="padding:2px 4px;white-space:nowrap;">
+        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${dotColor};vertical-align:middle;margin-right:3px;"></span>
+        <span style="font-size:11px;color:#ccd;vertical-align:middle;">${PC_NAMES[root]}</span>
+      </td>${cells}</tr>`;
+  }).join('');
+
+  return `<div style="margin-top:10px;">
+    <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#5b8db8;margin-bottom:4px;">Scale-native chords</div>
+    <table style="width:100%;border-collapse:collapse;">
+      <tr>
+        <th style="text-align:left;color:#5b8db8;padding:2px 4px;font-size:10px;font-weight:bold;">Root</th>
+        ${headerCells}
+      </tr>
+      ${rows}
+    </table>
+  </div>`;
 }
 
 function updateChordInfo() {
@@ -664,12 +723,20 @@ function updateChordInfo() {
     return { name: PC_NAMES[pc], has: panPcs.has(pc) };
   });
   const all = notes.every(n => n.has);
+  const isNative = all && panPcs.has(hlChordRoot);
+
   const noteHtml = notes.map(n =>
     `<span class="${n.has ? 'present' : 'missing'}">${n.name}${n.has ? '' : '✗'}</span>`
   ).join(' · ');
   const status = all ? '✓ All notes on pan' : `${notes.filter(n=>n.has).length}/${notes.length} notes on pan`;
+  const nativeBadge = isNative
+    ? `<span style="color:#5d8;font-size:10px;letter-spacing:.3px;">● Scale native</span>`
+    : panPcs.has(hlChordRoot)
+      ? `<span style="color:#a80;font-size:10px;letter-spacing:.3px;">◐ Root on pan, incomplete</span>`
+      : `<span style="color:#667;font-size:10px;letter-spacing:.3px;">○ Root not on pan</span>`;
+
   document.getElementById('hl-chord-info').innerHTML =
-    `${noteHtml}<br><span style="color:${all?'#5d8':'#e05'}">${status}</span>`;
+    `${nativeBadge}<br>${noteHtml}<br><span style="color:${all?'#5d8':'#e05'}">${status}</span>`;
 }
 
 // ─── Sidebar controls wiring ──────────────────────────────────────────────────
@@ -801,8 +868,8 @@ function buildSVGString(highlightPcs = null, chordLabel = '') {
     if (highlightPcs === 'all') {
       stroke = pc >= 0 ? PC_COLORS[pc] : ACCENT; strokeW = 3;
     } else if (highlightPcs instanceof Set) {
-      if (highlightPcs.has(pc)) { stroke = '#f39c12'; strokeW = 4; fill = '#fffbf0'; }
-      else                      { stroke = '#ccc';    strokeW = 2;  opacity = 0.3; }
+      if (highlightPcs.has(pc)) { stroke = pc >= 0 ? PC_COLORS[pc] : ACCENT; strokeW = 4; }
+      else                      { stroke = '#ccc'; strokeW = 2; opacity = 0.3; }
     }
 
     const fs  = Math.max(10, Math.min(Math.round(note.r * 0.46), 22));
@@ -895,10 +962,13 @@ function getPlayableChords(types) {
     const ivs = CHORD_TYPES[type]; if (!ivs) continue;
     for (let root = 0; root < 12; root++) {
       const pcs = ivs.map(i => (root + i) % 12);
-      if (pcs.every(p => panPcs.has(p)))
+      if (pcs.every(p => panPcs.has(p))) {
+        const native = panPcs.has(root);
         result.push({ type, root, pcs: new Set(pcs),
           label: `${PC_NAMES[root]} ${type}`,
+          native,
           filename: `${ROOT_FILE[root]}_${type}.png` });
+      }
     }
   }
   return result;
@@ -915,24 +985,33 @@ async function exportAllChordsZip() {
   const types = getSelectedChordTypes();
   if (!types.length) { setExportStatus('No chord types selected.'); return; }
 
-  const playable = getPlayableChords(types);
-  if (!playable.length) { setExportStatus('No playable chords found on this layout.'); return; }
+  const onlyNative = document.getElementById('only-native-check').checked;
+  const allPlayable = getPlayableChords(types);
+  const toExport = onlyNative ? allPlayable.filter(c => c.native) : allPlayable;
 
-  setExportStatus(`0 / ${playable.length} …`);
+  if (!toExport.length) {
+    setExportStatus(onlyNative ? 'No scale-native chords found.' : 'No playable chords found.');
+    return;
+  }
+
+  setExportStatus(`0 / ${toExport.length} …`);
   const zip = new JSZip();
 
-  for (let i = 0; i < playable.length; i++) {
-    const c = playable[i];
-    setExportStatus(`${i+1} / ${playable.length}  ${c.label}`);
+  for (let i = 0; i < toExport.length; i++) {
+    const c = toExport[i];
+    setExportStatus(`${i+1} / ${toExport.length}  ${c.label}`);
     const svg = buildSVGString(c.pcs, c.label);
     const png = await svgToPngBlob(svg);
-    zip.folder(c.type).file(c.filename, png);
+    // Always put everything in All/
+    zip.folder(`All/${c.type}`).file(c.filename, png);
+    // Also mirror into Native/ if scale-native
+    if (c.native) zip.folder(`Native/${c.type}`).file(c.filename, png);
   }
 
   setExportStatus('Building ZIP …');
   const zipBlob = await zip.generateAsync({ type: 'blob' });
   dlBlob(zipBlob, 'handpan-chords.zip');
-  setExportStatus(`Done — ${playable.length} chord images exported.`);
+  setExportStatus(`Done — ${toExport.length} chord images exported.`);
   setTimeout(() => setExportStatus(''), 5000);
 }
 
