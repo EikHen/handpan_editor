@@ -83,16 +83,20 @@ body {
 }
 .chord-grid input[type=checkbox] { accent-color: #5b8db8; cursor: pointer; }
 
-/* Note legend (by-note mode) */
+/* Note legend */
 #note-legend {
   display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px;
 }
 .legend-item {
   display: flex; align-items: center; gap: 4px; font-size: 11px; color: #bbc;
 }
-.legend-dot {
-  width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0;
+/* Color swatch dot — click opens palette popup */
+.color-swatch {
+  width: 13px; height: 13px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.3);
+  cursor: pointer; flex-shrink: 0;
 }
+.color-swatch:hover { outline: 2px solid #5b8db8; outline-offset: 1px; }
 
 /* Chord info */
 #hl-chord-info {
@@ -196,9 +200,13 @@ body {
         </select>
       </div>
 
-      <!-- By-note legend -->
-      <div id="hl-note-opts" style="display:none;">
+      <!-- Note color legend (shown for both note and chord modes) -->
+      <div id="note-legend-wrap" style="display:none;">
         <div id="note-legend"></div>
+      </div>
+
+      <!-- By-note only: scale-native table -->
+      <div id="hl-note-opts" style="display:none;">
         <div id="note-scale-table"></div>
       </div>
 
@@ -231,7 +239,7 @@ body {
           <button class="btn" style="flex:1;font-size:11px;" onclick="checkAllChordTypes(false)">None</button>
         </div>
         <label style="display:flex;align-items:center;gap:6px;margin-top:7px;font-size:11px;color:#aab;cursor:pointer;">
-          <input type="checkbox" id="only-native-check" style="accent-color:#5b8db8;">
+          <input type="checkbox" id="only-native-check" checked style="accent-color:#5b8db8;">
           Only scale-native chords
         </label>
         <button class="btn full" onclick="exportAllChordsZip()">⬇ Export ZIP</button>
@@ -262,8 +270,8 @@ body {
   </div><!-- /sidebar -->
 
   <div id="canvas-wrap">
-    <svg id="canvas" viewBox="0 0 1000 1000">
-      <rect id="bg" width="1000" height="1000" fill="white"/>
+    <svg id="canvas" viewBox="0 0 1000 1400">
+      <rect id="bg" width="1000" height="1400" fill="white"/>
       <g id="pan-layer"></g>
       <g id="notes-layer"></g>
       <rect id="sel-box" x="0" y="0" width="0" height="0"
@@ -275,6 +283,7 @@ body {
 </div>
 
 <input type="file" id="file-input" accept=".json" style="display:none">
+
 
 <!-- ══════════════════════════ Script ══════════════════════════════════ -->
 <script>
@@ -319,6 +328,14 @@ const CHORD_TYPES = {
 };
 
 const ACCENT = '#5b8db8';
+
+const PALETTE = [
+  '#e74c3c','#c0392b','#e91e63','#f06292',
+  '#e67e22','#f39c12','#f1c40f','#a8b820',
+  '#27ae60','#2ecc71','#16a085','#80cbc4',
+  '#3498db','#2980b9','#6c5ce7','#a855f7',
+  '#9c27b0','#e91e8c','#795548','#607d8b',
+];
 
 // ─── Pitch class helpers ──────────────────────────────────────────────────────
 
@@ -495,13 +512,12 @@ function renderNotes() {
     notesLayer.appendChild(g);
   }
 
-  // Chord label below pan body when in chord mode
+  // Chord label just below the pan
   if (hlMode === 'chord') {
-    const { cx, cy, r } = state.pan;
     const lbl = svgEl('text', {
-      x: cx, y: cy + r + 30,
-      'text-anchor': 'middle', 'dominant-baseline': 'hanging',
-      'font-family': 'Arial, sans-serif', 'font-size': 22,
+      x: 500, y: 880,
+      'text-anchor': 'middle', 'dominant-baseline': 'middle',
+      'font-family': 'Arial, sans-serif', 'font-size': 30,
       'font-weight': 'bold', fill: '#333', 'pointer-events': 'none',
     });
     lbl.textContent = `${PC_NAMES[hlChordRoot]} ${hlChordType}`;
@@ -650,13 +666,104 @@ function syncSidebar() {
 }
 
 function updateHighlightPanel() {
-  const noteOpts  = document.getElementById('hl-note-opts');
-  const chordOpts = document.getElementById('hl-chord-opts');
-  noteOpts.style.display  = hlMode === 'note'  ? '' : 'none';
-  chordOpts.style.display = hlMode === 'chord' ? '' : 'none';
+  document.getElementById('note-legend-wrap').style.display = hlMode !== 'none' ? '' : 'none';
+  document.getElementById('hl-note-opts').style.display     = hlMode === 'note'  ? '' : 'none';
+  document.getElementById('hl-chord-opts').style.display    = hlMode === 'chord' ? '' : 'none';
 
-  if (hlMode === 'note')  buildNoteLegend();
+  if (hlMode !== 'none') buildNoteLegend();
   if (hlMode === 'chord') updateChordInfo();
+}
+
+// ─── Color palette popup ──────────────────────────────────────────────────────
+
+let _colorPopup = null;
+
+function closeColorPopup() {
+  if (_colorPopup) { _colorPopup.remove(); _colorPopup = null; }
+}
+
+function showColorPopup(pc, anchor) {
+  closeColorPopup();
+
+  const popup = document.createElement('div');
+  popup.style.cssText = [
+    'position:fixed;z-index:10000;',
+    'background:#1a1a2e;border:1px solid #3a4060;border-radius:6px;',
+    'padding:8px;box-shadow:0 6px 24px rgba(0,0,0,.7);',
+  ].join('');
+  popup.addEventListener('click', e => e.stopPropagation());
+
+  // Palette grid
+  const grid = document.createElement('div');
+  grid.style.cssText = 'display:grid;grid-template-columns:repeat(5,20px);gap:3px;margin-bottom:7px;';
+  for (const col of PALETTE) {
+    const sq = document.createElement('div');
+    const active = col === PC_COLORS[pc];
+    sq.style.cssText = `width:20px;height:20px;border-radius:3px;background:${col};cursor:pointer;` +
+      `box-shadow:${active ? '0 0 0 2px #fff,0 0 0 3px '+col : 'none'};`;
+    sq.title = col;
+    sq.addEventListener('click', () => {
+      PC_COLORS[pc] = col;
+      render(); buildNoteLegend(); closeColorPopup();
+    });
+    grid.appendChild(sq);
+  }
+  popup.appendChild(grid);
+
+  // Hex input row
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;gap:4px;align-items:center;';
+
+  const preview = document.createElement('div');
+  preview.style.cssText = `width:18px;height:18px;border-radius:3px;background:${PC_COLORS[pc]};flex-shrink:0;border:1px solid #556;`;
+
+  const hexInp = document.createElement('input');
+  hexInp.type = 'text'; hexInp.maxLength = 7; hexInp.spellcheck = false;
+  hexInp.value = PC_COLORS[pc];
+  hexInp.style.cssText = 'flex:1;font-size:11px;background:#101828;color:#dde;border:1px solid #3a4060;border-radius:3px;padding:2px 5px;min-width:0;';
+  hexInp.addEventListener('input', () => {
+    let v = hexInp.value.trim();
+    if (!v.startsWith('#')) v = '#' + v;
+    if (/^#[0-9a-fA-F]{6}$/i.test(v)) preview.style.background = v;
+  });
+  hexInp.addEventListener('keydown', e => {
+    e.stopPropagation();
+    if (e.key === 'Escape') { closeColorPopup(); return; }
+    if (e.key === 'Enter') {
+      let v = hexInp.value.trim();
+      if (!v.startsWith('#')) v = '#' + v;
+      if (/^#[0-9a-fA-F]{6}$/i.test(v)) {
+        PC_COLORS[pc] = v.toLowerCase();
+        render(); buildNoteLegend(); closeColorPopup();
+      }
+    }
+  });
+
+  const ok = document.createElement('button');
+  ok.textContent = '✓';
+  ok.style.cssText = 'background:#1f2547;color:#dde;border:1px solid #3a4060;border-radius:3px;padding:1px 7px;cursor:pointer;font-size:13px;';
+  ok.addEventListener('click', () => {
+    let v = hexInp.value.trim();
+    if (!v.startsWith('#')) v = '#' + v;
+    if (/^#[0-9a-fA-F]{6}$/i.test(v)) {
+      PC_COLORS[pc] = v.toLowerCase();
+      render(); buildNoteLegend(); closeColorPopup();
+    }
+  });
+
+  row.appendChild(preview); row.appendChild(hexInp); row.appendChild(ok);
+  popup.appendChild(row);
+
+  // Position: right of anchor, clamped to viewport
+  const rect = anchor.getBoundingClientRect();
+  document.body.appendChild(popup);
+  const pw = popup.offsetWidth, ph = popup.offsetHeight;
+  popup.style.left = Math.min(rect.right + 6, window.innerWidth  - pw - 8) + 'px';
+  popup.style.top  = Math.min(rect.top  - 4,  window.innerHeight - ph - 8) + 'px';
+
+  _colorPopup = popup;
+  setTimeout(() => document.addEventListener('click', closeColorPopup, { once: true }), 0);
+  hexInp.focus(); hexInp.select();
 }
 
 function buildNoteLegend() {
@@ -667,13 +774,25 @@ function buildNoteLegend() {
   }
   const sorted = [...pcs.entries()].sort((a, b) => a[0] - b[0]);
   const legend = document.getElementById('note-legend');
-  legend.innerHTML = sorted.map(([pc, name]) =>
-    `<div class="legend-item">
-       <div class="legend-dot" style="background:${PC_COLORS[pc]}"></div>
-       <span>${name}</span>
-     </div>`
-  ).join('');
-  document.getElementById('note-scale-table').innerHTML = buildScaleNativeTable(new Set(pcs.keys()));
+  legend.innerHTML = '';
+  for (const [pc, name] of sorted) {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+
+    const swatch = document.createElement('div');
+    swatch.className = 'color-swatch';
+    swatch.style.background = PC_COLORS[pc];
+    swatch.title = `${name} — click to change color`;
+    swatch.addEventListener('click', e => { e.stopPropagation(); showColorPopup(pc, swatch); });
+
+    const span = document.createElement('span');
+    span.textContent = name;
+    item.appendChild(swatch); item.appendChild(span);
+    legend.appendChild(item);
+  }
+  if (hlMode === 'note') {
+    document.getElementById('note-scale-table').innerHTML = buildScaleNativeTable(new Set(pcs.keys()));
+  }
 }
 
 function buildScaleNativeTable(panPcs) {
@@ -704,7 +823,7 @@ function buildScaleNativeTable(panPcs) {
   }).join('');
 
   return `<div style="margin-top:10px;">
-    <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#5b8db8;margin-bottom:4px;">Scale-native chords</div>
+    <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#5b8db8;margin-bottom:4px;">Main Chords</div>
     <table style="width:100%;border-collapse:collapse;">
       <tr>
         <th style="text-align:left;color:#5b8db8;padding:2px 4px;font-size:10px;font-weight:bold;">Root</th>
@@ -856,8 +975,8 @@ document.addEventListener('keydown', e => {
 function buildSVGString(highlightPcs = null, chordLabel = '') {
   const { cx, cy, r } = state.pan;
   const innerR = Math.max(r - 50, Math.round(r * 0.8));
-  let s = `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
-<rect width="1000" height="1000" fill="white"/>
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1400" viewBox="0 0 1000 1400">
+<rect width="1000" height="1400" fill="white"/>
 <circle cx="${cx}" cy="${cy}" r="${r}" fill="#f2f2f2" stroke="#c0c0c0" stroke-width="5"/>
 <circle cx="${cx}" cy="${cy}" r="${innerR}" fill="none" stroke="#e0e0e0" stroke-width="1.5"/>`;
 
@@ -881,8 +1000,8 @@ function buildSVGString(highlightPcs = null, chordLabel = '') {
   }
 
   if (chordLabel) {
-    s += `\n<text x="500" y="965" text-anchor="middle" font-family="Arial, sans-serif" ` +
-         `font-size="26" font-weight="bold" fill="#333">${chordLabel}</text>`;
+    s += `\n<text x="500" y="880" text-anchor="middle" font-family="Arial, sans-serif" ` +
+         `font-size="30" font-weight="bold" fill="#333">${fmtLabel(chordLabel)}</text>`;
   }
 
   s += '\n</svg>';
@@ -895,9 +1014,9 @@ function svgToPngBlob(svgStr) {
     const url  = URL.createObjectURL(blob);
     const img  = new Image();
     img.onload = () => {
-      const canvas = Object.assign(document.createElement('canvas'), { width: 1000, height: 1000 });
+      const canvas = Object.assign(document.createElement('canvas'), { width: 1000, height: 1400 });
       const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, 1000, 1000);
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, 1000, 1400);
       ctx.drawImage(img, 0, 0);
       URL.revokeObjectURL(url);
       canvas.toBlob(resolve, 'image/png');
@@ -955,23 +1074,32 @@ function exportCurrentPNG() {
   svgToPngBlob(buildSVGString(hpcs, label)).then(blob => dlBlob(blob, 'handpan-layout.png'));
 }
 
-function getPlayableChords(types) {
+// All 12 roots × types; native=true when fully playable (all tones on pan).
+// Partial chords (some notes missing) are included in "All" export only.
+function getAllChords(types) {
   const panPcs = new Set(state.notes.map(n => parsePitchClass(n.label)).filter(p => p >= 0));
   const result = [];
   for (const type of types) {
     const ivs = CHORD_TYPES[type]; if (!ivs) continue;
     for (let root = 0; root < 12; root++) {
       const pcs = ivs.map(i => (root + i) % 12);
-      if (pcs.every(p => panPcs.has(p))) {
-        const native = panPcs.has(root);
-        result.push({ type, root, pcs: new Set(pcs),
-          label: `${PC_NAMES[root]} ${type}`,
-          native,
-          filename: `${ROOT_FILE[root]}_${type}.png` });
-      }
+      const missing = pcs.filter(p => !panPcs.has(p));
+      if (missing.length === pcs.length) continue; // nothing at all on pan — skip
+      const native = missing.length === 0;
+      const missingStr = missing.map(p => PC_NAMES[p]).join(', ');
+      const label = native
+        ? `${PC_NAMES[root]} ${type}`
+        : `${PC_NAMES[root]} ${type} (−${missingStr})`;
+      result.push({ type, root, pcs: new Set(pcs), native, label,
+        filename: `${ROOT_FILE[root]}_${type}.png` });
     }
   }
   return result;
+}
+
+// Only fully playable chords (used for chord info panel).
+function getPlayableChords(types) {
+  return getAllChords(types).filter(c => c.native);
 }
 
 function setExportStatus(msg) {
@@ -986,11 +1114,12 @@ async function exportAllChordsZip() {
   if (!types.length) { setExportStatus('No chord types selected.'); return; }
 
   const onlyNative = document.getElementById('only-native-check').checked;
-  const allPlayable = getPlayableChords(types);
-  const toExport = onlyNative ? allPlayable.filter(c => c.native) : allPlayable;
+  // Native/ = fully playable chords; All/ = every chord with ≥1 note on pan (incl. partial)
+  const allChords  = getAllChords(types);
+  const toExport   = onlyNative ? allChords.filter(c => c.native) : allChords;
 
   if (!toExport.length) {
-    setExportStatus(onlyNative ? 'No scale-native chords found.' : 'No playable chords found.');
+    setExportStatus(onlyNative ? 'No scale-native chords found.' : 'No chords found.');
     return;
   }
 
@@ -1002,10 +1131,8 @@ async function exportAllChordsZip() {
     setExportStatus(`${i+1} / ${toExport.length}  ${c.label}`);
     const svg = buildSVGString(c.pcs, c.label);
     const png = await svgToPngBlob(svg);
-    // Always put everything in All/
-    zip.folder(`All/${c.type}`).file(c.filename, png);
-    // Also mirror into Native/ if scale-native
     if (c.native) zip.folder(`Native/${c.type}`).file(c.filename, png);
+    if (!onlyNative) zip.folder(`All/${c.type}`).file(c.filename, png);
   }
 
   setExportStatus('Building ZIP …');
@@ -1019,8 +1146,17 @@ async function exportAllChordsZip() {
 
 function resizeCanvas() {
   const wrap = document.getElementById('canvas-wrap');
-  const size = Math.min(wrap.clientWidth - 24, wrap.clientHeight - 24);
-  SVG.style.width = SVG.style.height = size + 'px';
+  const maxW = wrap.clientWidth - 24;
+  const maxH = wrap.clientHeight - 24;
+  const aspect = 1000 / 1400; // card aspect ratio (5:7)
+  let w, h;
+  if (maxW / maxH > aspect) {
+    h = maxH; w = Math.round(h * aspect);
+  } else {
+    w = maxW; h = Math.round(w / aspect);
+  }
+  SVG.style.width = w + 'px';
+  SVG.style.height = h + 'px';
 }
 window.addEventListener('resize', resizeCanvas);
 
@@ -1039,5 +1175,6 @@ function syncPanSlider() {
   pushHistory(); resizeCanvas(); render(); syncSidebar(); syncPanSlider();
 })();
 </script>
+
 </body>
 </html>
