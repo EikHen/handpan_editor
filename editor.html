@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Handpan Layout Editor</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: Arial, sans-serif;
+  background: #12121f;
+  color: #dde;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Toolbar ─────────────────────────────────────────────────────────── */
+#toolbar {
+  background: #1a1a2e;
+  border-bottom: 1px solid #2a2a4a;
+  padding: 0 12px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  user-select: none;
+}
+#toolbar h1 { font-size: 15px; color: #7ab3d8; margin-right: 4px; white-space: nowrap; }
+.sep { width: 1px; background: #2a2a4a; height: 28px; margin: 0 4px; flex-shrink: 0; }
+.btn {
+  background: #1f2547; color: #ccd;
+  border: 1px solid #3a4060; border-radius: 4px;
+  padding: 5px 11px; cursor: pointer; font-size: 12px;
+  white-space: nowrap; transition: background .12s, border-color .12s; line-height: 1;
+}
+.btn:hover { background: #2a3060; border-color: #5b8db8; color: #fff; }
+.btn:active { background: #3a4080; }
+.btn.danger { border-color: #803040; }
+.btn.danger:hover { background: #a03050; border-color: #c04060; }
+.btn.icon { padding: 5px 8px; font-size: 14px; }
+.btn.full { width: 100%; text-align: center; margin-top: 5px; }
+.btn-group { display: flex; gap: 3px; }
+
+/* ── Workspace ───────────────────────────────────────────────────────── */
+#workspace { display: flex; flex: 1; overflow: hidden; }
+
+/* ── Sidebar ─────────────────────────────────────────────────────────── */
+#sidebar {
+  width: 230px; min-width: 230px;
+  background: #1a1a2e;
+  border-right: 1px solid #2a2a4a;
+  display: flex; flex-direction: column;
+  overflow-y: auto; overflow-x: hidden;
+  flex-shrink: 0;
+}
+.panel { padding: 11px 12px; border-bottom: 1px solid #2a2a4a; }
+.panel-title {
+  font-size: 10px; text-transform: uppercase; letter-spacing: .7px;
+  color: #5b8db8; margin-bottom: 9px; font-weight: bold;
+}
+.row { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; }
+.row:last-child { margin-bottom: 0; }
+.row label { font-size: 11px; color: #889; }
+.row input[type=text], .row select {
+  background: #101828; border: 1px solid #3a4060; border-radius: 3px;
+  color: #dde; padding: 4px 7px; font-size: 13px; width: 100%; outline: none;
+}
+.row input[type=text]:focus, .row select:focus { border-color: #5b8db8; }
+.row input[type=range] { width: 100%; accent-color: #5b8db8; }
+
+/* Chord checkboxes */
+.chord-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 3px 6px; margin: 6px 0;
+}
+.chord-grid label {
+  font-size: 11px; color: #aab; cursor: pointer;
+  display: flex; align-items: center; gap: 4px;
+}
+.chord-grid input[type=checkbox] { accent-color: #5b8db8; cursor: pointer; }
+
+/* Note legend (by-note mode) */
+#note-legend {
+  display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px;
+}
+.legend-item {
+  display: flex; align-items: center; gap: 4px; font-size: 11px; color: #bbc;
+}
+.legend-dot {
+  width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0;
+}
+
+/* Chord info */
+#hl-chord-info {
+  font-size: 11px; margin-top: 6px; line-height: 1.6;
+  color: #99b;
+}
+#hl-chord-info .missing { color: #e05; }
+#hl-chord-info .present { color: #5d8; }
+
+/* Export status */
+#export-status { font-size: 11px; color: #5b8db8; margin-top: 5px; min-height: 16px; }
+
+/* Shortcuts */
+.kbd { font-size: 10px; color: #556; line-height: 1.75; }
+.kbd b { color: #778; }
+.kbd code {
+  background: #1f2547; border: 1px solid #3a4060;
+  border-radius: 2px; padding: 0 3px; font-size: 10px;
+}
+
+/* ── Canvas ──────────────────────────────────────────────────────────── */
+#canvas-wrap {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  background: #0d0d1a; overflow: auto; position: relative;
+}
+#canvas { background: white; box-shadow: 0 0 40px rgba(0,0,0,.6); display: block; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<!-- ══ Toolbar ══════════════════════════════════════════════════════════ -->
+<div id="toolbar">
+  <h1>Handpan Editor</h1>
+  <div class="sep"></div>
+  <div class="btn-group">
+    <button class="btn" onclick="addNote()">+ Note</button>
+    <button class="btn" onclick="duplicateSelected()">⧉ Dup</button>
+    <button class="btn danger" onclick="deleteSelected()">✕ Del</button>
+  </div>
+  <div class="sep"></div>
+  <div class="btn-group">
+    <button class="btn icon" onclick="undo()" title="Ctrl+Z">↩</button>
+    <button class="btn icon" onclick="redo()" title="Ctrl+Y">↪</button>
+  </div>
+  <div class="sep"></div>
+  <div class="btn-group">
+    <button class="btn" onclick="exportJSON()">⬇ JSON</button>
+    <button class="btn" onclick="triggerImport()">⬆ JSON</button>
+    <button class="btn" onclick="exportCurrentSVG()">⬇ SVG</button>
+  </div>
+  <div class="sep"></div>
+  <span id="status" style="font-size:11px;color:#556;"></span>
+</div>
+
+<!-- ══ Workspace ════════════════════════════════════════════════════════ -->
+<div id="workspace">
+
+  <div id="sidebar">
+
+    <!-- Note properties -->
+    <div class="panel">
+      <div class="panel-title">Note</div>
+      <div id="props-empty" style="font-size:12px;color:#445;">Select a note to edit.</div>
+      <div id="props-single" style="display:none;">
+        <div class="row">
+          <label>Label</label>
+          <input type="text" id="prop-label" placeholder="D3, Bb4, F#5 …" maxlength="8"/>
+        </div>
+        <div class="row">
+          <label>Radius: <b id="prop-r-val">50</b> px</label>
+          <input type="range" id="prop-r" min="14" max="130" step="1"/>
+        </div>
+      </div>
+      <div id="props-multi" style="display:none;">
+        <div id="hint-multi" style="font-size:11px;color:#667;margin-bottom:6px;"></div>
+        <div class="row">
+          <label>Radius all: <b id="prop-r-multi-val">—</b> px</label>
+          <input type="range" id="prop-r-multi" min="14" max="130" step="1" value="50"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pan body -->
+    <div class="panel">
+      <div class="panel-title">Pan Body</div>
+      <div class="row">
+        <label>Radius: <b id="pan-r-val">320</b> px</label>
+        <input type="range" id="pan-r" min="80" max="480" step="1" value="320"/>
+      </div>
+    </div>
+
+    <!-- Highlight -->
+    <div class="panel">
+      <div class="panel-title">Highlight</div>
+      <div class="row">
+        <label>Mode</label>
+        <select id="hl-mode">
+          <option value="none">None</option>
+          <option value="note">By Note (pitch class)</option>
+          <option value="chord">By Chord</option>
+        </select>
+      </div>
+
+      <!-- By-note legend -->
+      <div id="hl-note-opts" style="display:none;">
+        <div id="note-legend"></div>
+      </div>
+
+      <!-- By-chord options -->
+      <div id="hl-chord-opts" style="display:none;">
+        <div class="row">
+          <label>Chord type</label>
+          <select id="hl-chord-type"></select>
+        </div>
+        <div class="row">
+          <label>Root</label>
+          <select id="hl-chord-root"></select>
+        </div>
+        <div id="hl-chord-info"></div>
+      </div>
+    </div>
+
+    <!-- Export -->
+    <div class="panel">
+      <div class="panel-title">Export</div>
+      <button class="btn full" onclick="exportCurrentPNG()">⬇ PNG (current view)</button>
+
+      <div style="margin-top:10px;">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#5b8db8;margin-bottom:6px;">
+          All chords → ZIP
+        </div>
+        <div class="chord-grid" id="chord-checks"></div>
+        <div style="display:flex;gap:4px;margin-top:6px;">
+          <button class="btn" style="flex:1;font-size:11px;" onclick="checkAllChordTypes(true)">All</button>
+          <button class="btn" style="flex:1;font-size:11px;" onclick="checkAllChordTypes(false)">None</button>
+        </div>
+        <button class="btn full" onclick="exportAllChordsZip()">⬇ Export ZIP</button>
+        <div id="export-status"></div>
+      </div>
+    </div>
+
+    <!-- Shortcuts -->
+    <div class="panel" style="flex:1;">
+      <div class="panel-title">Shortcuts</div>
+      <div class="kbd">
+        <b>Click</b> — select<br>
+        <b>Shift+click</b> — multi-select<br>
+        <b>Drag note</b> — move<br>
+        <b>Drag canvas</b> — box select<br>
+        <b>⊙ handle</b> — resize<br>
+        <b>Dbl-click</b> — edit label<br>
+        <code>↑↓←→</code> — nudge 1 px<br>
+        <code>Shift+↑↓←→</code> — nudge 10 px<br>
+        <code>Del</code> — delete<br>
+        <code>Ctrl+A</code> — select all<br>
+        <code>Ctrl+D</code> — duplicate<br>
+        <code>Ctrl+Z/Y</code> — undo/redo<br>
+        <code>Esc</code> — deselect
+      </div>
+    </div>
+
+  </div><!-- /sidebar -->
+
+  <div id="canvas-wrap">
+    <svg id="canvas" viewBox="0 0 1000 1000">
+      <rect id="bg" width="1000" height="1000" fill="white"/>
+      <g id="pan-layer"></g>
+      <g id="notes-layer"></g>
+      <rect id="sel-box" x="0" y="0" width="0" height="0"
+        fill="rgba(91,141,184,.12)" stroke="#5b8db8" stroke-width="1"
+        stroke-dasharray="5 3" pointer-events="none" visibility="hidden"/>
+    </svg>
+  </div>
+
+</div>
+
+<input type="file" id="file-input" accept=".json" style="display:none">
+
+<!-- ══════════════════════════ Script ══════════════════════════════════ -->
+<script>
+'use strict';
+
+// ─── Music theory constants ───────────────────────────────────────────────────
+
+// One colour per pitch class (C … B), designed to be distinct on white background
+const PC_COLORS = [
+  '#e74c3c', // 0  C   red
+  '#e67e22', // 1  C♯  orange
+  '#f1c40f', // 2  D   yellow
+  '#a8b820', // 3  E♭  yellow-green
+  '#27ae60', // 4  E   green
+  '#16a085', // 5  F   teal
+  '#2980b9', // 6  F♯  blue
+  '#6c5ce7', // 7  G   indigo
+  '#a855f7', // 8  A♭  violet
+  '#e91e8c', // 9  A   pink
+  '#c0392b', // 10 B♭  dark-red
+  '#795548', // 11 B   brown
+];
+
+const PC_NAMES  = ['C','C♯','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
+const ROOT_FILE = ['C','Cs','D','Eb','E','F','Fs','G','Ab','A','Bb','B']; // filename-safe
+
+const CHORD_TYPES = {
+  'Major':    [0, 4, 7],
+  'Minor':    [0, 3, 7],
+  'Dim':      [0, 3, 6],
+  'Aug':      [0, 4, 8],
+  'Sus2':     [0, 2, 7],
+  'Sus4':     [0, 5, 7],
+  'Maj7':     [0, 4, 7, 11],
+  'Min7':     [0, 3, 7, 10],
+  'Dom7':     [0, 4, 7, 10],
+  'Dim7':     [0, 3, 6,  9],
+  'HalfDim7': [0, 3, 6, 10],
+  'MinMaj7':  [0, 3, 7, 11],
+  'Maj6':     [0, 4, 7,  9],
+  'Min6':     [0, 3, 7,  9],
+};
+
+const ACCENT = '#5b8db8';
+
+// ─── Pitch class helpers ──────────────────────────────────────────────────────
+
+function parsePitchClass(label) {
+  if (!label) return -1;
+  const m = label.match(/^([A-G])([#b]?)/i);
+  if (!m) return -1;
+  const base = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 }[m[1].toUpperCase()];
+  if (base === undefined) return -1;
+  return (base + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0) + 12) % 12;
+}
+
+function fmtLabel(s) {
+  return (s || '').replace(/#/g, '♯').replace(/b(?=[0-9])/g, '♭');
+}
+
+// ─── State ────────────────────────────────────────────────────────────────────
+
+let state = { pan: { cx: 500, cy: 500, r: 320 }, notes: [], nextId: 1 };
+let selectedIds = new Set();
+let history = [], histIdx = -1;
+
+// Highlight state
+let hlMode       = 'none';   // 'none' | 'note' | 'chord'
+let hlChordType  = 'Major';
+let hlChordRoot  = 0;
+
+// ─── History ──────────────────────────────────────────────────────────────────
+
+function snapshot()  { return JSON.stringify({ pan: state.pan, notes: state.notes, nextId: state.nextId }); }
+
+function pushHistory() {
+  history.splice(histIdx + 1);
+  history.push(snapshot());
+  histIdx = history.length - 1;
+  if (history.length > 120) { history.shift(); histIdx--; }
+}
+
+function undo() { if (histIdx > 0)                    { histIdx--; restore(history[histIdx]); } }
+function redo() { if (histIdx < history.length - 1)   { histIdx++; restore(history[histIdx]); } }
+
+function restore(snap) {
+  const d = JSON.parse(snap);
+  state.pan = d.pan; state.notes = d.notes; state.nextId = d.nextId;
+  selectedIds.clear(); render(); syncSidebar();
+}
+
+// ─── Note helpers ─────────────────────────────────────────────────────────────
+
+function newId() { return `n${state.nextId++}`; }
+
+function addNote(x = 500, y = 320) {
+  const note = { id: newId(), x, y, r: 50, label: 'A3' };
+  state.notes.push(note);
+  selectedIds = new Set([note.id]);
+  pushHistory(); render(); syncSidebar();
+  setTimeout(() => { const el = document.getElementById('prop-label'); el.focus(); el.select(); }, 50);
+}
+
+function deleteSelected() {
+  if (!selectedIds.size) return;
+  state.notes = state.notes.filter(n => !selectedIds.has(n.id));
+  selectedIds.clear(); pushHistory(); render(); syncSidebar();
+}
+
+function duplicateSelected() {
+  if (!selectedIds.size) return;
+  const newIds = new Set(), toAdd = [];
+  for (const n of state.notes) {
+    if (!selectedIds.has(n.id)) continue;
+    const copy = { ...n, id: newId(), x: n.x + 20, y: n.y + 20 };
+    toAdd.push(copy); newIds.add(copy.id);
+  }
+  state.notes.push(...toAdd);
+  selectedIds = newIds; pushHistory(); render(); syncSidebar();
+}
+
+function selectAll() {
+  selectedIds = new Set(state.notes.map(n => n.id)); render(); syncSidebar();
+}
+
+// ─── Highlight helpers ────────────────────────────────────────────────────────
+
+// Returns null (no highlight), 'all' (by note), or Set<pitchClass> (chord)
+function getHighlightedPcs() {
+  if (hlMode === 'none')  return null;
+  if (hlMode === 'note')  return 'all';
+  if (hlMode === 'chord') {
+    const ivs = CHORD_TYPES[hlChordType];
+    if (!ivs) return null;
+    return new Set(ivs.map(i => (hlChordRoot + i) % 12));
+  }
+  return null;
+}
+
+// Returns { stroke, strokeW, opacity } for a note given highlight state
+function noteVisual(note, isSelected) {
+  const hpcs = getHighlightedPcs();
+  const pc   = parsePitchClass(note.label);
+
+  if (isSelected) return { stroke: '#f90', strokeW: 3.5, opacity: 1, fill: 'white' };
+
+  if (hpcs === null) return { stroke: ACCENT, strokeW: 2.5, opacity: 1, fill: 'white' };
+
+  if (hpcs === 'all') {
+    const col = pc >= 0 ? PC_COLORS[pc] : ACCENT;
+    return { stroke: col, strokeW: 3, opacity: 1, fill: 'white' };
+  }
+
+  // chord mode
+  if (hpcs.has(pc)) {
+    return { stroke: '#f39c12', strokeW: 4, opacity: 1, fill: '#fffbf0' };
+  }
+  return { stroke: '#aaa', strokeW: 2, opacity: 0.3, fill: 'white' };
+}
+
+// ─── Rendering ────────────────────────────────────────────────────────────────
+
+const SVG        = document.getElementById('canvas');
+const panLayer   = document.getElementById('pan-layer');
+const notesLayer = document.getElementById('notes-layer');
+const selBox     = document.getElementById('sel-box');
+
+function render() { renderPan(); renderNotes(); }
+
+function renderPan() {
+  const { cx, cy, r } = state.pan;
+  panLayer.innerHTML =
+    `<circle id="pan-circle" cx="${cx}" cy="${cy}" r="${r}"
+       fill="#f2f2f2" stroke="#c0c0c0" stroke-width="5" cursor="move"/>
+     <circle cx="${cx}" cy="${cy}" r="${Math.max(r-50, Math.round(r*.8))}"
+       fill="none" stroke="#e0e0e0" stroke-width="1.5" pointer-events="none"/>`;
+  document.getElementById('pan-circle').addEventListener('mousedown', onPanDown);
+}
+
+function svgEl(tag, attrs) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+  return el;
+}
+
+function renderNotes() {
+  notesLayer.innerHTML = '';
+  const single = selectedIds.size === 1;
+
+  for (const note of state.notes) {
+    const sel = selectedIds.has(note.id);
+    const { stroke, strokeW, opacity, fill } = noteVisual(note, sel);
+    const fs = Math.max(10, Math.min(Math.round(note.r * 0.46), 22));
+
+    const g = svgEl('g', { 'data-id': note.id, cursor: 'grab', opacity });
+
+    g.appendChild(svgEl('circle', { cx: note.x, cy: note.y, r: note.r,
+      fill, stroke, 'stroke-width': strokeW }));
+
+    const txt = svgEl('text', { x: note.x, y: note.y,
+      'text-anchor': 'middle', 'dominant-baseline': 'central',
+      'font-family': 'Arial, sans-serif', 'font-size': fs,
+      fill: '#222', 'pointer-events': 'none' });
+    txt.textContent = fmtLabel(note.label);
+    g.appendChild(txt);
+
+    if (sel && single) {
+      g.appendChild(svgEl('circle', {
+        cx: note.x + note.r, cy: note.y, r: 7,
+        fill: '#f90', stroke: 'white', 'stroke-width': 1.5,
+        cursor: 'ew-resize', class: 'resize-handle', 'data-noteid': note.id,
+      }));
+    }
+
+    g.addEventListener('mousedown', onNoteDown);
+    g.addEventListener('dblclick',  onNoteDblClick);
+    notesLayer.appendChild(g);
+  }
+}
+
+// ─── SVG coordinate helper ────────────────────────────────────────────────────
+
+function pt(e) {
+  const p = SVG.createSVGPoint();
+  p.x = e.clientX; p.y = e.clientY;
+  return p.matrixTransform(SVG.getScreenCTM().inverse());
+}
+
+// ─── Interaction ──────────────────────────────────────────────────────────────
+
+let iact = null, nudgeTimer = null;
+
+function onNoteDown(e) {
+  const p0 = pt(e);   // capture before any DOM mutation
+
+  if (e.target.classList.contains('resize-handle')) {
+    e.stopPropagation();
+    const note = state.notes.find(n => n.id === e.target.getAttribute('data-noteid'));
+    iact = { type: 'resize', note, origR: note.r, x0: p0.x };
+    e.preventDefault(); return;
+  }
+
+  e.stopPropagation();
+  const id = e.currentTarget.getAttribute('data-id');
+  const note = state.notes.find(n => n.id === id);
+  if (!note) return;
+
+  if (e.shiftKey) {
+    selectedIds.has(id) ? selectedIds.delete(id) : selectedIds.add(id);
+    render(); syncSidebar(); return;
+  }
+
+  if (!selectedIds.has(id)) { selectedIds = new Set([id]); render(); syncSidebar(); }
+
+  const origPos = {};
+  for (const n of state.notes) if (selectedIds.has(n.id)) origPos[n.id] = { x: n.x, y: n.y };
+  iact = { type: 'move', x0: p0.x, y0: p0.y, origPos, moved: false };
+  e.preventDefault();
+}
+
+function onPanDown(e) {
+  e.stopPropagation();
+  const p0 = pt(e);
+  iact = { type: 'pan-move', x0: p0.x, y0: p0.y, origCx: state.pan.cx, origCy: state.pan.cy, moved: false };
+  e.preventDefault();
+}
+
+document.getElementById('bg').addEventListener('mousedown', e => {
+  const p0 = pt(e);
+  if (!e.shiftKey) { selectedIds.clear(); render(); syncSidebar(); }
+  iact = { type: 'box', x0: p0.x, y0: p0.y };
+  e.preventDefault();
+});
+
+document.addEventListener('mousemove', e => {
+  if (!iact) return;
+  const p = pt(e);
+
+  if (iact.type === 'move') {
+    const dx = p.x - iact.x0, dy = p.y - iact.y0;
+    if (Math.abs(dx) > 1 || Math.abs(dy) > 1) iact.moved = true;
+    for (const n of state.notes) {
+      if (!selectedIds.has(n.id)) continue;
+      const o = iact.origPos[n.id];
+      n.x = Math.round(o.x + dx); n.y = Math.round(o.y + dy);
+    }
+    renderNotes();
+
+  } else if (iact.type === 'resize') {
+    iact.note.r = Math.max(14, Math.round(iact.origR + (p.x - iact.x0)));
+    renderNotes(); syncSidebar();
+
+  } else if (iact.type === 'pan-move') {
+    const dx = p.x - iact.x0, dy = p.y - iact.y0;
+    if (Math.abs(dx) > 1 || Math.abs(dy) > 1) iact.moved = true;
+    state.pan.cx = Math.round(iact.origCx + dx);
+    state.pan.cy = Math.round(iact.origCy + dy);
+    renderPan();
+
+  } else if (iact.type === 'box') {
+    const x = Math.min(iact.x0, p.x), y = Math.min(iact.y0, p.y);
+    const w = Math.abs(p.x - iact.x0),  h = Math.abs(p.y - iact.y0);
+    selBox.setAttribute('x', x); selBox.setAttribute('y', y);
+    selBox.setAttribute('width', w); selBox.setAttribute('height', h);
+    selBox.setAttribute('visibility', 'visible');
+    iact.box = { x, y, w, h };
+  }
+});
+
+document.addEventListener('mouseup', () => {
+  if (!iact) return;
+  if (iact.type === 'move'     && iact.moved)  pushHistory();
+  if (iact.type === 'resize')                  { pushHistory(); syncSidebar(); }
+  if (iact.type === 'pan-move') {
+    if (iact.moved) pushHistory();
+    else            { selectedIds.clear(); render(); syncSidebar(); }
+  }
+  if (iact.type === 'box') {
+    selBox.setAttribute('visibility', 'hidden');
+    const b = iact.box;
+    if (b && (b.w > 4 || b.h > 4)) {
+      for (const n of state.notes)
+        if (n.x >= b.x && n.x <= b.x+b.w && n.y >= b.y && n.y <= b.y+b.h)
+          selectedIds.add(n.id);
+    }
+    render(); syncSidebar();
+  }
+  iact = null;
+});
+
+function onNoteDblClick(e) {
+  const id = e.currentTarget.getAttribute('data-id');
+  selectedIds = new Set([id]); render(); syncSidebar();
+  setTimeout(() => { const el = document.getElementById('prop-label'); el.focus(); el.select(); }, 30);
+}
+
+// ─── Sidebar sync ─────────────────────────────────────────────────────────────
+
+function syncSidebar() {
+  const n = selectedIds.size;
+  document.getElementById('props-empty').style.display  = n === 0 ? '' : 'none';
+  document.getElementById('props-single').style.display = n === 1 ? '' : 'none';
+  document.getElementById('props-multi').style.display  = n > 1  ? '' : 'none';
+
+  if (n === 1) {
+    const note = state.notes.find(nd => selectedIds.has(nd.id));
+    if (note) {
+      document.getElementById('prop-label').value = note.label;
+      document.getElementById('prop-r').value     = note.r;
+      document.getElementById('prop-r-val').textContent = note.r;
+    }
+  }
+  if (n > 1) document.getElementById('hint-multi').textContent = `${n} notes selected`;
+
+  document.getElementById('status').textContent =
+    n === 0 ? `${state.notes.length} notes` : n === 1 ? '1 selected' : `${n} selected`;
+
+  updateHighlightPanel();
+}
+
+function updateHighlightPanel() {
+  const noteOpts  = document.getElementById('hl-note-opts');
+  const chordOpts = document.getElementById('hl-chord-opts');
+  noteOpts.style.display  = hlMode === 'note'  ? '' : 'none';
+  chordOpts.style.display = hlMode === 'chord' ? '' : 'none';
+
+  if (hlMode === 'note')  buildNoteLegend();
+  if (hlMode === 'chord') updateChordInfo();
+}
+
+function buildNoteLegend() {
+  const pcs = new Map();
+  for (const n of state.notes) {
+    const pc = parsePitchClass(n.label);
+    if (pc >= 0 && !pcs.has(pc)) pcs.set(pc, PC_NAMES[pc]);
+  }
+  const sorted = [...pcs.entries()].sort((a, b) => a[0] - b[0]);
+  const legend = document.getElementById('note-legend');
+  legend.innerHTML = sorted.map(([pc, name]) =>
+    `<div class="legend-item">
+       <div class="legend-dot" style="background:${PC_COLORS[pc]}"></div>
+       <span>${name}</span>
+     </div>`
+  ).join('');
+}
+
+function updateChordInfo() {
+  const ivs    = CHORD_TYPES[hlChordType] || [];
+  const panPcs = new Set(state.notes.map(n => parsePitchClass(n.label)).filter(p => p >= 0));
+  const notes  = ivs.map(i => {
+    const pc = (hlChordRoot + i) % 12;
+    return { name: PC_NAMES[pc], has: panPcs.has(pc) };
+  });
+  const all = notes.every(n => n.has);
+  const noteHtml = notes.map(n =>
+    `<span class="${n.has ? 'present' : 'missing'}">${n.name}${n.has ? '' : '✗'}</span>`
+  ).join(' · ');
+  const status = all ? '✓ All notes on pan' : `${notes.filter(n=>n.has).length}/${notes.length} notes on pan`;
+  document.getElementById('hl-chord-info').innerHTML =
+    `${noteHtml}<br><span style="color:${all?'#5d8':'#e05'}">${status}</span>`;
+}
+
+// ─── Sidebar controls wiring ──────────────────────────────────────────────────
+
+// Note props
+const propLabel = document.getElementById('prop-label');
+propLabel.addEventListener('input', () => {
+  const n = state.notes.find(nd => selectedIds.has(nd.id));
+  if (n) { n.label = propLabel.value; render(); updateHighlightPanel(); }
+});
+propLabel.addEventListener('change', pushHistory);
+propLabel.addEventListener('keydown', e => { if (e.key === 'Enter') propLabel.blur(); });
+
+const propR = document.getElementById('prop-r');
+propR.addEventListener('input', () => {
+  const r = +propR.value;
+  document.getElementById('prop-r-val').textContent = r;
+  for (const n of state.notes) if (selectedIds.has(n.id)) n.r = r;
+  renderNotes();
+});
+propR.addEventListener('change', pushHistory);
+
+const propRMulti = document.getElementById('prop-r-multi');
+propRMulti.addEventListener('input', () => {
+  const r = +propRMulti.value;
+  document.getElementById('prop-r-multi-val').textContent = r;
+  for (const n of state.notes) if (selectedIds.has(n.id)) n.r = r;
+  renderNotes();
+});
+propRMulti.addEventListener('change', pushHistory);
+
+// Pan radius
+const panR = document.getElementById('pan-r');
+panR.addEventListener('input', () => {
+  state.pan.r = +panR.value;
+  document.getElementById('pan-r-val').textContent = state.pan.r;
+  renderPan();
+});
+panR.addEventListener('change', pushHistory);
+
+// Highlight mode
+document.getElementById('hl-mode').addEventListener('change', e => {
+  hlMode = e.target.value; render(); updateHighlightPanel();
+});
+
+// Populate chord type dropdown
+const chordTypeEl = document.getElementById('hl-chord-type');
+Object.keys(CHORD_TYPES).forEach(name => {
+  const o = document.createElement('option');
+  o.value = name; o.textContent = name;
+  chordTypeEl.appendChild(o);
+});
+chordTypeEl.addEventListener('change', e => {
+  hlChordType = e.target.value; render(); updateChordInfo();
+});
+
+// Populate root dropdown
+const chordRootEl = document.getElementById('hl-chord-root');
+PC_NAMES.forEach((name, i) => {
+  const o = document.createElement('option');
+  o.value = i; o.textContent = name;
+  chordRootEl.appendChild(o);
+});
+chordRootEl.addEventListener('change', e => {
+  hlChordRoot = +e.target.value; render(); updateChordInfo();
+});
+
+// Populate chord type checkboxes for ZIP export
+const CHECKED_BY_DEFAULT = new Set(['Major','Minor','Dim','Sus2','Sus4','Maj7','Min7','Dom7']);
+const chordChecks = document.getElementById('chord-checks');
+Object.keys(CHORD_TYPES).forEach(name => {
+  const lbl = document.createElement('label');
+  lbl.innerHTML = `<input type="checkbox" value="${name}" ${CHECKED_BY_DEFAULT.has(name)?'checked':''}> ${name}`;
+  chordChecks.appendChild(lbl);
+});
+
+function checkAllChordTypes(on) {
+  chordChecks.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = on);
+}
+
+function getSelectedChordTypes() {
+  return [...chordChecks.querySelectorAll('input[type=checkbox]:checked')].map(cb => cb.value);
+}
+
+// ─── Keyboard ─────────────────────────────────────────────────────────────────
+
+document.addEventListener('keydown', e => {
+  const inInput = ['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName);
+  if (!inInput) {
+    if (e.key === 'Delete' || e.key === 'Backspace') { deleteSelected(); return; }
+    if (e.key === 'Escape') { selectedIds.clear(); render(); syncSidebar(); return; }
+    if (e.key === 'a' && (e.ctrlKey||e.metaKey)) { e.preventDefault(); selectAll(); return; }
+    if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) {
+      e.preventDefault();
+      const d = e.shiftKey ? 10 : 1;
+      for (const n of state.notes) {
+        if (!selectedIds.has(n.id)) continue;
+        if (e.key==='ArrowUp')    n.y -= d;
+        if (e.key==='ArrowDown')  n.y += d;
+        if (e.key==='ArrowLeft')  n.x -= d;
+        if (e.key==='ArrowRight') n.x += d;
+      }
+      renderNotes();
+      clearTimeout(nudgeTimer);
+      nudgeTimer = setTimeout(pushHistory, 400);
+      return;
+    }
+  }
+  if (e.key==='z' && (e.ctrlKey||e.metaKey) && !e.shiftKey) { e.preventDefault(); undo(); }
+  if ((e.key==='y' && (e.ctrlKey||e.metaKey)) ||
+      (e.key==='z' && (e.ctrlKey||e.metaKey) && e.shiftKey)) { e.preventDefault(); redo(); }
+  if (e.key==='d' && (e.ctrlKey||e.metaKey)) { e.preventDefault(); duplicateSelected(); }
+});
+
+// ─── SVG / PNG export helpers ─────────────────────────────────────────────────
+
+function buildSVGString(highlightPcs = null, chordLabel = '') {
+  const { cx, cy, r } = state.pan;
+  const innerR = Math.max(r - 50, Math.round(r * 0.8));
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
+<rect width="1000" height="1000" fill="white"/>
+<circle cx="${cx}" cy="${cy}" r="${r}" fill="#f2f2f2" stroke="#c0c0c0" stroke-width="5"/>
+<circle cx="${cx}" cy="${cy}" r="${innerR}" fill="none" stroke="#e0e0e0" stroke-width="1.5"/>`;
+
+  for (const note of state.notes) {
+    const pc = parsePitchClass(note.label);
+    let stroke = ACCENT, strokeW = 2.5, opacity = 1, fill = 'white';
+
+    if (highlightPcs === 'all') {
+      stroke = pc >= 0 ? PC_COLORS[pc] : ACCENT; strokeW = 3;
+    } else if (highlightPcs instanceof Set) {
+      if (highlightPcs.has(pc)) { stroke = '#f39c12'; strokeW = 4; fill = '#fffbf0'; }
+      else                      { stroke = '#ccc';    strokeW = 2;  opacity = 0.3; }
+    }
+
+    const fs  = Math.max(10, Math.min(Math.round(note.r * 0.46), 22));
+    const lbl = fmtLabel(note.label);
+    s += `\n<g opacity="${opacity}">` +
+         `<circle cx="${note.x}" cy="${note.y}" r="${note.r}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeW}"/>` +
+         `<text x="${note.x}" y="${note.y}" text-anchor="middle" dominant-baseline="central" ` +
+         `font-family="Arial, sans-serif" font-size="${fs}" fill="#222">${lbl}</text></g>`;
+  }
+
+  if (chordLabel) {
+    s += `\n<text x="500" y="965" text-anchor="middle" font-family="Arial, sans-serif" ` +
+         `font-size="26" font-weight="bold" fill="#333">${chordLabel}</text>`;
+  }
+
+  s += '\n</svg>';
+  return s;
+}
+
+function svgToPngBlob(svgStr) {
+  return new Promise((resolve, reject) => {
+    const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    const img  = new Image();
+    img.onload = () => {
+      const canvas = Object.assign(document.createElement('canvas'), { width: 1000, height: 1000 });
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, 1000, 1000);
+      ctx.drawImage(img, 0, 0);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(resolve, 'image/png');
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('SVG render failed')); };
+    img.src = url;
+  });
+}
+
+function dlBlob(blob, name) {
+  const a = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(blob), download: name });
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+// ─── Export functions ─────────────────────────────────────────────────────────
+
+function exportJSON() {
+  dlBlob(new Blob([JSON.stringify({ version:1, pan:state.pan, notes:state.notes }, null, 2)],
+    { type:'application/json' }), 'handpan-layout.json');
+}
+
+function triggerImport() { document.getElementById('file-input').click(); }
+
+document.getElementById('file-input').addEventListener('change', e => {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const d = JSON.parse(ev.target.result);
+      if (d.pan)   state.pan   = d.pan;
+      if (d.notes) {
+        state.notes = d.notes.map(n => ({ ...n, label: n.label || '' }));
+        state.nextId = 1;
+        for (const n of state.notes) {
+          const num = parseInt(n.id.replace(/\D/g,''));
+          if (!isNaN(num) && num >= state.nextId) state.nextId = num + 1;
+        }
+      }
+      selectedIds.clear(); pushHistory(); render(); syncSidebar(); syncPanSlider();
+    } catch (err) { alert('Invalid JSON: ' + err.message); }
+  };
+  reader.readAsText(file); e.target.value = '';
+});
+
+function exportCurrentSVG() {
+  const hpcs = getHighlightedPcs();
+  const label = hlMode === 'chord' ? `${PC_NAMES[hlChordRoot]} ${hlChordType}` : '';
+  dlBlob(new Blob([buildSVGString(hpcs, label)], { type:'image/svg+xml' }), 'handpan-layout.svg');
+}
+
+function exportCurrentPNG() {
+  const hpcs  = getHighlightedPcs();
+  const label = hlMode === 'chord' ? `${PC_NAMES[hlChordRoot]} ${hlChordType}` : '';
+  svgToPngBlob(buildSVGString(hpcs, label)).then(blob => dlBlob(blob, 'handpan-layout.png'));
+}
+
+function getPlayableChords(types) {
+  const panPcs = new Set(state.notes.map(n => parsePitchClass(n.label)).filter(p => p >= 0));
+  const result = [];
+  for (const type of types) {
+    const ivs = CHORD_TYPES[type]; if (!ivs) continue;
+    for (let root = 0; root < 12; root++) {
+      const pcs = ivs.map(i => (root + i) % 12);
+      if (pcs.every(p => panPcs.has(p)))
+        result.push({ type, root, pcs: new Set(pcs),
+          label: `${PC_NAMES[root]} ${type}`,
+          filename: `${ROOT_FILE[root]}_${type}.png` });
+    }
+  }
+  return result;
+}
+
+function setExportStatus(msg) {
+  document.getElementById('export-status').textContent = msg;
+}
+
+async function exportAllChordsZip() {
+  if (typeof JSZip === 'undefined') {
+    alert('JSZip not loaded — check internet connection.'); return;
+  }
+  const types = getSelectedChordTypes();
+  if (!types.length) { setExportStatus('No chord types selected.'); return; }
+
+  const playable = getPlayableChords(types);
+  if (!playable.length) { setExportStatus('No playable chords found on this layout.'); return; }
+
+  setExportStatus(`0 / ${playable.length} …`);
+  const zip = new JSZip();
+
+  for (let i = 0; i < playable.length; i++) {
+    const c = playable[i];
+    setExportStatus(`${i+1} / ${playable.length}  ${c.label}`);
+    const svg = buildSVGString(c.pcs, c.label);
+    const png = await svgToPngBlob(svg);
+    zip.folder(c.type).file(c.filename, png);
+  }
+
+  setExportStatus('Building ZIP …');
+  const zipBlob = await zip.generateAsync({ type: 'blob' });
+  dlBlob(zipBlob, 'handpan-chords.zip');
+  setExportStatus(`Done — ${playable.length} chord images exported.`);
+  setTimeout(() => setExportStatus(''), 5000);
+}
+
+// ─── Canvas sizing ────────────────────────────────────────────────────────────
+
+function resizeCanvas() {
+  const wrap = document.getElementById('canvas-wrap');
+  const size = Math.min(wrap.clientWidth - 24, wrap.clientHeight - 24);
+  SVG.style.width = SVG.style.height = size + 'px';
+}
+window.addEventListener('resize', resizeCanvas);
+
+function syncPanSlider() {
+  panR.value = state.pan.r;
+  document.getElementById('pan-r-val').textContent = state.pan.r;
+}
+
+// ─── Init: load saved layout ──────────────────────────────────────────────────
+
+(function () {
+  const DEFAULT = {"version":1,"pan":{"cx":500,"cy":500,"r":324},"notes":[{"id":"n1","x":502,"y":510,"r":80,"label":"D3"},{"id":"n2","x":585,"y":652,"r":62,"label":"A3"},{"id":"n3","x":417,"y":658,"r":62,"label":"Bb3"},{"id":"n4","x":688,"y":553,"r":50,"label":"C4"},{"id":"n5","x":305,"y":548,"r":50,"label":"D4"},{"id":"n6","x":695,"y":439,"r":50,"label":"E4"},{"id":"n7","x":309,"y":421,"r":50,"label":"F4"},{"id":"n8","x":635,"y":339,"r":50,"label":"G4"},{"id":"n9","x":388,"y":327,"r":50,"label":"A4"},{"id":"n10","x":506,"y":295,"r":50,"label":"C4"},{"id":"n15","x":647,"y":134,"r":43,"label":"F5"},{"id":"n17","x":180,"y":774,"r":71,"label":"E3"},{"id":"n18","x":842,"y":753,"r":77,"label":"Bb2"},{"id":"n19","x":456,"y":386,"r":32,"label":"D5"},{"id":"n20","x":548,"y":385,"r":32,"label":"E5"},{"id":"n21","x":84,"y":531,"r":77,"label":"C3"},{"id":"n22","x":909,"y":531,"r":71,"label":"F3"},{"id":"n23","x":193,"y":206,"r":71,"label":"G3"}]};
+  state.pan   = DEFAULT.pan;
+  state.notes = DEFAULT.notes;
+  state.nextId = 24;
+  pushHistory(); resizeCanvas(); render(); syncSidebar(); syncPanSlider();
+})();
+</script>
+</body>
+</html>
