@@ -123,6 +123,86 @@ body {
   background: #0d0d1a; overflow: auto; position: relative;
 }
 #canvas { background: white; box-shadow: 0 0 40px rgba(0,0,0,.6); display: block; flex-shrink: 0; }
+
+/* ── Progressions panel ──────────────────────────────────────────────── */
+#prog-panel {
+  width: 340px; min-width: 240px;
+  background: #1a1a2e;
+  border-left: 1px solid #2a2a4a;
+  display: none; flex-direction: column;
+  overflow: hidden; flex-shrink: 0;
+  position: relative;
+}
+#prog-panel.open { display: flex; }
+#prog-resize-handle {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  cursor: col-resize; background: transparent; transition: background .15s; z-index: 10;
+}
+#prog-resize-handle:hover, #prog-resize-handle.dragging { background: #5b8db8; }
+.prog-header {
+  padding: 10px 14px 9px;
+  border-bottom: 1px solid #2a2a4a;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.prog-header-title { font-size: 12px; text-transform: uppercase; letter-spacing: .7px; color: #5b8db8; font-weight: bold; }
+.prog-section { padding: 9px 12px 8px; border-bottom: 1px solid #2a2a4a; flex-shrink: 0; }
+.prog-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: .6px; color: #556; margin-bottom: 7px; }
+/* Mood pills */
+.mood-pills { display: flex; flex-wrap: wrap; gap: 5px; }
+.mood-pill {
+  background: #1f2547; color: #889;
+  border: 1px solid #3a4060; border-radius: 12px;
+  padding: 4px 12px; font-size: 11px; cursor: pointer;
+  transition: background .12s, border-color .12s, color .12s; white-space: nowrap;
+}
+.mood-pill:hover { border-color: #5b8db8; color: #ccd; }
+.mood-pill.active { background: #253060; border-color: #5b8db8; color: #8bc4e8; }
+/* Root bar */
+.root-bar { display: flex; flex-wrap: wrap; gap: 3px; }
+.root-btn {
+  background: #1f2547; color: #667;
+  border: 1px solid #2e3a55; border-radius: 3px;
+  padding: 4px 5px; font-size: 11px; cursor: pointer;
+  min-width: 34px; text-align: center;
+  transition: background .1s, border-color .1s, color .1s;
+}
+.root-btn:hover { border-color: #5b8db8; color: #aac; }
+.root-btn.on-pan { color: #9ab; border-color: #3a4a60; }
+.root-btn.active { background: #253060; border-color: #5b8db8; color: #8bc4e8; font-weight: bold; }
+/* Progression list */
+.prog-list { flex: 1; overflow-y: auto; padding: 8px 0 12px; }
+.prog-card {
+  margin: 0 10px 10px; padding: 9px 9px 8px;
+  background: #12121f; border: 1px solid #252540; border-radius: 6px;
+}
+.prog-card-title {
+  font-size: 10px; color: #556; margin-bottom: 7px;
+  letter-spacing: .3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.chord-row { display: flex; gap: 4px; flex-wrap: wrap; }
+.chord-tile {
+  background: #1c1c35; border: 1px solid #333558; border-radius: 5px;
+  padding: 5px 6px 4px; cursor: pointer; flex: 1; min-width: 48px;
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  transition: background .12s, border-color .12s;
+  user-select: none;
+}
+.chord-tile:hover { background: #253060; border-color: #5b8db8; }
+.chord-tile.active-tile { background: #253060; border-color: #5b8db8; box-shadow: 0 0 0 1px #5b8db8; }
+.chord-tile .roman  { font-size: 9px; color: #445; letter-spacing: .3px; line-height: 1.3; }
+.chord-tile .t-root { font-size: 13px; color: #ccd; font-weight: bold; line-height: 1.1; }
+.chord-tile .t-sym  { font-size: 9px; color: #7ab; line-height: 1.2; }
+.chord-tile .play-dot { font-size: 9px; margin-top: 1px; }
+.play-full    { color: #5d8; }
+.play-partial { color: #c80; }
+.play-none    { color: #445; }
+/* Playability legend */
+.play-legend {
+  display: flex; gap: 10px; padding: 6px 12px 0;
+  font-size: 10px; color: #445; flex-shrink: 0;
+}
+.play-legend span { display: flex; align-items: center; gap: 3px; }
 </style>
 </head>
 <body>
@@ -147,6 +227,8 @@ body {
     <button class="btn" onclick="triggerImport()">⬆ JSON</button>
     <button class="btn" onclick="exportCurrentSVG()">⬇ SVG</button>
   </div>
+  <div class="sep"></div>
+  <button class="btn" id="prog-toggle-btn" onclick="toggleProgressions()" title="Chord Progressions">♬ Progressions</button>
   <div class="sep"></div>
   <span id="status" style="font-size:11px;color:#556;"></span>
 </div>
@@ -290,6 +372,32 @@ body {
     </svg>
   </div>
 
+  <!-- ══ Progressions Panel ═══════════════════════════════════════════════ -->
+  <div id="prog-panel">
+    <div id="prog-resize-handle"></div>
+    <div class="prog-header">
+      <span class="prog-header-title">♬ Chord Progressions</span>
+      <div style="display:flex;gap:4px;">
+        <button class="btn" style="padding:2px 8px;font-size:11px;" onclick="exportMoodsZip()" title="Export all moods as PNG images">⬇ ZIP</button>
+        <button class="btn" style="padding:2px 7px;font-size:11px;" onclick="toggleProgressions()">✕</button>
+      </div>
+    </div>
+    <div class="prog-section">
+      <div class="prog-section-title">Mood</div>
+      <div class="mood-pills" id="mood-pills"></div>
+    </div>
+    <div class="prog-section">
+      <div class="prog-section-title">Root note</div>
+      <div class="root-bar" id="root-bar"></div>
+    </div>
+    <div class="play-legend">
+      <span><span class="play-full">●</span> All notes on pan</span>
+      <span><span class="play-partial">◑</span> Partial</span>
+      <span><span class="play-none">○</span> None</span>
+    </div>
+    <div class="prog-list" id="prog-list"></div>
+  </div>
+
 </div>
 
 <input type="file" id="file-input" accept=".json" style="display:none">
@@ -355,6 +463,47 @@ const CHORD_SYMBOLS = {
 };
 
 const ACCENT = '#5b8db8';
+
+const MOODS = [
+  { id: 'happy',    label: 'Happy',       icon: '☀' },
+  { id: 'sad',      label: 'Melancholic', icon: '♩' },
+  { id: 'jazz',     label: 'Jazz',        icon: '♪' },
+  { id: 'epic',     label: 'Epic',        icon: '⚡' },
+  { id: 'dark',     label: 'Dark',        icon: '◆' },
+  { id: 'peaceful', label: 'Peaceful',    icon: '◌' },
+];
+
+// s = semitone offset from tonic (I), t = chord type from CHORD_TYPES
+const PROGRESSIONS = [
+  // Happy
+  { name:'Classic Major',      moods:['happy'],           chords:[{s:0,t:'Major'},{s:5,t:'Major'},{s:7,t:'Major'},{s:0,t:'Major'}] },
+  { name:'Pop Anthem',         moods:['happy','epic'],    chords:[{s:0,t:'Major'},{s:7,t:'Major'},{s:9,t:'Minor'},{s:5,t:'Major'}] },
+  { name:'50s Doo-Wop',        moods:['happy'],           chords:[{s:0,t:'Major'},{s:9,t:'Minor'},{s:5,t:'Major'},{s:7,t:'Major'}] },
+  { name:'Bright Pop',         moods:['happy'],           chords:[{s:0,t:'Major'},{s:2,t:'Minor'},{s:5,t:'Major'},{s:7,t:'Major'}] },
+  // Melancholic
+  { name:'Aeolian Loop',       moods:['sad'],             chords:[{s:0,t:'Minor'},{s:10,t:'Major'},{s:8,t:'Major'},{s:10,t:'Major'}] },
+  { name:'Harmonic Minor',     moods:['sad','dark'],      chords:[{s:0,t:'Minor'},{s:5,t:'Minor'},{s:7,t:'Major'},{s:0,t:'Minor'}] },
+  { name:'Andalusian Descent', moods:['sad','dark'],      chords:[{s:0,t:'Minor'},{s:10,t:'Major'},{s:8,t:'Major'},{s:7,t:'Major'}] },
+  { name:'Minor Waltz',        moods:['sad'],             chords:[{s:0,t:'Minor'},{s:5,t:'Minor'},{s:10,t:'Major'},{s:3,t:'Major'}] },
+  // Jazz
+  { name:'ii–V–I',             moods:['jazz'],            chords:[{s:2,t:'Min7'},{s:7,t:'Dom7'},{s:0,t:'Maj7'}] },
+  { name:'Rhythm Changes',     moods:['jazz'],            chords:[{s:0,t:'Maj7'},{s:9,t:'Min7'},{s:2,t:'Min7'},{s:7,t:'Dom7'}] },
+  { name:'Jazz Turnaround',    moods:['jazz'],            chords:[{s:0,t:'Maj7'},{s:9,t:'Dom7'},{s:2,t:'Min7'},{s:7,t:'Dom7'}] },
+  { name:'Harm. Min. ii–V–i',  moods:['jazz','dark'],    chords:[{s:2,t:'HalfDim7'},{s:7,t:'Dom7'},{s:0,t:'Minor'}] },
+  { name:'Bossa Groove',       moods:['jazz','peaceful'], chords:[{s:0,t:'Maj7'},{s:5,t:'Maj7'},{s:2,t:'Min7'},{s:7,t:'Dom7'}] },
+  // Epic
+  { name:'Cinematic Minor',    moods:['epic','sad'],      chords:[{s:0,t:'Minor'},{s:8,t:'Major'},{s:3,t:'Major'},{s:10,t:'Major'}] },
+  { name:'Mixolydian Rock',    moods:['epic','happy'],    chords:[{s:0,t:'Major'},{s:7,t:'Major'},{s:10,t:'Major'},{s:5,t:'Major'}] },
+  { name:'Power Ascent',       moods:['epic'],            chords:[{s:0,t:'Major'},{s:5,t:'Major'},{s:9,t:'Minor'},{s:7,t:'Major'},{s:0,t:'Major'}] },
+  // Dark
+  { name:'Phrygian Gate',      moods:['dark'],            chords:[{s:0,t:'Minor'},{s:1,t:'Major'},{s:10,t:'Major'},{s:0,t:'Minor'}] },
+  { name:'Dim Tension',        moods:['dark'],            chords:[{s:0,t:'Minor'},{s:2,t:'Dim'},{s:7,t:'Major'},{s:0,t:'Minor'}] },
+  { name:'Dark Ostinato',      moods:['dark'],            chords:[{s:0,t:'Minor'},{s:8,t:'Major'},{s:10,t:'Major'},{s:0,t:'Minor'}] },
+  // Peaceful
+  { name:'Ascending Steps',    moods:['peaceful'],        chords:[{s:0,t:'Major'},{s:2,t:'Minor'},{s:4,t:'Minor'},{s:5,t:'Major'}] },
+  { name:'Simple Loop',        moods:['peaceful','happy'],chords:[{s:0,t:'Major'},{s:5,t:'Major'},{s:0,t:'Major'},{s:7,t:'Major'}] },
+  { name:'Mixolydian Flow',    moods:['peaceful'],        chords:[{s:0,t:'Major'},{s:10,t:'Major'},{s:5,t:'Major'},{s:0,t:'Major'}] },
+];
 
 const PALETTE = [
   '#e74c3c','#c0392b','#e91e63','#f06292',
@@ -606,6 +755,12 @@ let hlMode       = 'none';   // 'none' | 'note' | 'chord'
 let hlChordType  = 'Major';
 let hlChordRoot  = 0;
 
+// Progressions panel state
+let progOpen     = false;
+let activeMood   = 'happy';
+let activeRootPc = -1;       // -1 = auto (best root per progression)
+let _activeTile  = null;     // { progName, chordIdx } — currently highlighted tile
+
 // ─── History ──────────────────────────────────────────────────────────────────
 
 function snapshot()  { return JSON.stringify({ pan: state.pan, notes: state.notes, nextId: state.nextId }); }
@@ -615,6 +770,7 @@ function pushHistory() {
   history.push(snapshot());
   histIdx = history.length - 1;
   if (history.length > 120) { history.shift(); histIdx--; }
+  if (progOpen) { buildRootBar(); renderProgressions(); }
 }
 
 function undo() { if (histIdx > 0)                    { histIdx--; restore(history[histIdx]); } }
@@ -1406,6 +1562,299 @@ async function exportAllChordsZip() {
   setExportStatus(`Done — ${toExport.length} chord images exported.`);
   setTimeout(() => setExportStatus(''), 5000);
 }
+
+// ─── Progressions panel ───────────────────────────────────────────────────────
+
+function toRoman(s, type) {
+  const UPPER = ['I','♭II','II','♭III','III','IV','♭V','V','♭VI','VI','♭VII','VII'];
+  const base = UPPER[((s % 12) + 12) % 12];
+  const isMinorQ = ['Minor','Dim','Min7','HalfDim7','Dim7','MinMaj7','Min6'].includes(type);
+  const r = isMinorQ ? base.toLowerCase() : base;
+  return ['Dim','Dim7'].includes(type) ? r + '°' : type === 'HalfDim7' ? r + 'ø' : r;
+}
+
+function chordPlayability(rootPc, type) {
+  const ivs = CHORD_TYPES[type];
+  if (!ivs) return 'none';
+  const panPcs = new Set(state.notes.map(n => parsePitchClass(n.label)).filter(p => p >= 0));
+  const chord  = ivs.map(i => (rootPc + i) % 12);
+  const present = chord.filter(p => panPcs.has(p)).length;
+  if (present === chord.length) return 'full';
+  if (present > 0) return 'partial';
+  return 'none';
+}
+
+function playScore(play) { return play === 'full' ? 2 : play === 'partial' ? 1 : 0; }
+
+function progressionScore(prog, rootPc) {
+  return prog.chords.reduce((sum, c) =>
+    sum + playScore(chordPlayability((rootPc + c.s) % 12, c.t)), 0);
+}
+
+function bestRootForProg(prog) {
+  const panPcs = [...new Set(state.notes.map(n => parsePitchClass(n.label)).filter(p => p >= 0))];
+  if (!panPcs.length) return 0;
+  let best = panPcs[0], bestScore = -1;
+  for (const pc of panPcs) {
+    const sc = progressionScore(prog, pc);
+    if (sc > bestScore) { bestScore = sc; best = pc; }
+  }
+  return best;
+}
+
+function playDot(play) {
+  if (play === 'full')    return '<span class="play-dot play-full">●</span>';
+  if (play === 'partial') return '<span class="play-dot play-partial">◑</span>';
+  return '<span class="play-dot play-none">○</span>';
+}
+
+function toggleProgressions() {
+  progOpen = !progOpen;
+  const panel = document.getElementById('prog-panel');
+  const btn   = document.getElementById('prog-toggle-btn');
+  panel.classList.toggle('open', progOpen);
+  btn.style.background  = progOpen ? '#253060' : '';
+  btn.style.borderColor = progOpen ? '#5b8db8' : '';
+  btn.style.color       = progOpen ? '#8bc4e8' : '';
+  if (progOpen) { buildMoodPills(); buildRootBar(); renderProgressions(); }
+  resizeCanvas();
+}
+
+function moodAvailability(moodId) {
+  const progs = PROGRESSIONS.filter(p => p.moods.includes(moodId));
+  if (!progs.length) return 0;
+  const total = progs.reduce((sum, prog) => {
+    const rootPc = activeRootPc === -1 ? bestRootForProg(prog) : activeRootPc;
+    const score  = progressionScore(prog, rootPc);
+    const maxScore = prog.chords.length * 2;
+    return sum + score / maxScore;
+  }, 0);
+  return total / progs.length; // 0..1
+}
+
+function buildMoodPills() {
+  const el = document.getElementById('mood-pills');
+  el.innerHTML = '';
+  for (const mood of MOODS) {
+    const avail = moodAvailability(mood.id); // 0..1
+    const pill = document.createElement('button');
+    pill.className = 'mood-pill' + (mood.id === activeMood ? ' active' : '');
+    pill.textContent = `${mood.icon} ${mood.label}`;
+    // Tint non-active pills: dim (22% lightness) → bright (58% lightness)
+    if (mood.id !== activeMood) {
+      const l = Math.round(22 + avail * 36);
+      pill.style.color = `hsl(220,18%,${l}%)`;
+    }
+    pill.title = `${mood.label} — ${Math.round(avail * 100)}% available on this pan`;
+    pill.addEventListener('click', () => {
+      activeMood = mood.id;
+      buildMoodPills(); renderProgressions();
+    });
+    el.appendChild(pill);
+  }
+}
+
+function buildRootBar() {
+  const el = document.getElementById('root-bar');
+  const panPcs = new Set(state.notes.map(n => parsePitchClass(n.label)).filter(p => p >= 0));
+  el.innerHTML = '';
+
+  const auto = document.createElement('button');
+  auto.className = 'root-btn' + (activeRootPc === -1 ? ' active' : '');
+  auto.textContent = 'Auto';
+  auto.title = 'Best root per progression';
+  auto.addEventListener('click', () => { activeRootPc = -1; buildRootBar(); buildMoodPills(); renderProgressions(); });
+  el.appendChild(auto);
+
+  for (let i = 0; i < 12; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'root-btn' +
+      (panPcs.has(i) ? ' on-pan' : '') +
+      (activeRootPc === i ? ' active' : '');
+    btn.textContent = PC_NAMES[i];
+    btn.title = panPcs.has(i) ? `${PC_NAMES[i]} — on pan` : PC_NAMES[i];
+    btn.addEventListener('click', () => { activeRootPc = i; buildRootBar(); buildMoodPills(); renderProgressions(); });
+    el.appendChild(btn);
+  }
+}
+
+function renderProgressions() {
+  const el = document.getElementById('prog-list');
+  el.innerHTML = '';
+  const filtered = PROGRESSIONS.filter(p => p.moods.includes(activeMood));
+
+  if (!filtered.length) {
+    el.innerHTML = '<div style="padding:20px;font-size:12px;color:#445;text-align:center;">No progressions for this mood.</div>';
+    return;
+  }
+
+  for (const prog of filtered) {
+    const rootPc  = activeRootPc === -1 ? bestRootForProg(prog) : activeRootPc;
+    const rootName = PC_NAMES[rootPc];
+
+    const card = document.createElement('div');
+    card.className = 'prog-card';
+
+    const title = document.createElement('div');
+    title.className = 'prog-card-title';
+    title.textContent = activeRootPc === -1
+      ? `${prog.name}  ·  ${rootName}`
+      : prog.name;
+    card.appendChild(title);
+
+    const row = document.createElement('div');
+    row.className = 'chord-row';
+
+    prog.chords.forEach((c, ci) => {
+      const chordRoot = (rootPc + c.s) % 12;
+      const play  = chordPlayability(chordRoot, c.t);
+      const sym   = CHORD_SYMBOLS[c.t] ?? c.t;
+      const roman = toRoman(c.s, c.t);
+      const isActive = _activeTile && _activeTile.progName === prog.name && _activeTile.chordIdx === ci;
+
+      const tile = document.createElement('div');
+      tile.className = 'chord-tile' + (isActive ? ' active-tile' : '');
+      tile.innerHTML =
+        `<span class="roman">${roman}</span>` +
+        `<span class="t-root">${PC_NAMES[chordRoot]}</span>` +
+        `<span class="t-sym">${sym}</span>` +
+        playDot(play);
+
+      tile.addEventListener('click', () => {
+        _activeTile = { progName: prog.name, chordIdx: ci };
+        hlMode      = 'chord';
+        hlChordRoot = chordRoot;
+        hlChordType = c.t;
+        document.getElementById('hl-mode').value       = 'chord';
+        document.getElementById('hl-chord-root').value = chordRoot;
+        document.getElementById('hl-chord-type').value = c.t;
+        render(); updateHighlightPanel(); renderProgressions();
+      });
+
+      row.appendChild(tile);
+    });
+
+    card.appendChild(row);
+    el.appendChild(card);
+  }
+}
+
+// ─── Progressions export ─────────────────────────────────────────────────────
+
+function buildProgressionsSVG(moodId) {
+  const mood  = MOODS.find(m => m.id === moodId);
+  const progs = PROGRESSIONS.filter(p => p.moods.includes(moodId));
+  const W = 1000, H = 1400, ML = 50;
+  const innerW  = W - ML * 2;
+  const headerH = 100;
+  const legendH = 55;
+  const gap     = 18;
+  const availH  = H - headerH - 36 - legendH;
+  const cardH   = Math.min(248, Math.floor((availH - (progs.length - 1) * gap) / progs.length));
+  const tileH   = cardH - 50;
+
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+<rect width="${W}" height="${H}" fill="white"/>
+<rect x="0" y="0" width="${W}" height="${headerH}" fill="#f4f4f8"/>
+<line x1="0" y1="${headerH}" x2="${W}" y2="${headerH}" stroke="#ddd" stroke-width="1.5"/>
+<text x="${ML}" y="60" font-family="Arial,sans-serif" font-size="40" font-weight="bold" fill="#1a1a2e">${mood.icon} ${mood.label}</text>`;
+
+  const rootLabel = activeRootPc >= 0
+    ? `Root: ${PC_NAMES[activeRootPc]}`
+    : 'Auto root (best per progression)';
+  svg += `<text x="${ML}" y="85" font-family="Arial,sans-serif" font-size="14" fill="#aaa">${rootLabel}</text>`;
+
+  let y = headerH + 26;
+
+  for (const prog of progs) {
+    const rootPc  = activeRootPc === -1 ? bestRootForProg(prog) : activeRootPc;
+    const nChords = prog.chords.length;
+    const tileGap = 10;
+    const tileW   = Math.floor((innerW - 28 - (nChords - 1) * tileGap) / nChords);
+    const tileY   = y + 38;
+
+    svg += `<rect x="${ML}" y="${y}" width="${innerW}" height="${cardH}" rx="8" fill="#f9f9fc" stroke="#e4e4ee" stroke-width="1.2"/>`;
+
+    const titleStr = activeRootPc === -1
+      ? `${prog.name}  ·  ${PC_NAMES[rootPc]}`
+      : prog.name;
+    svg += `<text x="${ML + 14}" y="${y + 24}" font-family="Arial,sans-serif" font-size="13" fill="#888">${titleStr}</text>`;
+
+    prog.chords.forEach((c, ci) => {
+      const chordRoot = (rootPc + c.s) % 12;
+      const play  = chordPlayability(chordRoot, c.t);
+      const sym   = CHORD_SYMBOLS[c.t] ?? c.t;
+      const roman = toRoman(c.s, c.t);
+      const tileX = ML + 14 + ci * (tileW + tileGap);
+      const cx    = tileX + tileW / 2;
+
+      const bg  = play === 'full' ? '#eef8f3' : play === 'partial' ? '#fdf5e8' : '#f5f5f8';
+      const brd = play === 'full' ? '#aed4bc' : play === 'partial' ? '#d4c090' : '#dcdce8';
+      svg += `<rect x="${tileX}" y="${tileY}" width="${tileW}" height="${tileH}" rx="6" fill="${bg}" stroke="${brd}" stroke-width="1.2"/>`;
+
+      const ry  = tileY + Math.round(tileH * 0.16);
+      const ny  = tileY + Math.round(tileH * 0.48);
+      const sy  = tileY + Math.round(tileH * 0.70);
+      const dy  = tileY + Math.round(tileH * 0.88);
+      const nfs = Math.min(30, Math.round(tileH * 0.26));
+      const sfs = Math.max(11, Math.round(tileH * 0.14));
+
+      svg += `<text x="${cx}" y="${ry}" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#bbb">${roman}</text>`;
+      svg += `<text x="${cx}" y="${ny}" text-anchor="middle" font-family="Arial,sans-serif" font-size="${nfs}" font-weight="bold" fill="#222">${PC_NAMES[chordRoot]}</text>`;
+      svg += `<text x="${cx}" y="${sy}" text-anchor="middle" font-family="Arial,sans-serif" font-size="${sfs}" fill="#5b8db8">${sym}</text>`;
+
+      const dc = play === 'full' ? '#55bb77' : play === 'partial' ? '#cc8800' : '#ccc';
+      const dd = play === 'full' ? '●' : play === 'partial' ? '◑' : '○';
+      svg += `<text x="${cx}" y="${dy}" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" fill="${dc}">${dd}</text>`;
+    });
+
+    y += cardH + gap;
+  }
+
+  const legY = H - 22;
+  svg += `<text x="${ML}" y="${legY}" font-family="Arial,sans-serif" font-size="12" fill="#bbb">● All notes on pan   ◑ Partial   ○ None</text>`;
+  svg += '\n</svg>';
+  return svg;
+}
+
+async function exportMoodsZip() {
+  if (typeof JSZip === 'undefined') { alert('JSZip not loaded — check internet connection.'); return; }
+  setExportStatus('Building mood images …');
+  const zip = new JSZip();
+  for (let i = 0; i < MOODS.length; i++) {
+    const mood = MOODS[i];
+    setExportStatus(`${i + 1}/${MOODS.length}  ${mood.label} …`);
+    const png = await svgToPngBlob(buildProgressionsSVG(mood.id));
+    zip.file(`${mood.label}.png`, png);
+  }
+  setExportStatus('Building ZIP …');
+  const zipBlob = await zip.generateAsync({ type: 'blob' });
+  dlBlob(zipBlob, 'handpan-progressions.zip');
+  setExportStatus(`Done — ${MOODS.length} mood images exported.`);
+  setTimeout(() => setExportStatus(''), 5000);
+}
+
+// ─── Progressions panel resize ────────────────────────────────────────────────
+
+(function () {
+  const handle = document.getElementById('prog-resize-handle');
+  const panel  = document.getElementById('prog-panel');
+  let active = false, startX = 0, startW = 0;
+
+  handle.addEventListener('mousedown', e => {
+    active = true; startX = e.clientX; startW = panel.offsetWidth;
+    handle.classList.add('dragging'); e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!active) return;
+    const w = Math.max(240, Math.min(640, startW - (e.clientX - startX)));
+    panel.style.width = w + 'px'; panel.style.minWidth = w + 'px';
+    resizeCanvas();
+  });
+  document.addEventListener('mouseup', () => {
+    if (active) { active = false; handle.classList.remove('dragging'); }
+  });
+})();
 
 // ─── Canvas sizing ────────────────────────────────────────────────────────────
 
