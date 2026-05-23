@@ -139,6 +139,76 @@ body {
   cursor: col-resize; background: transparent; transition: background .15s; z-index: 10;
 }
 #prog-resize-handle:hover, #prog-resize-handle.dragging { background: #5b8db8; }
+
+/* ── Chords panel ────────────────────────────────────────────────────── */
+#chords-panel {
+  width: 320px; min-width: 220px;
+  background: #1a1a2e;
+  border-left: 1px solid #2a2a4a;
+  display: none; flex-direction: column;
+  overflow: hidden; flex-shrink: 0;
+  position: relative;
+}
+#chords-panel.open { display: flex; }
+#chords-resize-handle {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  cursor: col-resize; background: transparent; transition: background .15s; z-index: 10;
+}
+#chords-resize-handle:hover, #chords-resize-handle.dragging { background: #5b8db8; }
+/* Chord type pills — scrollable row */
+.chord-type-pills { display: flex; flex-wrap: wrap; gap: 5px; }
+.chord-type-pill {
+  background: #1f2547; color: #889;
+  border: 1px solid #3a4060; border-radius: 12px;
+  padding: 4px 10px; font-size: 11px; cursor: pointer;
+  transition: background .12s, border-color .12s, color .12s; white-space: nowrap;
+}
+.chord-type-pill:hover { border-color: #5b8db8; color: #ccd; }
+.chord-type-pill.active { background: #253060; border-color: #5b8db8; color: #8bc4e8; }
+/* Chords card (groups one chord type) */
+.chords-card {
+  margin: 0 10px 10px; padding: 9px 9px 8px;
+  background: #12121f; border: 1px solid #252540; border-radius: 6px;
+}
+.chords-card-title {
+  font-size: 10px; color: #556; letter-spacing: .3px;
+  margin-bottom: 7px; display: flex; align-items: center; gap: 5px;
+}
+.chords-card-title .ct-sym { font-size: 13px; color: #7ab; }
+/* Chord export section inside chords panel */
+.chord-export-section {
+  padding: 10px 12px 12px; border-top: 1px solid #2a2a4a; flex-shrink: 0;
+}
+.chord-export-title {
+  font-size: 10px; text-transform: uppercase; letter-spacing: .6px;
+  color: #556; margin-bottom: 8px;
+}
+.chord-export-type-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 3px 5px; margin-bottom: 7px;
+}
+.chord-export-type-grid label {
+  font-size: 11px; color: #aab; cursor: pointer;
+  display: flex; align-items: center; gap: 4px; white-space: nowrap;
+}
+.chord-export-type-grid input[type=checkbox] { accent-color: #5b8db8; cursor: pointer; }
+.chord-export-row { display: flex; gap: 4px; margin-bottom: 7px; }
+.chord-export-row .btn { flex: 1; font-size: 11px; padding: 4px 6px; }
+.chord-export-subtitle {
+  font-size: 9px; text-transform: uppercase; letter-spacing: .5px;
+  color: #445; margin: 8px 0 5px;
+}
+.chord-export-play-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px; margin-bottom: 9px;
+}
+.chord-export-play-label {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; color: #aab; cursor: pointer;
+}
+.chord-export-play-label input { accent-color: #5b8db8; cursor: pointer; }
+#export-status {
+  font-size: 11px; color: #5b8db8; min-height: 15px; margin-top: 5px;
+}
 .prog-header {
   padding: 10px 14px 9px;
   border-bottom: 1px solid #2a2a4a;
@@ -219,13 +289,15 @@ body {
 .fn-T-lbl { color: #3a7090; }
 .fn-S-lbl { color: #2a7050; }
 .fn-D-lbl { color: #905030; }
-.play-full    { color: #5d8; }
-.play-partial { color: #c80; }
-.play-none    { color: #445; }
+.play-full       { color: #4c9; }
+.play-partial    { color: #ca0; }
+.play-incomplete { color: #d44; }
+.play-none       { color: #445; }
 /* Playability legend */
 .play-legend {
   display: flex; gap: 10px; padding: 6px 12px 0;
   font-size: 10px; color: #445; flex-shrink: 0;
+  flex-wrap: wrap;
 }
 .play-legend span { display: flex; align-items: center; gap: 3px; }
 
@@ -770,6 +842,7 @@ body {
   <div class="sep"></div>
   <button class="btn" id="rhy-toggle-btn" onclick="toggleRhythm()" title="Rhythm Mode">♩ Rhythm</button>
   <button class="btn" id="prog-toggle-btn" onclick="toggleProgressions()" title="Chord Progressions">♬ Progressions</button>
+  <button class="btn" id="chords-toggle-btn" onclick="toggleChords()" title="Chords">♩ Chords</button>
   <div class="sep"></div>
   <span id="status" style="font-size:11px;color:#556;"></span>
 </div>
@@ -861,23 +934,6 @@ body {
     <div class="panel">
       <div class="panel-title">Export</div>
       <button class="btn full" onclick="exportCurrentPNG()">⬇ PNG (current view)</button>
-
-      <div style="margin-top:10px;">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#5b8db8;margin-bottom:6px;">
-          All chords → ZIP
-        </div>
-        <div class="chord-grid" id="chord-checks"></div>
-        <div style="display:flex;gap:4px;margin-top:6px;">
-          <button class="btn" style="flex:1;font-size:11px;" onclick="checkAllChordTypes(true)">All</button>
-          <button class="btn" style="flex:1;font-size:11px;" onclick="checkAllChordTypes(false)">None</button>
-        </div>
-        <label style="display:flex;align-items:center;gap:6px;margin-top:7px;font-size:11px;color:#aab;cursor:pointer;">
-          <input type="checkbox" id="only-native-check" checked style="accent-color:#5b8db8;">
-          Only scale-native chords
-        </label>
-        <button class="btn full" onclick="exportAllChordsZip()">⬇ Export ZIP</button>
-        <div id="export-status"></div>
-      </div>
     </div>
 
     <!-- Shortcuts -->
@@ -971,8 +1027,9 @@ body {
       <div class="root-bar" id="root-bar"></div>
     </div>
     <div class="play-legend">
-      <span><span class="play-full">●</span> All notes on pan</span>
-      <span><span class="play-partial">◑</span> Partial</span>
+      <span><span class="play-full">●</span> Complete</span>
+      <span><span class="play-partial">◕</span> −1 note</span>
+      <span><span class="play-incomplete">◔</span> −2+</span>
       <span><span class="play-none">○</span> None</span>
     </div>
     <div class="prog-func-legend">
@@ -981,6 +1038,60 @@ body {
       <span class="fn-D-lbl">■ Dominant</span>
     </div>
     <div class="prog-list" id="prog-list"></div>
+  </div>
+
+  <!-- ══ Chords Panel ══════════════════════════════════════════════════════ -->
+  <div id="chords-panel">
+    <div id="chords-resize-handle"></div>
+    <div class="prog-header">
+      <span class="prog-header-title">♩ Chords</span>
+      <button class="btn" style="padding:2px 7px;font-size:11px;" onclick="toggleChords()">✕</button>
+    </div>
+    <div class="prog-section">
+      <div class="prog-section-title">Type</div>
+      <div class="chord-type-pills" id="chord-type-pills"></div>
+    </div>
+    <div class="play-legend">
+      <span><span class="play-full">●</span> Complete</span>
+      <span><span class="play-partial">◕</span> −1 note</span>
+      <span><span class="play-incomplete">◔</span> −2+</span>
+      <span><span class="play-none">○</span> None</span>
+    </div>
+    <div class="prog-list" id="chords-list"></div>
+
+    <div class="chord-export-section">
+      <div class="chord-export-title">Export chords → ZIP</div>
+
+      <div class="chord-export-subtitle">Chord types</div>
+      <div class="chord-export-type-grid" id="chord-checks"></div>
+      <div class="chord-export-row">
+        <button class="btn" onclick="checkAllChordTypes(true)">All</button>
+        <button class="btn" onclick="checkAllChordTypes(false)">None</button>
+      </div>
+
+      <div class="chord-export-subtitle">Include completeness</div>
+      <div class="chord-export-play-grid">
+        <label class="chord-export-play-label">
+          <input type="checkbox" id="export-play-complete" checked>
+          <span class="play-full">●</span> Complete
+        </label>
+        <label class="chord-export-play-label">
+          <input type="checkbox" id="export-play-partial" checked>
+          <span class="play-partial">◕</span> −1 note
+        </label>
+        <label class="chord-export-play-label">
+          <input type="checkbox" id="export-play-incomplete">
+          <span class="play-incomplete">◔</span> −2+
+        </label>
+        <label class="chord-export-play-label">
+          <input type="checkbox" id="export-play-none">
+          <span class="play-none">○</span> None
+        </label>
+      </div>
+
+      <button class="btn full" onclick="exportAllChordsZip()">⬇ Export ZIP</button>
+      <div id="export-status"></div>
+    </div>
   </div>
 
 </div>
@@ -2030,6 +2141,10 @@ let activeMood   = 'happy';
 let activeRootPc = -1;       // -1 = auto (best root per progression)
 let _activeTile  = null;     // { progName, chordIdx } — currently highlighted tile
 
+// Chords panel state
+let chordsOpen          = false;
+let activeChordTypeFilter = 'all'; // 'all' | any key of CHORD_TYPES
+
 // Rhythm panel state
 let rhythmOpen     = false;
 let activeHatIdx   = null;   // index into HAT_PATTERNS selected for playback
@@ -2068,7 +2183,8 @@ function pushHistory() {
   history.push(snapshot());
   histIdx = history.length - 1;
   if (history.length > 120) { history.shift(); histIdx--; }
-  if (progOpen) { buildRootBar(); renderProgressions(); }
+  if (progOpen)   { buildRootBar(); renderProgressions(); }
+  if (chordsOpen) { buildChordTypePills(); renderChords(); }
 }
 
 function undo() { if (histIdx > 0)                    { histIdx--; restore(history[histIdx]); } }
@@ -2618,6 +2734,7 @@ templateSelect.addEventListener('change', e => {
 // Highlight mode
 document.getElementById('hl-mode').addEventListener('change', e => {
   hlMode = e.target.value; render(); updateHighlightPanel();
+  if (chordsOpen) renderChords();
 });
 
 // Populate chord type dropdown
@@ -2629,6 +2746,7 @@ Object.keys(CHORD_TYPES).forEach(name => {
 });
 chordTypeEl.addEventListener('change', e => {
   hlChordType = e.target.value; render(); updateChordInfo();
+  if (chordsOpen) renderChords();
 });
 
 // Populate root dropdown
@@ -2640,6 +2758,7 @@ PC_NAMES.forEach((name, i) => {
 });
 chordRootEl.addEventListener('change', e => {
   hlChordRoot = +e.target.value; render(); updateChordInfo();
+  if (chordsOpen) renderChords();
 });
 
 // Populate chord type checkboxes for ZIP export
@@ -2872,15 +2991,18 @@ function getAllChords(types) {
   for (const type of types) {
     const ivs = CHORD_TYPES[type]; if (!ivs) continue;
     for (let root = 0; root < 12; root++) {
-      const pcs = ivs.map(i => (root + i) % 12);
+      const pcs     = ivs.map(i => (root + i) % 12);
       const missing = pcs.filter(p => !panPcs.has(p));
-      if (missing.length === pcs.length) continue; // nothing at all on pan — skip
-      const native = missing.length === 0;
+      const play    = missing.length === 0           ? 'complete'
+                    : missing.length === 1           ? 'partial'
+                    : missing.length < pcs.length    ? 'incomplete'
+                    :                                  'none';
+      const native     = play === 'complete';
       const missingStr = missing.map(p => PC_NAMES[p]).join(', ');
       const label = native
         ? `${CHORD_SYMBOLS[type] ?? ''} ${PC_NAMES[root]} ${type}`
         : `${CHORD_SYMBOLS[type] ?? ''} ${PC_NAMES[root]} ${type} (−${missingStr})`;
-      result.push({ type, root, pcs: new Set(pcs), native, label,
+      result.push({ type, root, pcs: new Set(pcs), play, native, label,
         filename: `${ROOT_FILE[root]}_${type}.png` });
     }
   }
@@ -2903,26 +3025,34 @@ async function exportAllChordsZip() {
   const types = getSelectedChordTypes();
   if (!types.length) { setExportStatus('No chord types selected.'); return; }
 
-  const onlyNative = document.getElementById('only-native-check').checked;
-  // Native/ = fully playable chords; All/ = every chord with ≥1 note on pan (incl. partial)
-  const allChords  = getAllChords(types);
-  const toExport   = onlyNative ? allChords.filter(c => c.native) : allChords;
+  const wantPlay = new Set([
+    document.getElementById('export-play-complete').checked  && 'complete',
+    document.getElementById('export-play-partial').checked   && 'partial',
+    document.getElementById('export-play-incomplete').checked && 'incomplete',
+    document.getElementById('export-play-none').checked      && 'none',
+  ].filter(Boolean));
+
+  if (!wantPlay.size) { setExportStatus('No completeness level selected.'); return; }
+
+  const toExport = getAllChords(types).filter(c => wantPlay.has(c.play));
 
   if (!toExport.length) {
-    setExportStatus(onlyNative ? 'No scale-native chords found.' : 'No chords found.');
+    setExportStatus('No matching chords found.');
     return;
   }
 
   setExportStatus(`0 / ${toExport.length} …`);
   const zip = new JSZip();
 
+  // Folder per play level → per type
+  const folderName = { complete: 'Complete', partial: 'Partial (−1)', incomplete: 'Incomplete (−2+)', none: 'None' };
+
   for (let i = 0; i < toExport.length; i++) {
     const c = toExport[i];
     setExportStatus(`${i+1} / ${toExport.length}  ${c.label}`);
     const svg = buildSVGString(c.pcs, c.label);
     const png = await svgToPngBlob(svg);
-    if (c.native) zip.folder(`Native/${c.type}`).file(c.filename, png);
-    if (!onlyNative) zip.folder(`All/${c.type}`).file(c.filename, png);
+    zip.folder(`${folderName[c.play]}/${c.type}`).file(c.filename, png);
   }
 
   setExportStatus('Building ZIP …');
@@ -2951,14 +3081,17 @@ function chordPlayability(rootPc, type) {
   const ivs = CHORD_TYPES[type];
   if (!ivs) return 'none';
   const panPcs = new Set(state.notes.map(n => parsePitchClass(n.label)).filter(p => p >= 0));
-  const chord  = ivs.map(i => (rootPc + i) % 12);
-  const present = chord.filter(p => panPcs.has(p)).length;
-  if (present === chord.length) return 'full';
-  if (present > 0) return 'partial';
+  const chord   = ivs.map(i => (rootPc + i) % 12);
+  const missing = chord.filter(p => !panPcs.has(p)).length;
+  if (missing === 0)             return 'complete';
+  if (missing === 1)             return 'partial';
+  if (missing < chord.length)   return 'incomplete';
   return 'none';
 }
 
-function playScore(play) { return play === 'full' ? 2 : play === 'partial' ? 1 : 0; }
+function playScore(play) {
+  return play === 'complete' ? 3 : play === 'partial' ? 2 : play === 'incomplete' ? 1 : 0;
+}
 
 function progressionScore(prog, rootPc) {
   return prog.chords.reduce((sum, c) =>
@@ -2977,8 +3110,9 @@ function bestRootForProg(prog) {
 }
 
 function playDot(play) {
-  if (play === 'full')    return '<span class="play-dot play-full">●</span>';
-  if (play === 'partial') return '<span class="play-dot play-partial">◑</span>';
+  if (play === 'complete')   return '<span class="play-dot play-full">●</span>';
+  if (play === 'partial')    return '<span class="play-dot play-partial">◕</span>';
+  if (play === 'incomplete') return '<span class="play-dot play-incomplete">◔</span>';
   return '<span class="play-dot play-none">○</span>';
 }
 
@@ -3000,7 +3134,7 @@ function moodAvailability(moodId) {
   const total = progs.reduce((sum, prog) => {
     const rootPc = activeRootPc === -1 ? bestRootForProg(prog) : activeRootPc;
     const score  = progressionScore(prog, rootPc);
-    const maxScore = prog.chords.length * 2;
+    const maxScore = prog.chords.length * 3;
     return sum + score / maxScore;
   }, 0);
   return total / progs.length; // 0..1
@@ -3134,6 +3268,133 @@ function renderProgressions() {
   }
 }
 
+// ─── Chords panel ─────────────────────────────────────────────────────────────
+
+const CHORD_TYPE_GROUPS = [
+  { id: 'all',    label: 'All' },
+  { id: 'Major',  label: 'Major' },
+  { id: 'Minor',  label: 'Minor' },
+  { id: 'Dim',    label: 'Dim' },
+  { id: 'Aug',    label: 'Aug' },
+  { id: 'Sus2',   label: 'Sus2' },
+  { id: 'Sus4',   label: 'Sus4' },
+  { id: 'Maj7',   label: 'Maj7' },
+  { id: 'Min7',   label: 'Min7' },
+  { id: 'Dom7',   label: 'Dom7' },
+  { id: 'Dim7',   label: 'Dim7' },
+  { id: 'HalfDim7', label: 'ø7' },
+  { id: 'MinMaj7',  label: 'mM7' },
+  { id: 'Maj6',   label: 'Maj6' },
+  { id: 'Min6',   label: 'Min6' },
+];
+
+function toggleChords() {
+  chordsOpen = !chordsOpen;
+  const panel = document.getElementById('chords-panel');
+  const btn   = document.getElementById('chords-toggle-btn');
+  panel.classList.toggle('open', chordsOpen);
+  btn.style.background  = chordsOpen ? '#253060' : '';
+  btn.style.borderColor = chordsOpen ? '#5b8db8' : '';
+  btn.style.color       = chordsOpen ? '#8bc4e8' : '';
+  if (chordsOpen) { buildChordTypePills(); renderChords(); }
+  resizeCanvas();
+}
+
+function chordTypeAvailability(typeName) {
+  // Returns 0..1: fraction of 12 roots that are at least 'complete' for this type.
+  if (!CHORD_TYPES[typeName]) return 0;
+  let complete = 0;
+  for (let pc = 0; pc < 12; pc++) {
+    if (chordPlayability(pc, typeName) === 'complete') complete++;
+  }
+  return complete / 12;
+}
+
+function chordTypePillAvailability(groupId) {
+  // For 'all', average across all types; for specific type, use that type's availability.
+  if (groupId === 'all') {
+    const types = Object.keys(CHORD_TYPES);
+    return types.reduce((s, t) => s + chordTypeAvailability(t), 0) / types.length;
+  }
+  return chordTypeAvailability(groupId);
+}
+
+function buildChordTypePills() {
+  const el = document.getElementById('chord-type-pills');
+  el.innerHTML = '';
+  for (const g of CHORD_TYPE_GROUPS) {
+    const isActive = g.id === activeChordTypeFilter;
+    const pill = document.createElement('button');
+    pill.className = 'chord-type-pill' + (isActive ? ' active' : '');
+    pill.textContent = g.label;
+    if (!isActive) {
+      const avail = chordTypePillAvailability(g.id);
+      const l = Math.round(22 + avail * 36);
+      pill.style.color = `hsl(220,18%,${l}%)`;
+    }
+    pill.addEventListener('click', () => {
+      activeChordTypeFilter = g.id;
+      buildChordTypePills();
+      renderChords();
+    });
+    el.appendChild(pill);
+  }
+}
+
+function renderChords() {
+  const el = document.getElementById('chords-list');
+  el.innerHTML = '';
+
+  const types = activeChordTypeFilter === 'all'
+    ? Object.keys(CHORD_TYPES)
+    : [activeChordTypeFilter];
+
+  for (const typeName of types) {
+    const sym = CHORD_SYMBOLS[typeName] ?? typeName;
+
+    const card = document.createElement('div');
+    card.className = 'chords-card';
+
+    const cardTitle = document.createElement('div');
+    cardTitle.className = 'chords-card-title';
+    cardTitle.innerHTML = `${typeName} <span class="ct-sym">${sym}</span>`;
+    card.appendChild(cardTitle);
+
+    const row = document.createElement('div');
+    row.className = 'chord-row';
+
+    for (let rootPc = 0; rootPc < 12; rootPc++) {
+      const play = chordPlayability(rootPc, typeName);
+      const isActive = hlMode === 'chord' && hlChordRoot === rootPc && hlChordType === typeName;
+
+      const tile = document.createElement('div');
+      tile.className = 'chord-tile' + (isActive ? ' active-tile' : '');
+      tile.innerHTML =
+        `<span class="roman"></span>` +
+        `<span class="t-root">${PC_NAMES[rootPc]}</span>` +
+        `<span class="t-sym">${sym}</span>` +
+        playDot(play);
+
+      tile.addEventListener('click', () => {
+        _activeTile  = null;
+        hlMode       = 'chord';
+        hlChordRoot  = rootPc;
+        hlChordType  = typeName;
+        document.getElementById('hl-mode').value       = 'chord';
+        document.getElementById('hl-chord-root').value = rootPc;
+        document.getElementById('hl-chord-type').value = typeName;
+        render(); updateHighlightPanel(); renderChords();
+        if (progOpen) renderProgressions();
+      });
+
+      row.appendChild(tile);
+    }
+
+    card.appendChild(row);
+    el.appendChild(card);
+  }
+}
+
 // ─── Progressions export ─────────────────────────────────────────────────────
 
 function buildProgressionsSVG(moodId) {
@@ -3183,8 +3444,8 @@ function buildProgressionsSVG(moodId) {
       const tileX = ML + 14 + ci * (tileW + tileGap);
       const cx    = tileX + tileW / 2;
 
-      const bg  = play === 'full' ? '#eef8f3' : play === 'partial' ? '#fdf5e8' : '#f5f5f8';
-      const brd = play === 'full' ? '#aed4bc' : play === 'partial' ? '#d4c090' : '#dcdce8';
+      const bg  = play === 'complete' ? '#eef8f3' : play === 'partial' ? '#fdf5e8' : play === 'incomplete' ? '#fdf0f0' : '#f5f5f8';
+      const brd = play === 'complete' ? '#aed4bc' : play === 'partial' ? '#d4c090' : play === 'incomplete' ? '#d4a0a0' : '#dcdce8';
       svg += `<rect x="${tileX}" y="${tileY}" width="${tileW}" height="${tileH}" rx="6" fill="${bg}" stroke="${brd}" stroke-width="1.2"/>`;
 
       const ry  = tileY + Math.round(tileH * 0.16);
@@ -3198,8 +3459,8 @@ function buildProgressionsSVG(moodId) {
       svg += `<text x="${cx}" y="${ny}" text-anchor="middle" font-family="Arial,sans-serif" font-size="${nfs}" font-weight="bold" fill="#222">${PC_NAMES[chordRoot]}</text>`;
       svg += `<text x="${cx}" y="${sy}" text-anchor="middle" font-family="Arial,sans-serif" font-size="${sfs}" fill="#5b8db8">${sym}</text>`;
 
-      const dc = play === 'full' ? '#55bb77' : play === 'partial' ? '#cc8800' : '#ccc';
-      const dd = play === 'full' ? '●' : play === 'partial' ? '◑' : '○';
+      const dc = play === 'complete' ? '#44cc88' : play === 'partial' ? '#cc8800' : play === 'incomplete' ? '#cc4444' : '#ccc';
+      const dd = play === 'complete' ? '●' : play === 'partial' ? '◕' : play === 'incomplete' ? '◔' : '○';
       svg += `<text x="${cx}" y="${dy}" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" fill="${dc}">${dd}</text>`;
     });
 
@@ -3207,7 +3468,7 @@ function buildProgressionsSVG(moodId) {
   }
 
   const legY = H - 22;
-  svg += `<text x="${ML}" y="${legY}" font-family="Arial,sans-serif" font-size="12" fill="#bbb">● All notes on pan   ◑ Partial   ○ None</text>`;
+  svg += `<text x="${ML}" y="${legY}" font-family="Arial,sans-serif" font-size="12" fill="#bbb">● Complete   ◕ −1 note   ◔ −2+ notes   ○ None</text>`;
   svg += '\n</svg>';
   return svg;
 }
@@ -3321,8 +3582,8 @@ async function buildDetailedProgressionPng(prog, rootPc) {
     ctx.fillText(PC_NAMES[chordRoot], icx, cellY + 90);
     ctx.fillStyle = '#5b8db8'; ctx.font = '20px Arial, sans-serif';
     ctx.fillText(sym, icx, cellY + 116);
-    const dc = play === 'full' ? '#55bb77' : play === 'partial' ? '#cc8800' : '#bbb';
-    const dd = play === 'full' ? '● All notes on pan' : play === 'partial' ? '◑ Partial' : '○ Not available';
+    const dc = play === 'complete' ? '#44cc88' : play === 'partial' ? '#cc8800' : play === 'incomplete' ? '#cc4444' : '#bbb';
+    const dd = play === 'complete' ? '● Complete' : play === 'partial' ? '◕ −1 note' : play === 'incomplete' ? '◔ −2+ notes' : '○ Not available';
     ctx.fillStyle = dc; ctx.font = '11px Arial, sans-serif';
     ctx.fillText(dd, icx, cellY + 138);
     ctx.textAlign = 'left';
@@ -3347,7 +3608,7 @@ async function buildDetailedProgressionPng(prog, rootPc) {
 
   // ── Footer ──
   ctx.fillStyle = '#bbb'; ctx.font = '11px Arial, sans-serif';
-  ctx.fillText('■ Tonic  ■ Subdominant  ■ Dominant  |  ● All notes on pan  ◑ Partial  ○ Not available', 40, H - 14);
+  ctx.fillText('■ Tonic  ■ Subdominant  ■ Dominant  |  ● Complete  ◕ −1 note  ◔ −2+ notes  ○ None', 40, H - 14);
 
   return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
 }
@@ -5442,6 +5703,28 @@ async function exportRhythmsZip() {
   document.addEventListener('mousemove', e => {
     if (!active) return;
     const w = Math.max(240, Math.min(640, startW - (e.clientX - startX)));
+    panel.style.width = w + 'px'; panel.style.minWidth = w + 'px';
+    resizeCanvas();
+  });
+  document.addEventListener('mouseup', () => {
+    if (active) { active = false; handle.classList.remove('dragging'); }
+  });
+})();
+
+// ─── Chords panel resize ──────────────────────────────────────────────────────
+
+(function () {
+  const handle = document.getElementById('chords-resize-handle');
+  const panel  = document.getElementById('chords-panel');
+  let active = false, startX = 0, startW = 0;
+
+  handle.addEventListener('mousedown', e => {
+    active = true; startX = e.clientX; startW = panel.offsetWidth;
+    handle.classList.add('dragging'); e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!active) return;
+    const w = Math.max(220, Math.min(600, startW - (e.clientX - startX)));
     panel.style.width = w + 'px'; panel.style.minWidth = w + 'px';
     resizeCanvas();
   });
