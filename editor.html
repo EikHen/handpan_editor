@@ -50,7 +50,7 @@ body {
 
 /* ── Sidebar ─────────────────────────────────────────────────────────── */
 #sidebar {
-  width: 230px; min-width: 230px;
+  width: 252px; min-width: 252px;
   background: #1a1a2e;
   border-right: 1px solid #2a2a4a;
   display: flex; flex-direction: column;
@@ -71,6 +71,18 @@ body {
 }
 .row input[type=text]:focus, .row select:focus { border-color: #5b8db8; }
 .row input[type=range] { width: 100%; accent-color: #5b8db8; }
+
+/* Pan editing sub-labels and button rows */
+.panel-sub-label {
+  font-size: 9px; text-transform: uppercase; letter-spacing: .6px;
+  color: #445; margin-bottom: 5px; margin-top: 10px;
+}
+.panel-sub-label:first-child { margin-top: 0; }
+.btn-row { display: flex; gap: 3px; flex-wrap: wrap; margin-bottom: 2px; }
+.btn-row .btn { flex: 1; min-width: 0; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.btn-row .btn.danger { flex: 1; }
+/* Beta superscript on toolbar button */
+.beta-sup { font-size: 7px; color: #e87a30; font-weight: bold; vertical-align: super; margin-left: 1px; letter-spacing: 0; }
 
 /* Chord checkboxes */
 .chord-grid {
@@ -261,6 +273,9 @@ body {
 }
 .prog-expand-btn:hover { border-color: #5b8db8; color: #8bc4e8; background: #1a2040; }
 .chord-row { display: flex; gap: 4px; flex-wrap: wrap; }
+.chord-row--grid4 {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
+}
 .chord-tile {
   background: #1c1c35; border: 1px solid #333558; border-radius: 5px;
   padding: 5px 6px 4px; cursor: pointer; flex: 1; min-width: 48px;
@@ -268,6 +283,7 @@ body {
   transition: background .12s, border-color .12s;
   user-select: none;
 }
+.chord-row--grid4 .chord-tile { flex: unset; min-width: 0; }
 .chord-tile:hover { background: #253060; border-color: #5b8db8; }
 .chord-tile.active-tile { background: #253060; border-color: #5b8db8; box-shadow: 0 0 0 1px #5b8db8; }
 .chord-tile .roman  { font-size: 9px; color: #445; letter-spacing: .3px; line-height: 1.3; }
@@ -522,12 +538,15 @@ body {
 #rhythm-panel.expanded .hat-card-title { font-size: 16px; }
 #rhythm-panel.expanded .hat-src pre { font-size: 12px; }
 
-/* Ghost-sound toggle */
+/* Ghost-volume control */
 .rhy-ghost-toggle {
-  display: flex; align-items: center; gap: 5px;
-  font-size: 10px; color: #889; cursor: pointer; white-space: nowrap;
+  display: flex; align-items: center; gap: 4px;
+  font-size: 10px; color: #889; white-space: nowrap;
 }
-.rhy-ghost-toggle input { accent-color: #5b8db8; margin: 0; }
+.rhy-ghost-toggle input[type=range] {
+  width: 44px; accent-color: #5b8db8; margin: 0; cursor: pointer;
+  height: 3px; padding: 0;
+}
 
 /* Per-card focus button */
 .hat-focus-btn {
@@ -823,24 +842,7 @@ body {
 <div id="toolbar">
   <h1>Handpan Editor</h1>
   <div class="sep"></div>
-  <div class="btn-group">
-    <button class="btn" onclick="addNote()">+ Note</button>
-    <button class="btn" onclick="duplicateSelected()">⧉ Dup</button>
-    <button class="btn danger" onclick="deleteSelected()">✕ Del</button>
-  </div>
-  <div class="sep"></div>
-  <div class="btn-group">
-    <button class="btn icon" onclick="undo()" title="Ctrl+Z">↩</button>
-    <button class="btn icon" onclick="redo()" title="Ctrl+Y">↪</button>
-  </div>
-  <div class="sep"></div>
-  <div class="btn-group">
-    <button class="btn" onclick="exportJSON()">⬇ JSON</button>
-    <button class="btn" onclick="triggerImport()">⬆ JSON</button>
-    <button class="btn" onclick="exportCurrentSVG()">⬇ SVG</button>
-  </div>
-  <div class="sep"></div>
-  <button class="btn" id="rhy-toggle-btn" onclick="toggleRhythm()" title="Rhythm Mode">♩ Rhythm</button>
+  <button class="btn" id="rhy-toggle-btn" onclick="toggleRhythm()" title="Rhythm Mode">♩ Rhythm<sup class="beta-sup">β</sup></button>
   <button class="btn" id="prog-toggle-btn" onclick="toggleProgressions()" title="Chord Progressions">♬ Progressions</button>
   <button class="btn" id="chords-toggle-btn" onclick="toggleChords()" title="Chords">♩ Chords</button>
   <div class="sep"></div>
@@ -859,6 +861,50 @@ body {
         <select id="template-select">
           <option value="">— choose a template —</option>
         </select>
+      </div>
+    </div>
+
+    <!-- Pan Editing -->
+    <div class="panel">
+      <div class="panel-title">Pan Editing</div>
+
+      <div class="panel-sub-label">Layout file</div>
+      <div class="btn-row" style="margin-bottom:5px;">
+        <button class="btn" onclick="exportJSON()" title="Export layout as JSON">⬇ Export</button>
+        <button class="btn" onclick="triggerImport()" title="Import layout from JSON">⬆ Import</button>
+      </div>
+      <div class="btn-row" style="margin-bottom:8px;">
+        <button class="btn" onclick="exportCurrentSVG()" title="Export current view as SVG">⬇ SVG</button>
+        <button class="btn" onclick="exportCurrentPNG()" title="Export current view as PNG">⬇ PNG</button>
+      </div>
+
+      <div class="panel-sub-label">Notes</div>
+      <div class="btn-row" style="margin-bottom:8px;">
+        <button class="btn" onclick="addNote()">+ Add</button>
+        <button class="btn" onclick="duplicateSelected()">⧉ Dup</button>
+        <button class="btn danger" onclick="deleteSelected()">✕ Delete</button>
+      </div>
+
+      <div class="panel-sub-label">History</div>
+      <div class="btn-row" style="margin-bottom:8px;">
+        <button class="btn icon" onclick="undo()" title="Ctrl+Z">↩ Undo</button>
+        <button class="btn icon" onclick="redo()" title="Ctrl+Y">↪ Redo</button>
+      </div>
+
+      <div class="panel-sub-label">Enharmonics</div>
+      <div class="row" style="margin-bottom:8px;">
+        <select id="enharmonic-mode" title="Note name spelling">
+          <option value="-">— default</option>
+          <option value="proper">proper (auto key)</option>
+          <option value="#"># sharps</option>
+          <option value="b">♭ flats</option>
+        </select>
+      </div>
+
+      <div class="panel-sub-label">Pan body</div>
+      <div class="row" style="margin-bottom:0;">
+        <label>Radius: <b id="pan-r-val">320</b> px</label>
+        <input type="range" id="pan-r" min="80" max="480" step="1" value="320"/>
       </div>
     </div>
 
@@ -882,15 +928,6 @@ body {
           <label>Radius all: <b id="prop-r-multi-val">—</b> px</label>
           <input type="range" id="prop-r-multi" min="14" max="130" step="1" value="50"/>
         </div>
-      </div>
-    </div>
-
-    <!-- Pan body -->
-    <div class="panel">
-      <div class="panel-title">Pan Body</div>
-      <div class="row">
-        <label>Radius: <b id="pan-r-val">320</b> px</label>
-        <input type="range" id="pan-r" min="80" max="480" step="1" value="320"/>
       </div>
     </div>
 
@@ -930,12 +967,6 @@ body {
       </div>
     </div>
 
-    <!-- Export -->
-    <div class="panel">
-      <div class="panel-title">Export</div>
-      <button class="btn full" onclick="exportCurrentPNG()">⬇ PNG (current view)</button>
-    </div>
-
     <!-- Shortcuts -->
     <div class="panel" style="flex:1;">
       <div class="panel-title">Shortcuts</div>
@@ -964,7 +995,6 @@ body {
     <div class="rhy-header">
       <div style="display:flex;align-items:center;gap:7px;">
         <span class="rhy-header-title">♩ Rhythm</span>
-        <span class="rhy-beta-badge">β BETA</span>
       </div>
       <div style="display:flex;gap:4px;">
         <button class="btn" style="padding:2px 8px;font-size:11px;" onclick="showNewPatternModal()" title="Create a new blank pattern">＋ New</button>
@@ -984,8 +1014,8 @@ body {
       <input type="number" id="bpm-input" value="90" min="30" max="300">
       <button class="btn rhy-tap-btn" onclick="tapTempo()">Tap</button>
       <button class="btn rhy-play-btn" id="rhy-play-btn" onclick="togglePlay()" disabled>▶ Play</button>
-      <label class="rhy-ghost-toggle" title="Whether ghost notes (•) are audible">
-        <input type="checkbox" id="ghost-sound-check" checked> ghost sound
+      <label class="rhy-ghost-toggle" title="Ghost note volume">
+        <span style="color:#556;">ghost volume</span> <input type="range" id="ghost-vol-slider" min="0" max="100" value="50"><span id="ghost-vol-val">50</span>%
       </label>
     </div>
     <div class="rhy-legend">
@@ -1013,10 +1043,7 @@ body {
     <div id="prog-resize-handle"></div>
     <div class="prog-header">
       <span class="prog-header-title">♬ Chord Progressions</span>
-      <div style="display:flex;gap:4px;">
-        <button class="btn" style="padding:2px 8px;font-size:11px;" onclick="exportMoodsZip()" title="Export all moods as PNG images">⬇ ZIP</button>
-        <button class="btn" style="padding:2px 7px;font-size:11px;" onclick="toggleProgressions()">✕</button>
-      </div>
+      <button class="btn" style="padding:2px 7px;font-size:11px;" onclick="toggleProgressions()">✕</button>
     </div>
     <div class="prog-section">
       <div class="prog-section-title">Mood</div>
@@ -1038,6 +1065,23 @@ body {
       <span class="fn-D-lbl">■ Dominant</span>
     </div>
     <div class="prog-list" id="prog-list"></div>
+
+    <div class="chord-export-section">
+      <div class="chord-export-title">Export progressions → ZIP</div>
+
+      <div class="chord-export-subtitle">Moods</div>
+      <div class="chord-export-type-grid" id="prog-export-mood-checks"></div>
+      <div class="chord-export-row">
+        <button class="btn" onclick="checkAllProgExportMoods(true)">All</button>
+        <button class="btn" onclick="checkAllProgExportMoods(false)">None</button>
+      </div>
+
+      <div class="chord-export-subtitle">Root note</div>
+      <div class="root-bar" id="prog-export-root-bar"></div>
+
+      <button class="btn full" style="margin-top:9px;" onclick="exportProgressionsZip()">⬇ Export ZIP</button>
+      <div id="prog-export-status" style="font-size:11px;color:#5b8db8;min-height:15px;margin-top:4px;"></div>
+    </div>
   </div>
 
   <!-- ══ Chords Panel ══════════════════════════════════════════════════════ -->
@@ -1121,7 +1165,24 @@ const PC_COLORS = [
   '#795548', // 11 B   brown
 ];
 
-const PC_NAMES  = ['C','C♯','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
+const PC_NAMES   = ['C','C♯','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
+const SHARP_NAMES= ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const FLAT_NAMES = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+// 12 major keys: diatonic PC sets + accidental direction for 'proper' mode
+const MAJOR_KEYS = [
+  { pcs: new Set([0,2,4,5,7,9,11]), acc: ''  }, // C  major
+  { pcs: new Set([0,2,4,6,7,9,11]), acc: '#' }, // G  major
+  { pcs: new Set([1,2,4,6,7,9,11]), acc: '#' }, // D  major
+  { pcs: new Set([1,2,4,6,8,9,11]), acc: '#' }, // A  major
+  { pcs: new Set([1,3,4,6,8,9,11]), acc: '#' }, // E  major
+  { pcs: new Set([1,3,4,6,8,10,11]),acc: '#' }, // B  major
+  { pcs: new Set([1,3,5,6,8,10,11]),acc: '#' }, // F# major
+  { pcs: new Set([0,2,4,5,7,9,10]), acc: 'b' }, // F  major
+  { pcs: new Set([0,2,3,5,7,9,10]), acc: 'b' }, // Bb major
+  { pcs: new Set([0,2,3,5,7,8,10]), acc: 'b' }, // Eb major
+  { pcs: new Set([0,1,3,5,7,8,10]), acc: 'b' }, // Ab major
+  { pcs: new Set([0,1,3,5,6,8,10]), acc: 'b' }, // Db major
+];
 const ROOT_FILE = ['C','Cs','D','Eb','E','F','Fs','G','Ab','A','Bb','B']; // filename-safe
 
 const CHORD_TYPES = {
@@ -2015,25 +2076,59 @@ const TEMPLATES = [
 
 function parsePitchClass(label) {
   if (!label) return -1;
-  const m = label.match(/^([A-G])([#b]?)/i);
+  const m = label.match(/^([A-G])([#♯b♭]?)/i);
   if (!m) return -1;
   const base = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 }[m[1].toUpperCase()];
   if (base === undefined) return -1;
-  return (base + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0) + 12) % 12;
+  const acc = (m[2] === '#' || m[2] === '♯') ? 1 : (m[2] === 'b' || m[2] === '♭') ? -1 : 0;
+  return (base + acc + 12) % 12;
 }
 
 function fmtLabel(s) {
   return (s || '').replace(/#/g, '♯').replace(/b(?=[0-9])/g, '♭');
 }
 
+// ─── Enharmonic helpers ───────────────────────────────────────────────────────
+
+function getDisplayNames() {
+  if (enharmonicMode === '#') return SHARP_NAMES;
+  if (enharmonicMode === 'b') return FLAT_NAMES;
+  if (enharmonicMode === 'proper') {
+    const panPcs = new Set(state.notes.map(n => parsePitchClass(n.label)).filter(p => p >= 0));
+    let best = null, bestScore = -1;
+    for (const key of MAJOR_KEYS) {
+      let score = 0;
+      for (const pc of panPcs) if (key.pcs.has(pc)) score++;
+      if (score > bestScore) { bestScore = score; best = key; }
+    }
+    if (!best || best.acc === '') return PC_NAMES;
+    return best.acc === '#' ? SHARP_NAMES : FLAT_NAMES;
+  }
+  return PC_NAMES; // '-' default
+}
+
+function rewriteLabel(label) {
+  if (!label) return label;
+  const pc = parsePitchClass(label);
+  if (pc < 0) return label;
+  const names = getDisplayNames();
+  const newPitch = names[pc];
+  const m = label.match(/(\d+)$/);
+  return newPitch + (m ? m[1] : '');
+}
+
+function applyEnharmonics() {
+  for (const n of state.notes) n.label = rewriteLabel(n.label);
+}
+
 // ─── Layout-from-string ───────────────────────────────────────────────────────
 
 // Convert a note label (e.g. "F#3", "Bb2") to a MIDI note number.
 function midiNote(label) {
-  const m = label.match(/^([A-G])([#b]?)(\d+)$/i);
+  const m = label.match(/^([A-G])([#♯b♭]?)(\d+)$/i);
   if (!m) return 60;
   const base = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 }[m[1].toUpperCase()] ?? 0;
-  const acc  = m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0;
+  const acc  = (m[2] === '#' || m[2] === '♯') ? 1 : (m[2] === 'b' || m[2] === '♭') ? -1 : 0;
   return (parseInt(m[3]) + 1) * 12 + base + acc;
 }
 
@@ -2145,11 +2240,17 @@ let _activeTile  = null;     // { progName, chordIdx } — currently highlighted
 let chordsOpen          = false;
 let activeChordTypeFilter = 'all'; // 'all' | any key of CHORD_TYPES
 
+// Progressions export state
+let progExportRootPcs = new Set([-1]); // -1 = auto; multi-select
+
+// Enharmonics state
+let enharmonicMode = '-'; // '-' | 'proper' | '#' | 'b'
+
 // Rhythm panel state
 let rhythmOpen     = false;
 let activeHatIdx   = null;   // index into HAT_PATTERNS selected for playback
 let focusedHatIdx  = null;   // index shown alone (single-rhythm focus view)
-let ghostSound     = true;   // whether ghost notes (•) are audible
+let ghostVol       = 0.025;  // ghost note volume (• notes); 0 = silent
 let activeHatCat   = 'all';  // currently selected category pill
 let hatSearchQuery = '';     // current search string
 let editingHatIdx  = null;   // idx being edited (focus view), or null
@@ -2183,7 +2284,7 @@ function pushHistory() {
   history.push(snapshot());
   histIdx = history.length - 1;
   if (history.length > 120) { history.shift(); histIdx--; }
-  if (progOpen)   { buildRootBar(); renderProgressions(); }
+  if (progOpen)   { buildRootBar(); renderProgressions(); buildProgExportRootBar(); }
   if (chordsOpen) { buildChordTypePills(); renderChords(); }
 }
 
@@ -2201,7 +2302,7 @@ function restore(snap) {
 function newId() { return `n${state.nextId++}`; }
 
 function addNote(x = 500, y = 320) {
-  const note = { id: newId(), x, y, r: 50, label: 'A3' };
+  const note = { id: newId(), x, y, r: 50, label: rewriteLabel('A3') };
   state.notes.push(note);
   selectedIds = new Set([note.id]);
   pushHistory(); render(); syncSidebar();
@@ -2333,7 +2434,7 @@ function renderNotes() {
       'font-family': 'Arial, sans-serif', 'font-size': 30,
       'font-weight': 'bold', fill: '#333', 'pointer-events': 'none',
     });
-    lbl.textContent = `${CHORD_SYMBOLS[hlChordType] ?? ''} ${PC_NAMES[hlChordRoot]} ${hlChordType}`;
+    lbl.textContent = `${CHORD_SYMBOLS[hlChordType] ?? ''} ${getDisplayNames()[hlChordRoot]} ${hlChordType}`;
     notesLayer.appendChild(lbl);
   }
 }
@@ -2583,7 +2684,7 @@ function buildNoteLegend() {
   const pcs = new Map();
   for (const n of state.notes) {
     const pc = parsePitchClass(n.label);
-    if (pc >= 0 && !pcs.has(pc)) pcs.set(pc, PC_NAMES[pc]);
+    if (pc >= 0 && !pcs.has(pc)) pcs.set(pc, getDisplayNames()[pc]);
   }
   const sorted = [...pcs.entries()].sort((a, b) => a[0] - b[0]);
   const legend = document.getElementById('note-legend');
@@ -2625,13 +2726,13 @@ function buildScaleNativeTable(panPcs) {
       if (missing.length === 0) {
         return `<td style="text-align:center;color:#5d8;padding:2px 3px;">✓</td>`;
       }
-      const names = missing.map(p => PC_NAMES[p]).join(',');
+      const names = missing.map(p => getDisplayNames()[p]).join(',');
       return `<td style="text-align:center;color:#c44;padding:2px 3px;font-size:9px;" title="Missing: ${names}">–${names}</td>`;
     }).join('');
     return `<tr>
       <td style="padding:2px 4px;white-space:nowrap;">
         <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${dotColor};vertical-align:middle;margin-right:3px;"></span>
-        <span style="font-size:11px;color:#ccd;vertical-align:middle;">${PC_NAMES[root]}</span>
+        <span style="font-size:11px;color:#ccd;vertical-align:middle;">${getDisplayNames()[root]}</span>
       </td>${cells}</tr>`;
   }).join('');
 
@@ -2652,7 +2753,7 @@ function updateChordInfo() {
   const panPcs = new Set(state.notes.map(n => parsePitchClass(n.label)).filter(p => p >= 0));
   const notes  = ivs.map(i => {
     const pc = (hlChordRoot + i) % 12;
-    return { name: PC_NAMES[pc], has: panPcs.has(pc) };
+    return { name: getDisplayNames()[pc], has: panPcs.has(pc) };
   });
   const all = notes.every(n => n.has);
   const isNative = all && panPcs.has(hlChordRoot);
@@ -2679,7 +2780,15 @@ propLabel.addEventListener('input', () => {
   const n = state.notes.find(nd => selectedIds.has(nd.id));
   if (n) { n.label = propLabel.value; render(); updateHighlightPanel(); }
 });
-propLabel.addEventListener('change', pushHistory);
+propLabel.addEventListener('change', () => {
+  const n = state.notes.find(nd => selectedIds.has(nd.id));
+  if (n && enharmonicMode !== '-') {
+    n.label = rewriteLabel(n.label);
+    propLabel.value = n.label;
+    render(); updateHighlightPanel();
+  }
+  pushHistory();
+});
 propLabel.addEventListener('keydown', e => { if (e.key === 'Enter') propLabel.blur(); });
 
 const propR = document.getElementById('prop-r');
@@ -2709,6 +2818,17 @@ panR.addEventListener('input', () => {
 });
 panR.addEventListener('change', pushHistory);
 
+// Enharmonics dropdown
+document.getElementById('enharmonic-mode').addEventListener('change', function() {
+  enharmonicMode = this.value;
+  applyEnharmonics();
+  pushHistory(); render(); syncSidebar();
+  refreshChordRootDropdown();
+  if (progOpen)   { buildRootBar(); buildMoodPills(); renderProgressions(); buildProgExportRootBar(); }
+  if (chordsOpen) { buildChordTypePills(); renderChords(); }
+  updateChordInfo(); buildNoteLegend();
+});
+
 // Templates dropdown
 const templateSelect = document.getElementById('template-select');
 TEMPLATES.forEach((tpl, i) => {
@@ -2727,6 +2847,7 @@ templateSelect.addEventListener('change', e => {
   state.notes  = layout.notes;
   state.nextId = layout.nextId;
   selectedIds.clear();
+  if (enharmonicMode !== '-') applyEnharmonics();
   pushHistory(); render(); syncSidebar(); syncPanSlider();
   templateSelect.value = '';
 });
@@ -2756,6 +2877,12 @@ PC_NAMES.forEach((name, i) => {
   o.value = i; o.textContent = name;
   chordRootEl.appendChild(o);
 });
+
+function refreshChordRootDropdown() {
+  const names = getDisplayNames();
+  const opts = chordRootEl.options;
+  for (let i = 0; i < 12; i++) if (opts[i]) opts[i].textContent = names[i];
+}
 chordRootEl.addEventListener('change', e => {
   hlChordRoot = +e.target.value; render(); updateChordInfo();
   if (chordsOpen) renderChords();
@@ -2965,6 +3092,7 @@ document.getElementById('file-input').addEventListener('change', e => {
           if (!isNaN(num) && num >= state.nextId) state.nextId = num + 1;
         }
       }
+      if (enharmonicMode !== '-') applyEnharmonics();
       selectedIds.clear(); pushHistory(); render(); syncSidebar(); syncPanSlider();
     } catch (err) { alert('Invalid JSON: ' + err.message); }
   };
@@ -2973,13 +3101,13 @@ document.getElementById('file-input').addEventListener('change', e => {
 
 function exportCurrentSVG() {
   const hpcs = getHighlightedPcs();
-  const label = hlMode === 'chord' ? `${CHORD_SYMBOLS[hlChordType] ?? ''} ${PC_NAMES[hlChordRoot]} ${hlChordType}` : '';
+  const label = hlMode === 'chord' ? `${CHORD_SYMBOLS[hlChordType] ?? ''} ${getDisplayNames()[hlChordRoot]} ${hlChordType}` : '';
   dlBlob(new Blob([buildSVGString(hpcs, label)], { type:'image/svg+xml' }), 'handpan-layout.svg');
 }
 
 function exportCurrentPNG() {
   const hpcs  = getHighlightedPcs();
-  const label = hlMode === 'chord' ? `${CHORD_SYMBOLS[hlChordType] ?? ''} ${PC_NAMES[hlChordRoot]} ${hlChordType}` : '';
+  const label = hlMode === 'chord' ? `${CHORD_SYMBOLS[hlChordType] ?? ''} ${getDisplayNames()[hlChordRoot]} ${hlChordType}` : '';
   svgToPngBlob(buildSVGString(hpcs, label)).then(blob => dlBlob(blob, 'handpan-layout.png'));
 }
 
@@ -2998,10 +3126,10 @@ function getAllChords(types) {
                     : missing.length < pcs.length    ? 'incomplete'
                     :                                  'none';
       const native     = play === 'complete';
-      const missingStr = missing.map(p => PC_NAMES[p]).join(', ');
+      const missingStr = missing.map(p => getDisplayNames()[p]).join(', ');
       const label = native
-        ? `${CHORD_SYMBOLS[type] ?? ''} ${PC_NAMES[root]} ${type}`
-        : `${CHORD_SYMBOLS[type] ?? ''} ${PC_NAMES[root]} ${type} (−${missingStr})`;
+        ? `${CHORD_SYMBOLS[type] ?? ''} ${getDisplayNames()[root]} ${type}`
+        : `${CHORD_SYMBOLS[type] ?? ''} ${getDisplayNames()[root]} ${type} (−${missingStr})`;
       result.push({ type, root, pcs: new Set(pcs), play, native, label,
         filename: `${ROOT_FILE[root]}_${type}.png` });
     }
@@ -3124,7 +3252,10 @@ function toggleProgressions() {
   btn.style.background  = progOpen ? '#253060' : '';
   btn.style.borderColor = progOpen ? '#5b8db8' : '';
   btn.style.color       = progOpen ? '#8bc4e8' : '';
-  if (progOpen) { buildMoodPills(); buildRootBar(); renderProgressions(); }
+  if (progOpen) {
+    buildMoodPills(); buildRootBar(); renderProgressions();
+    buildProgExportMoodChecks(); buildProgExportRootBar();
+  }
   resizeCanvas();
 }
 
@@ -3143,14 +3274,15 @@ function moodAvailability(moodId) {
 function buildMoodPills() {
   const el = document.getElementById('mood-pills');
   el.innerHTML = '';
+  const avails = Object.fromEntries(MOODS.map(m => [m.id, moodAvailability(m.id)]));
+  const maxAvail = Math.max(...Object.values(avails), 1e-9);
   for (const mood of MOODS) {
-    const avail = moodAvailability(mood.id); // 0..1
+    const avail = avails[mood.id];
     const pill = document.createElement('button');
     pill.className = 'mood-pill' + (mood.id === activeMood ? ' active' : '');
     pill.textContent = `${mood.icon} ${mood.label}`;
-    // Tint non-active pills: dim (22% lightness) → bright (58% lightness)
     if (mood.id !== activeMood) {
-      const l = Math.round(22 + avail * 36);
+      const l = Math.round(22 + (avail / maxAvail) * 36);
       pill.style.color = `hsl(220,18%,${l}%)`;
     }
     pill.title = `${mood.label} — ${Math.round(avail * 100)}% available on this pan`;
@@ -3179,8 +3311,8 @@ function buildRootBar() {
     btn.className = 'root-btn' +
       (panPcs.has(i) ? ' on-pan' : '') +
       (activeRootPc === i ? ' active' : '');
-    btn.textContent = PC_NAMES[i];
-    btn.title = panPcs.has(i) ? `${PC_NAMES[i]} — on pan` : PC_NAMES[i];
+    btn.textContent = getDisplayNames()[i];
+    btn.title = panPcs.has(i) ? `${getDisplayNames()[i]} — on pan` : getDisplayNames()[i];
     btn.addEventListener('click', () => { activeRootPc = i; buildRootBar(); buildMoodPills(); renderProgressions(); });
     el.appendChild(btn);
   }
@@ -3198,7 +3330,7 @@ function renderProgressions() {
 
   for (const prog of filtered) {
     const rootPc  = activeRootPc === -1 ? bestRootForProg(prog) : activeRootPc;
-    const rootName = PC_NAMES[rootPc];
+    const rootName = getDisplayNames()[rootPc];
 
     const card = document.createElement('div');
     card.className = 'prog-card';
@@ -3240,7 +3372,7 @@ function renderProgressions() {
       tile.className = 'chord-tile' + (isActive ? ' active-tile' : '') + (fn ? ` fn-${fn}` : '');
       tile.innerHTML =
         `<span class="roman">${roman}</span>` +
-        `<span class="t-root">${PC_NAMES[chordRoot]}</span>` +
+        `<span class="t-root">${getDisplayNames()[chordRoot]}</span>` +
         `<span class="t-sym">${sym}</span>` +
         playDot(play);
 
@@ -3322,14 +3454,16 @@ function chordTypePillAvailability(groupId) {
 function buildChordTypePills() {
   const el = document.getElementById('chord-type-pills');
   el.innerHTML = '';
+  const avails = Object.fromEntries(CHORD_TYPE_GROUPS.map(g => [g.id, chordTypePillAvailability(g.id)]));
+  const maxAvail = Math.max(...Object.values(avails), 1e-9);
   for (const g of CHORD_TYPE_GROUPS) {
     const isActive = g.id === activeChordTypeFilter;
     const pill = document.createElement('button');
     pill.className = 'chord-type-pill' + (isActive ? ' active' : '');
     pill.textContent = g.label;
     if (!isActive) {
-      const avail = chordTypePillAvailability(g.id);
-      const l = Math.round(22 + avail * 36);
+      const avail = avails[g.id];
+      const l = Math.round(22 + (avail / maxAvail) * 36);
       pill.style.color = `hsl(220,18%,${l}%)`;
     }
     pill.addEventListener('click', () => {
@@ -3361,7 +3495,7 @@ function renderChords() {
     card.appendChild(cardTitle);
 
     const row = document.createElement('div');
-    row.className = 'chord-row';
+    row.className = 'chord-row chord-row--grid4';
 
     for (let rootPc = 0; rootPc < 12; rootPc++) {
       const play = chordPlayability(rootPc, typeName);
@@ -3371,7 +3505,7 @@ function renderChords() {
       tile.className = 'chord-tile' + (isActive ? ' active-tile' : '');
       tile.innerHTML =
         `<span class="roman"></span>` +
-        `<span class="t-root">${PC_NAMES[rootPc]}</span>` +
+        `<span class="t-root">${getDisplayNames()[rootPc]}</span>` +
         `<span class="t-sym">${sym}</span>` +
         playDot(play);
 
@@ -3416,7 +3550,7 @@ function buildProgressionsSVG(moodId) {
 <text x="${ML}" y="60" font-family="Arial,sans-serif" font-size="40" font-weight="bold" fill="#1a1a2e">${mood.icon} ${mood.label}</text>`;
 
   const rootLabel = activeRootPc >= 0
-    ? `Root: ${PC_NAMES[activeRootPc]}`
+    ? `Root: ${getDisplayNames()[activeRootPc]}`
     : 'Auto root (best per progression)';
   svg += `<text x="${ML}" y="85" font-family="Arial,sans-serif" font-size="14" fill="#aaa">${rootLabel}</text>`;
 
@@ -3432,7 +3566,7 @@ function buildProgressionsSVG(moodId) {
     svg += `<rect x="${ML}" y="${y}" width="${innerW}" height="${cardH}" rx="8" fill="#f9f9fc" stroke="#e4e4ee" stroke-width="1.2"/>`;
 
     const titleStr = activeRootPc === -1
-      ? `${prog.name}  ·  ${PC_NAMES[rootPc]}`
+      ? `${prog.name}  ·  ${getDisplayNames()[rootPc]}`
       : prog.name;
     svg += `<text x="${ML + 14}" y="${y + 24}" font-family="Arial,sans-serif" font-size="13" fill="#888">${titleStr}</text>`;
 
@@ -3456,7 +3590,7 @@ function buildProgressionsSVG(moodId) {
       const sfs = Math.max(11, Math.round(tileH * 0.14));
 
       svg += `<text x="${cx}" y="${ry}" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#bbb">${roman}</text>`;
-      svg += `<text x="${cx}" y="${ny}" text-anchor="middle" font-family="Arial,sans-serif" font-size="${nfs}" font-weight="bold" fill="#222">${PC_NAMES[chordRoot]}</text>`;
+      svg += `<text x="${cx}" y="${ny}" text-anchor="middle" font-family="Arial,sans-serif" font-size="${nfs}" font-weight="bold" fill="#222">${getDisplayNames()[chordRoot]}</text>`;
       svg += `<text x="${cx}" y="${sy}" text-anchor="middle" font-family="Arial,sans-serif" font-size="${sfs}" fill="#5b8db8">${sym}</text>`;
 
       const dc = play === 'complete' ? '#44cc88' : play === 'partial' ? '#cc8800' : play === 'incomplete' ? '#cc4444' : '#ccc';
@@ -3538,7 +3672,7 @@ async function buildDetailedProgressionPng(prog, rootPc) {
   ctx.fillText(prog.name, 40, 56);
   ctx.fillStyle = '#aaa';
   ctx.font = '13px Arial, sans-serif';
-  ctx.fillText(`Root: ${PC_NAMES[rootPc]}${activeRootPc === -1 ? ' (auto)' : ''}`, 40, 84);
+  ctx.fillText(`Root: ${getDisplayNames()[rootPc]}${activeRootPc === -1 ? ' (auto)' : ''}`, 40, 84);
   ctx.fillStyle = '#777';
   ctx.font = '18px "Courier New", monospace';
   ctx.fillText(prog.chords.map(c => toRoman(c.s, c.t)).join('  —  '), 40, 118);
@@ -3579,7 +3713,7 @@ async function buildDetailedProgressionPng(prog, rootPc) {
     ctx.fillStyle = '#aaa';    ctx.font = '13px Arial, sans-serif';
     ctx.fillText(roman, icx, cellY + 36);
     ctx.fillStyle = '#1a1a2e'; ctx.font = 'bold 52px Arial, sans-serif';
-    ctx.fillText(PC_NAMES[chordRoot], icx, cellY + 90);
+    ctx.fillText(getDisplayNames()[chordRoot], icx, cellY + 90);
     ctx.fillStyle = '#5b8db8'; ctx.font = '20px Arial, sans-serif';
     ctx.fillText(sym, icx, cellY + 116);
     const dc = play === 'complete' ? '#44cc88' : play === 'partial' ? '#cc8800' : play === 'incomplete' ? '#cc4444' : '#bbb';
@@ -3611,6 +3745,123 @@ async function buildDetailedProgressionPng(prog, rootPc) {
   ctx.fillText('■ Tonic  ■ Subdominant  ■ Dominant  |  ● Complete  ◕ −1 note  ◔ −2+ notes  ○ None', 40, H - 14);
 
   return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+}
+
+// ─── Progressions export (filterable) ────────────────────────────────────────
+
+function buildProgExportMoodChecks() {
+  const el = document.getElementById('prog-export-mood-checks');
+  if (!el) return;
+  el.innerHTML = '';
+  for (const mood of MOODS) {
+    const lbl = document.createElement('label');
+    lbl.style.cssText = 'display:flex;align-items:center;gap:4px;font-size:11px;color:#aab;cursor:pointer;';
+    lbl.innerHTML = `<input type="checkbox" value="${mood.id}" checked style="accent-color:#5b8db8;cursor:pointer;"> ${mood.icon} ${mood.label}`;
+    el.appendChild(lbl);
+  }
+}
+
+function checkAllProgExportMoods(on) {
+  document.getElementById('prog-export-mood-checks')
+    .querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = on);
+}
+
+function buildProgExportRootBar() {
+  const el = document.getElementById('prog-export-root-bar');
+  if (!el) return;
+  const panPcs = new Set(state.notes.map(n => parsePitchClass(n.label)).filter(p => p >= 0));
+  el.innerHTML = '';
+
+  function toggle(key) {
+    if (progExportRootPcs.has(key)) {
+      if (progExportRootPcs.size > 1) progExportRootPcs.delete(key);
+    } else {
+      progExportRootPcs.add(key);
+    }
+    buildProgExportRootBar();
+  }
+
+  const auto = document.createElement('button');
+  auto.className = 'root-btn' + (progExportRootPcs.has(-1) ? ' active' : '');
+  auto.textContent = 'Auto';
+  auto.title = 'Best root per progression (auto)';
+  auto.addEventListener('click', () => toggle(-1));
+  el.appendChild(auto);
+
+  for (let i = 0; i < 12; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'root-btn' +
+      (panPcs.has(i) ? ' on-pan' : '') +
+      (progExportRootPcs.has(i) ? ' active' : '');
+    btn.textContent = getDisplayNames()[i];
+    btn.title = (panPcs.has(i) ? `${getDisplayNames()[i]} — on pan` : getDisplayNames()[i]) + ' (click to toggle)';
+    btn.addEventListener('click', () => toggle(i));
+    el.appendChild(btn);
+  }
+}
+
+function setProgExportStatus(msg) {
+  const el = document.getElementById('prog-export-status');
+  if (el) el.textContent = msg;
+}
+
+async function exportProgressionsZip() {
+  if (typeof JSZip === 'undefined') { alert('JSZip not loaded — check internet connection.'); return; }
+
+  const selectedMoodIds = [...document.getElementById('prog-export-mood-checks')
+    .querySelectorAll('input:checked')].map(cb => cb.value);
+  if (!selectedMoodIds.length) { setProgExportStatus('No moods selected.'); return; }
+
+  const exportRoots  = [...progExportRootPcs]; // array of -1 and/or 0..11
+  const multiRoot    = exportRoots.length > 1;
+  const selectedMoods = MOODS.filter(m => selectedMoodIds.includes(m.id));
+  const progsPerMood  = selectedMoods.flatMap(m => PROGRESSIONS.filter(p => p.moods.includes(m.id)));
+  // total images = (overviews + detailed) × number of roots
+  const total = (selectedMoods.length + progsPerMood.length) * exportRoots.length;
+  let done = 0;
+
+  const zip = new JSZip();
+  const savedRootPc = activeRootPc;
+
+  try {
+    for (const rootPc of exportRoots) {
+      const rootLabel = rootPc === -1 ? 'Auto' : getDisplayNames()[rootPc];
+      activeRootPc = rootPc; // override for buildProgressionsSVG
+
+      const base     = multiRoot ? zip.folder(`handpan-progressions/${rootLabel}`) : zip.folder('handpan-progressions');
+      const detailed = base.folder('detailed');
+
+      for (const mood of selectedMoods) {
+        done++;
+        setProgExportStatus(`${done}/${total}  [${rootLabel}] ${mood.label} overview …`);
+        const png = await svgToPngBlob(buildProgressionsSVG(mood.id));
+        base.file(`${mood.label}.png`, png);
+      }
+
+      for (const mood of selectedMoods) {
+        const moodFolder = detailed.folder(mood.label);
+        const progs = PROGRESSIONS.filter(p => p.moods.includes(mood.id));
+        for (let pi = 0; pi < progs.length; pi++) {
+          const prog = progs[pi];
+          done++;
+          setProgExportStatus(`${done}/${total}  [${rootLabel}] ${mood.label} / ${prog.name} …`);
+          const usedRoot = rootPc === -1 ? bestRootForProg(prog) : rootPc;
+          const png      = await buildDetailedProgressionPng(prog, usedRoot);
+          const idx  = String(pi + 1).padStart(2, '0');
+          const slug = prog.name.replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '');
+          moodFolder.file(`${idx}-${slug}.png`, png);
+        }
+      }
+    }
+  } finally {
+    activeRootPc = savedRootPc;
+  }
+
+  setProgExportStatus('Building ZIP …');
+  const zipBlob = await zip.generateAsync({ type: 'blob' });
+  dlBlob(zipBlob, 'handpan-progressions.zip');
+  setProgExportStatus(`Done — ${done} images exported.`);
+  setTimeout(() => setProgExportStatus(''), 6000);
 }
 
 async function exportMoodsZip() {
@@ -5453,9 +5704,11 @@ function _playOsc(time, freq, vol, pan) {
 
 function scheduleHit(time, ev, pan) {
   if (!ev || ev.hit === '-') return;
-  if (ev.hit === '•' && !ghostSound) return;
+  if (ev.hit === '•' && ghostVol === 0) return;
   const v = _voice(ev.hit);
-  if (v) _playOsc(time, v.f, v.v, pan);
+  if (!v) return;
+  const vol = ev.hit === '•' ? ghostVol : v.v;
+  _playOsc(time, v.f, vol, pan);
 }
 
 // Step index k always sounds at exactly  _playStartTime + k*dt  (no float
@@ -5566,8 +5819,9 @@ document.getElementById('bpm-input').addEventListener('input', e => {
 });
 document.getElementById('bpm-input').addEventListener('keydown', e => e.stopPropagation());
 
-document.getElementById('ghost-sound-check').addEventListener('change', e => {
-  ghostSound = e.target.checked;
+document.getElementById('ghost-vol-slider').addEventListener('input', e => {
+  ghostVol = (+e.target.value / 100) * 0.05;
+  document.getElementById('ghost-vol-val').textContent = e.target.value;
 });
 
 document.getElementById('rhy-search').addEventListener('input', e => {
