@@ -314,6 +314,21 @@ body {
 
 /* ── HAT two-row grid ──────────────────────────────────────────────────────── */
 .hat-grid-wrap { overflow-x: auto; padding-bottom: 2px; }
+/* Bar-wrapping flex container — bars flow to new rows when they don't fit */
+.hat-grid-rows { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: flex-start; }
+/* Each bar is an independent unit: header + mini-grid */
+.hat-bar-unit {
+  display: flex; flex-direction: column;
+  border: 1px solid #1a1a30; border-radius: 4px; overflow: hidden;
+}
+.hat-bar-hdr {
+  font-size: 8px; color: #445; text-align: left;
+  padding: 2px 4px 3px; position: relative; line-height: 1;
+  background: #0e0e1e; border-bottom: 1px solid #1a1a30;
+  border-radius: 3px 3px 0 0;
+}
+.hat-bar-hdr.pasteable { color: #5b8db8; cursor: pointer; }
+.hat-bar-hdr.pasteable:hover { color: #7ab8e8; }
 .hat-grid { display: grid; gap: 3px 0; width: max-content; }
 .hat-rowlbl {
   display: flex; align-items: center; justify-content: center;
@@ -325,6 +340,7 @@ body {
 .hat-marker {
   font-size: 8px; color: #44557a; text-align: center;
   min-width: 26px; line-height: 1; padding-bottom: 1px;
+  position: relative;
 }
 .hat-cell {
   min-width: 26px; height: 30px; margin-right: 2px;
@@ -369,16 +385,35 @@ body {
 .hat-src summary {
   font-size: 10px; color: #556; cursor: pointer;
   list-style: none; user-select: none;
+  display: flex; align-items: center; gap: 6px;
 }
 .hat-src summary:hover { color: #7ab; }
-.hat-src summary::before { content: '▸ '; }
+.hat-src summary::before { content: '▸ '; flex-shrink: 0; }
 .hat-src[open] summary::before { content: '▾ '; }
+.hat-src-copy-btn {
+  font-size: 9px; padding: 1px 6px; margin-left: auto;
+  background: #111826; border: 1px solid #2a3a50; border-radius: 3px;
+  color: #5a7a9a; cursor: pointer;
+  transition: color .1s, border-color .1s, background .1s;
+}
+.hat-src-copy-btn:hover { color: #8ab8d8; border-color: #4a6a88; background: #182434; }
 .hat-src pre {
   margin: 6px 0 0; padding: 8px 10px;
   background: #0b0b16; border: 1px solid #1e1e38; border-radius: 4px;
   font-family: 'Courier New', Courier, monospace; font-size: 10px;
   color: #8898b8; overflow-x: auto; white-space: pre; line-height: 1.45;
 }
+.hat-src-ta {
+  display: block; width: 100%; margin: 6px 0 0;
+  padding: 8px 10px; min-height: 120px; resize: vertical;
+  background: #0b0b16; border: 1px solid #2a3050; border-radius: 4px;
+  font-family: 'Courier New', Courier, monospace; font-size: 10px;
+  color: #aab8d0; line-height: 1.45; outline: none;
+  transition: border-color .15s;
+}
+.hat-src-ta:focus { border-color: #4a6090; color: #ccd8ee; }
+.hat-src-ta.hat-src-ta-err { border-color: #803030 !important; color: #cc8080; }
+#rhythm-panel.expanded .hat-src-ta { font-size: 12px; min-height: 160px; }
 
 /* Notation legend */
 .rhy-legend {
@@ -447,6 +482,267 @@ body {
 #rhythm-panel.expanded .rhy-list.focused .hat-cell { min-width: 48px; height: 52px; font-size: 23px; }
 #rhythm-panel.expanded .rhy-list.focused .hat-cell.k-mute,
 #rhythm-panel.expanded .rhy-list.focused .hat-cell.k-ghost { font-size: 19px; }
+
+/* ── Pattern editor ────────────────────────────────────────────────────────── */
+.hat-back.disabled { color: #556; cursor: default; opacity: .6; }
+.hat-back.disabled:hover { color: #556; border-color: #252540; }
+.hat-badge.edited { background: #2e2410; border-color: #6a5020; color: #c8a050; }
+.hat-card.editing { border-color: #c8a050; box-shadow: 0 0 0 1px #6a5020; cursor: default; }
+
+/* ── Larger cells in edit mode ──────────────────────────────────────────────── */
+.hat-card.editing .hat-cell {
+  min-width: 42px; height: 46px; font-size: 20px; margin-right: 3px;
+}
+.hat-card.editing .hat-cell.k-mute,
+.hat-card.editing .hat-cell.k-ghost { font-size: 16px; }
+.hat-card.editing .hat-cell.k-note  { font-size: 11px; min-width: 40px; }
+.hat-card.editing .hat-rowlbl { font-size: 14px; width: 24px; }
+.hat-card.editing .hat-accent-btn { height: 22px; line-height: 22px; font-size: 11px; }
+.hat-card.editing .hat-subdiv-btn { height: 10px; font-size: 9px; }
+.hat-card.editing .hat-bar-ctrl-btn { font-size: 11px; padding: 3px 8px; }
+/* Even larger when also in expanded focused view */
+#rhythm-panel.expanded .hat-card.editing .hat-cell {
+  min-width: 56px; height: 60px; font-size: 26px;
+}
+#rhythm-panel.expanded .hat-card.editing .hat-cell.k-mute,
+#rhythm-panel.expanded .hat-card.editing .hat-cell.k-ghost { font-size: 21px; }
+#rhythm-panel.expanded .hat-card.editing .hat-cell.k-note  { font-size: 12px; }
+.hat-edit-toolbar {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+  margin: 2px 0 11px; padding: 8px 9px;
+  background: #16140c; border: 1px solid #3a3018; border-radius: 5px;
+}
+.hat-edit-btn {
+  font-size: 11px; padding: 4px 10px; border-radius: 5px;
+  border: 1px solid #4a4060; background: #1f1d2e; color: #ccd;
+  cursor: pointer; transition: border-color .1s, background .1s, color .1s;
+}
+.hat-edit-btn:hover { border-color: #c8a050; color: #e8c878; }
+.hat-edit-btn.save { border-color: #3a6040; color: #7ab878; }
+.hat-edit-btn.save:hover { background: #16240f; border-color: #5a8050; }
+.hat-edit-btn.cancel { border-color: #6a3030; color: #d08080; }
+.hat-edit-btn.cancel:hover { background: #240f0f; border-color: #904040; }
+.hat-edit-btn.active { border-color: #5b8db8; color: #7ab8e8; background: #0d1e30; }
+.hat-scale-sel {
+  font-size: 10px; padding: 2px 4px;
+  background: #101828; border: 1px solid #3a4060; border-radius: 3px;
+  color: #8ab; cursor: pointer; outline: none; max-width: 130px;
+}
+.hat-scale-sel:hover { border-color: #5b8db8; color: #ccd; }
+.hat-scale-sel:focus { border-color: #5b8db8; }
+.hat-edit-spacer { flex: 1; min-width: 8px; }
+.hat-edit-msg {
+  flex-basis: 100%; font-size: 10px; color: #8a9; padding-top: 2px;
+}
+.hat-edit-msg.err { color: #d88a5a; }
+.hat-edit-hint {
+  flex-basis: 100%; font-size: 9px; color: #667;
+  font-family: 'Courier New', Courier, monospace; padding-top: 1px;
+}
+.hat-grid-wrap.editable .hat-cell.edit-cell { cursor: pointer; }
+.hat-grid-wrap.editable .hat-cell.edit-cell:hover {
+  outline: 1px solid #c8a050; outline-offset: -1px; filter: brightness(1.35);
+}
+/* Feature 1 — per-bar +/− controls */
+.hat-bar-ctrl-row { display: contents; }
+.hat-bar-ctrl { display: flex; align-items: center; justify-content: center; gap: 3px; padding: 2px 0; }
+.hat-bar-ctrl-btn {
+  font-size: 13px; line-height: 1; padding: 0 5px; height: 18px;
+  border-radius: 3px; border: 1px solid #3a3060; background: #1a182a; color: #8890c0;
+  cursor: pointer; transition: border-color .1s, color .1s;
+}
+.hat-bar-ctrl-btn:hover { border-color: #c8a050; color: #e8c878; }
+/* Feature 2 — undo button: inherits .hat-edit-btn */
+/* Feature 3 — copied bar marker */
+.hat-marker.pasteable { cursor: pointer; }
+.hat-marker.pasteable:hover { color: #5b8db8; }
+.hat-bar-copy-btn {
+  display: none; position: absolute; top: -1px; right: -1px;
+  font-size: 7px; line-height: 1; padding: 1px 2px;
+  background: #1a2a40; border: 1px solid #3a5070; border-radius: 2px;
+  color: #7ab8e8; cursor: pointer; z-index: 2;
+}
+.hat-marker:hover .hat-bar-copy-btn,
+.hat-bar-hdr:hover .hat-bar-copy-btn { display: block; }
+.hat-marker.copied { outline: 2px solid #5b8db8; outline-offset: -1px; border-radius: 2px; }
+/* Feature 5 — paint mode */
+.hat-cell.edit-cell.paint-active { outline: 2px solid #f1c40f !important; outline-offset: -1px; }
+/* Feature 6 — accent indicators */
+.hat-cell { position: relative; }
+.hat-cell.k-accent { border-top: 2px solid #f1c40f; }
+.hat-accent-row { display: contents; }
+.hat-accent-btn {
+  font-size: 9px; text-align: center; line-height: 18px; height: 18px;
+  cursor: pointer; user-select: none; color: #444466;
+  background: transparent; border: none; padding: 0;
+  transition: color .1s;
+}
+.hat-accent-btn:hover { color: #f1c40f; }
+.hat-accent-btn.on { color: #f1c40f; }
+/* ── Note cells ─────────────────────────────────────────────────────────────── */
+.hat-cell.k-note { font-size: 9px; font-weight: bold; letter-spacing: -.3px;
+                   min-width: 32px; }
+.hat-cell.k-note.hand-R { background: #0f2a1a; color: #6ae88a; border-color: #1e4a2a; }
+.hat-cell.k-note.hand-L { background: #2a1a08; color: #e8c068; border-color: #4a3010; }
+
+/* ── Section labels ──────────────────────────────────────────────────────────── */
+.hat-section-lbl {
+  flex-basis: 100%; /* forces new row in flex-wrap */
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 2px 3px; margin-top: 4px;
+  border-top: 1px solid #2a3050;
+}
+.hat-section-name {
+  font-size: 10px; font-weight: bold; letter-spacing: .8px;
+  text-transform: lowercase; color: #7a9ab8;
+}
+.hat-section-repeat {
+  font-size: 9px; color: #5b7a98; background: #162030;
+  border: 1px solid #253a50; border-radius: 8px;
+  padding: 1px 6px;
+}
+.hat-section-edit-btn {
+  font-size: 9px; padding: 1px 4px;
+  background: transparent; border: 1px solid #2a3a50;
+  border-radius: 3px; color: #556; cursor: pointer;
+}
+.hat-section-edit-btn:hover { border-color: #5b8db8; color: #7ab8e8; }
+
+/* ── Bar group pattern tag ──────────────────────────────────────────────────── */
+.hat-bar-pattern {
+  font-size: 8px; color: #4a6888; margin-left: 6px; letter-spacing: .5px;
+  cursor: pointer; border-radius: 3px; padding: 1px 4px;
+  border: 1px solid transparent;
+  transition: color .1s, background .1s, border-color .1s;
+}
+.hat-bar-pattern:hover { color: #7abedc; background: #0c1a28; border-color: #2a4a68; }
+.hat-card.editing .hat-bar-pattern { font-size: 10px; padding: 2px 6px; }
+
+/* ── Beat-grouping editor popup ─────────────────────────────────────────────── */
+.hat-group-popup {
+  position: fixed; z-index: 3000;
+  background: #0d1222; border: 1px solid #3a4060; border-radius: 8px;
+  padding: 12px 14px 10px; min-width: 280px; max-width: 360px;
+  box-shadow: 0 8px 30px #000b;
+  display: flex; flex-direction: column; gap: 9px;
+}
+.hat-group-lbl { font-size: 11px; color: #556; line-height: 1.5; }
+.hat-group-presets { display: flex; flex-wrap: wrap; gap: 5px; }
+.hat-group-chip {
+  font-size: 12px; padding: 4px 10px;
+  background: #121a30; border: 1px solid #2a3a58;
+  border-radius: 12px; color: #7a9ab8; cursor: pointer;
+  font-family: 'Courier New', monospace; letter-spacing: .5px;
+  transition: background .1s, border-color .1s, color .1s;
+}
+.hat-group-chip:hover { background: #1a2a48; border-color: #4a6a98; color: #aac8e8; }
+.hat-group-chip.active { border-color: #4a7ab0; color: #7abbe8; background: #0e1e38; }
+.hat-group-inp {
+  width: 100%; padding: 7px 10px; font-size: 15px;
+  background: #101828; border: 1px solid #3a4060; border-radius: 5px;
+  color: #dde; outline: none; font-family: 'Courier New', monospace;
+  letter-spacing: 1.2px; transition: border-color .15s;
+}
+.hat-group-inp:focus { border-color: #5b8db8; }
+.hat-group-err { font-size: 11px; color: #887040; min-height: 14px; }
+
+/* ── Sub-beat divider toggle row ────────────────────────────────────────────── */
+.hat-subdiv-btn {
+  height: 8px; display: flex; align-items: center; justify-content: center;
+  font-size: 8px; line-height: 1; color: #22223a; cursor: pointer;
+  user-select: none; transition: color .1s, background .1s;
+  border-radius: 1px;
+}
+.hat-subdiv-btn::after { content: '·'; }
+.hat-subdiv-btn.on { color: #5a7ab0; }
+.hat-subdiv-btn.on::after { content: '|'; }
+.hat-subdiv-btn.bar-start { color: #3a5a8a; cursor: default; }
+.hat-subdiv-btn.bar-start::after { content: '|'; }
+.hat-subdiv-btn:not(.bar-start):hover { color: #7ab8e8; background: #0e1a30; }
+
+/* ── Note picker popup ───────────────────────────────────────────────────────── */
+.hat-note-popup {
+  position: fixed; z-index: 3000;
+  background: #0d1222; border: 1px solid #3a4060; border-radius: 7px;
+  padding: 8px; max-width: 260px;
+  box-shadow: 0 6px 24px #0009;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.hat-note-popup-lbl {
+  font-size: 9px; color: #445; letter-spacing: .3px;
+}
+.hat-note-popup-grid {
+  display: flex; flex-wrap: wrap; gap: 4px;
+}
+.hat-note-popup-btn {
+  font-size: 10px; padding: 3px 7px;
+  background: #0f2a1a; border: 1px solid #2a5a3a;
+  border-radius: 4px; color: #6ae88a; cursor: pointer;
+  font-family: 'Courier New', monospace;
+  display: flex; align-items: center; gap: 3px;
+  transition: background .1s, border-color .1s;
+}
+.hat-note-popup-btn:hover { background: #1a5a2a; border-color: #5aaa6a; color: #8affa0; }
+.hat-npop-num {
+  font-size: 8px; color: #3a7a4a; background: #071510;
+  border-radius: 2px; padding: 0 3px; min-width: 13px;
+  text-align: center; font-family: Arial, sans-serif;
+}
+.hat-note-popup-inp {
+  width: 100%; padding: 4px 6px; font-size: 10px;
+  background: #101828; border: 1px solid #3a4060; border-radius: 4px;
+  color: #ccd; outline: none; font-family: 'Courier New', monospace;
+}
+.hat-note-popup-inp:focus { border-color: #5b8db8; }
+
+/* ── Fields palette ──────────────────────────────────────────────────────────── */
+.hat-fields-palette {
+  display: flex; align-items: center; gap: 4px;
+  flex-wrap: wrap; padding: 4px 0 0;
+  border-top: 1px solid #2a2a4a; margin-top: 3px;
+  flex-basis: 100%;
+}
+.hat-fields-lbl { font-size: 9px; color: #556; }
+.hat-field-btn {
+  font-size: 9px; padding: 2px 5px;
+  background: #0f2a1a; border: 1px solid #2a5a3a;
+  border-radius: 3px; color: #6ae88a; cursor: pointer;
+  font-family: 'Courier New', Courier, monospace;
+  display: inline-flex; align-items: center; gap: 2px;
+}
+.hat-field-btn:hover { background: #1a4a2a; border-color: #4a8a5a; }
+.hat-field-num {
+  font-size: 7px; color: #3a7a4a; background: #071510;
+  border-radius: 2px; padding: 0 2px; min-width: 10px;
+  text-align: center; font-family: Arial, sans-serif;
+}
+
+/* ── Fields badge ────────────────────────────────────────────────────────────── */
+.hat-badge.hat-fields-badge { background: #0f2218; border-color: #2a5a3a; color: #6ae88a; }
+
+/* ── Flam indicator ──────────────────────────────────────────────────────────── */
+.hat-cell[data-mod="*"]::before {
+  content: '✦'; font-size: 6px; position: absolute;
+  top: 2px; right: 2px; color: #f1c40f; opacity: .7;
+}
+
+/* New pattern modal */
+#new-pat-modal {
+  position: fixed; inset: 0; z-index: 9000;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.65);
+}
+#new-pat-modal .modal-box {
+  background: #15131f; border: 1px solid #3a3060; border-radius: 8px;
+  padding: 20px 24px; min-width: 280px; display: flex; flex-direction: column; gap: 12px;
+}
+#new-pat-modal h3 { margin: 0; font-size: 14px; color: #ccd; }
+#new-pat-modal label { font-size: 11px; color: #889; display: flex; flex-direction: column; gap: 4px; }
+#new-pat-modal input, #new-pat-modal select {
+  background: #1e1c2e; border: 1px solid #3a3060; border-radius: 4px;
+  color: #ccd; font-size: 12px; padding: 4px 7px; outline: none;
+}
+#new-pat-modal .modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
 </style>
 </head>
 <body>
@@ -615,6 +911,7 @@ body {
         <span class="rhy-beta-badge">β BETA</span>
       </div>
       <div style="display:flex;gap:4px;">
+        <button class="btn" style="padding:2px 8px;font-size:11px;" onclick="showNewPatternModal()" title="Create a new blank pattern">＋ New</button>
         <button class="btn" style="padding:2px 8px;font-size:11px;" onclick="importHatFile()" title="Import HAT patterns from a Markdown file">⬆ Import</button>
         <input type="file" id="hat-import-input" accept=".md,.hat,.txt" style="display:none">
         <button class="btn" style="padding:2px 8px;font-size:11px;" onclick="exportRhythmsZip()" title="Export all styles as PNG images">⬇ ZIP</button>
@@ -1740,6 +2037,17 @@ let focusedHatIdx  = null;   // index shown alone (single-rhythm focus view)
 let ghostSound     = true;   // whether ghost notes (•) are audible
 let activeHatCat   = 'all';  // currently selected category pill
 let hatSearchQuery = '';     // current search string
+let editingHatIdx  = null;   // idx being edited (focus view), or null
+let _editModel     = null;   // working clone while editing; null otherwise
+let _hoveredCell   = null;   // hat-cell DOM element currently under the pointer (edit mode)
+let _lastClickedCell = null; // last cell clicked (fallback for field palette when hover is gone)
+let _hatSrcOpen    = false;  // whether the HAT source disclosure is open (persist across re-renders)
+let _hatTextTimer  = null;   // debounce timer for live HAT text editing
+let editMsg        = '';     // transient toolbar status/error message
+let _editHistory   = [];     // undo stack of JSON snapshots (Feature 2)
+let _copiedBar     = null;   // deep-cloned bar cols for copy/paste (Feature 3)
+let _paintKey      = null;   // symbol held for drag-paint (Feature 5)
+let _paintDown     = false;  // mouse button held (Feature 5)
 let globalBpm      = 90;
 let rhythmPlaying  = false;
 let _tapTimes      = [];
@@ -2375,11 +2683,78 @@ document.addEventListener('keydown', e => {
       return;
     }
   }
-  if (e.key==='z' && (e.ctrlKey||e.metaKey) && !e.shiftKey) { e.preventDefault(); undo(); }
+  if (e.key==='z' && (e.ctrlKey||e.metaKey) && !e.shiftKey) {
+    e.preventDefault();
+    if (_editModel) { editUndo(); } else { undo(); }
+  }
   if ((e.key==='y' && (e.ctrlKey||e.metaKey)) ||
       (e.key==='z' && (e.ctrlKey||e.metaKey) && e.shiftKey)) { e.preventDefault(); redo(); }
   if (e.key==='d' && (e.ctrlKey||e.metaKey)) { e.preventDefault(); duplicateSelected(); }
+
+  // ── Rhythm cell keyboard shortcuts ──────────────────────────────────────
+  if (_editModel && !inInput && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    const _targetCell = _hoveredCell || _lastClickedCell;
+    // n = open note picker popup (field notes or fallback text input)
+    if (e.key === 'n' && _targetCell) {
+      e.preventDefault();
+      _openNoteInput(_targetCell);
+      return;
+    }
+    // Digits 1–9 + 0: set nth field note on the target cell (0 = 10th field)
+    const digit = parseInt(e.key, 10);
+    if (!isNaN(digit) && _targetCell) {
+      const fieldIdx = digit === 0 ? 9 : digit - 1; // 1→0, 2→1, …, 9→8, 0→9
+      const fields = (_editModel.meta.fields || '').split(/\s+/).filter(Boolean);
+      const note = fields[fieldIdx];
+      if (note) {
+        e.preventDefault();
+        _editPushUndo();
+        setCell(+_targetCell.dataset.barIndex, +_targetCell.dataset.colInBar,
+                _targetCell.dataset.hand, note);
+        return;
+      }
+    }
+    // Letter keys a b c e f g … → field notes 11 12 13 … (keys not in _VALID_HITS or 'n')
+    if (e.key.length === 1 && _targetCell) {
+      const li = _FIELD_LETTER_KEYS.indexOf(e.key);
+      if (li !== -1) {
+        const fieldIdx = 10 + li;
+        const fields = (_editModel.meta.fields || '').split(/\s+/).filter(Boolean);
+        const note = fields[fieldIdx];
+        if (note) {
+          e.preventDefault();
+          _editPushUndo();
+          setCell(+_targetCell.dataset.barIndex, +_targetCell.dataset.colInBar,
+                  _targetCell.dataset.hand, note);
+          return;
+        }
+      }
+    }
+    // Map period → • for convenience
+    const sym = e.key === '.' ? '•' : e.key;
+    if (_VALID_HITS.has(sym)) {
+      // Set paint key for drag-paint (Feature 5)
+      _paintKey = sym;
+      if (_hoveredCell) {
+        e.preventDefault();
+        const { barIndex, colInBar, hand } = _hoveredCell.dataset;
+        _editPushUndo();
+        setCell(+barIndex, +colInBar, hand, sym);
+      }
+    }
+  }
 });
+
+document.addEventListener('keyup', e => {
+  // Clear paint key when the key is released (Feature 5)
+  if (_paintKey !== null) {
+    const sym = e.key === '.' ? '•' : e.key;
+    if (sym === _paintKey) _paintKey = null;
+  }
+});
+
+document.addEventListener('mousedown', () => { _paintDown = true; });
+document.addEventListener('mouseup',   () => { _paintDown = false; });
 
 // ─── SVG / PNG export helpers ─────────────────────────────────────────────────
 
@@ -3033,6 +3408,7 @@ function toggleRhythm() {
   if (rhythmOpen) { buildCatPills(); renderRhythms(); }
   else { document.getElementById('rhythm-panel').classList.remove('expanded');
          focusedHatIdx = null;
+         editingHatIdx = null; _editModel = null; editMsg = '';
          const eb = document.getElementById('rhy-expand-btn');
          if (eb) eb.textContent = '⤢ Expand'; }
   resizeCanvas();
@@ -3120,10 +3496,138 @@ function importHatFile() {
   input.click();
 }
 
-// ─── HAT parser (spec v1.2.2, section 7) ──────────────────────────────────────
+// ─── HAT scale templates ──────────────────────────────────────────────────────
+// Each entry: { name, tuning, fields }  where fields is a space-separated list
+// of note names in ascending pitch order, matching HAT ;;fields: format.
+const HAT_SCALE_TEMPLATES = [
+  // ── D root ────────────────────────────────────────────────────────────────
+  { group: 'D root', scales: [
+    { name: 'D Kurd',          tuning: 'D Kurd',          fields: 'D4 A4 Bb4 C5 D5 E5 F5 G5' },
+    { name: 'D Celtic Minor',  tuning: 'D Celtic Minor',  fields: 'D4 A4 B4 C5 D5 E5 F5 G5'  },
+    { name: 'D Aeolian',       tuning: 'D Aeolian',       fields: 'D4 E4 F4 G4 A4 Bb4 C5 D5' },
+    { name: 'D Hijaz',         tuning: 'D Hijaz',         fields: 'D4 Eb4 F#4 G4 A4 Bb4 C5 D5' },
+    { name: 'D Integral',      tuning: 'D Integral',      fields: 'D4 F4 G4 Ab4 C5 D5 F5 G5'  },
+    { name: 'D Major',         tuning: 'D Major',         fields: 'D4 F#4 A4 B4 C#5 D5 E5 F#5' },
+    { name: 'D Dorian',        tuning: 'D Dorian',        fields: 'D4 E4 F4 G4 A4 B4 C5 D5'  },
+    { name: 'D Low Kurd',      tuning: 'D Low Kurd',      fields: 'D3 A3 Bb3 D4 E4 F4 G4 A4 Bb4 D5' },
+  ]},
+  // ── E root ────────────────────────────────────────────────────────────────
+  { group: 'E root', scales: [
+    { name: 'E Aeolian',       tuning: 'E Aeolian',       fields: 'E4 F#4 G4 A4 B4 C5 D5 E5' },
+    { name: 'E Dorian',        tuning: 'E Dorian',        fields: 'E4 F#4 G4 A4 B4 C#5 D5 E5' },
+    { name: 'E Mystic',        tuning: 'E Mystic',        fields: 'E4 F#4 G4 B4 C5 D5 E5 G5'  },
+    { name: 'E Amara',         tuning: 'E Amara',         fields: 'E4 G4 A4 B4 C5 D5 E5 G5'   },
+    { name: 'E Low Pygmy',     tuning: 'E Low Pygmy',     fields: 'E3 G3 Bb3 C4 Eb4 E4 G4 Bb4' },
+    { name: 'E Hijaz',         tuning: 'E Hijaz',         fields: 'E4 F4 G#4 A4 B4 C5 D5 E5'  },
+  ]},
+  // ── F♯ root ───────────────────────────────────────────────────────────────
+  { group: 'F♯ root', scales: [
+    { name: 'F# Akebono',      tuning: 'F# Akebono',      fields: 'F#4 A4 B4 C#5 D5 E5 F#5'   },
+    { name: 'F# Kurd',         tuning: 'F# Kurd',         fields: 'F#4 C#5 D5 E5 F#5 G#5 A5 B5' },
+    { name: 'F# Low Pygmy',    tuning: 'F# Low Pygmy',    fields: 'F#3 A3 C#4 E4 F#4 A4 C#5 E5' },
+    { name: 'F# Aeolian',      tuning: 'F# Aeolian',      fields: 'F#4 G#4 A4 B4 C#5 D5 E5 F#5' },
+  ]},
+  // ── G root ────────────────────────────────────────────────────────────────
+  { group: 'G root', scales: [
+    { name: 'G Pygmy',         tuning: 'G Pygmy',         fields: 'G4 Ab4 Bb4 C5 Eb5 F5 G5'   },
+    { name: 'G Minor',         tuning: 'G Minor',         fields: 'G4 A4 Bb4 C5 D5 Eb5 F5 G5' },
+    { name: 'G Celtic Minor',  tuning: 'G Celtic Minor',  fields: 'G4 D5 Eb5 F5 G5 A5 Bb5 C6' },
+  ]},
+  // ── A root ────────────────────────────────────────────────────────────────
+  { group: 'A root', scales: [
+    { name: 'A La Sirena',     tuning: 'A La Sirena',     fields: 'A3 C4 D4 E4 G4 A4 C5 D5 E5' },
+    { name: 'A Integral',      tuning: 'A Integral',      fields: 'A3 C#4 E4 G4 A4 B4 C5 E5'   },
+    { name: 'A Minor Pent.',   tuning: 'A Minor Pent.',   fields: 'A3 C4 D4 E4 G4 A4 C5 D5'    },
+    { name: 'A Kurd',          tuning: 'A Kurd',          fields: 'A4 E5 F5 G5 A5 B5 C6 D6'    },
+    { name: 'A Aeolian',       tuning: 'A Aeolian',       fields: 'A4 B4 C5 D5 E5 F5 G5 A5'    },
+  ]},
+  // ── B root ────────────────────────────────────────────────────────────────
+  { group: 'B root', scales: [
+    { name: 'B Celtic Minor',  tuning: 'B Celtic Minor',  fields: 'B3 F#4 G4 A4 B4 C5 D5 F#5' },
+    { name: 'B Kurd',          tuning: 'B Kurd',          fields: 'B3 F#4 G4 A4 B4 C5 D5 F#5'  },
+    { name: 'B Hijaz',         tuning: 'B Hijaz',         fields: 'B4 C5 D#5 E5 F#5 G5 A5 B5'  },
+  ]},
+  // ── C♯ root ───────────────────────────────────────────────────────────────
+  { group: 'C♯ root', scales: [
+    { name: 'C# Minor',        tuning: 'C# Minor',        fields: 'C#4 E4 F#4 G#4 A4 B4 C#5 E5' },
+    { name: 'C# Kurd',         tuning: 'C# Kurd',         fields: 'C#4 G#4 A4 B4 C#5 D#5 E5 F#5' },
+    { name: 'C# Akebono',      tuning: 'C# Akebono',      fields: 'C#4 E4 F#4 G#4 A4 B4 C#5'    },
+  ]},
+  // ── From canvas layouts ───────────────────────────────────────────────────
+  { group: 'From layout', scales:
+    TEMPLATES.map(tpl => ({
+      name: tpl.name,
+      tuning: tpl.name,
+      fields: tpl.state.notes
+        .map(n => n.label)
+        .sort((a, b) => midiNote(a) - midiNote(b))
+        .filter((n, i, arr) => arr.indexOf(n) === i)
+        .join(' '),
+    }))
+  },
+];
 
-// Valid hit symbols per HAT-spec v1.2.2 §2: D T K S d • -
+function _buildScaleSelect(onSelect) {
+  const sel = document.createElement('select');
+  sel.className = 'hat-scale-sel';
+  const def = document.createElement('option');
+  def.value = '';
+  def.textContent = 'Scale template…';
+  sel.appendChild(def);
+  HAT_SCALE_TEMPLATES.forEach(group => {
+    const og = document.createElement('optgroup');
+    og.label = group.group;
+    group.scales.forEach(tpl => {
+      const opt = document.createElement('option');
+      opt.value = JSON.stringify({ tuning: tpl.tuning, fields: tpl.fields });
+      opt.textContent = tpl.name;
+      og.appendChild(opt);
+    });
+    sel.appendChild(og);
+  });
+  sel.addEventListener('change', e => {
+    e.stopPropagation();
+    if (!sel.value) return;
+    const tpl = JSON.parse(sel.value);
+    onSelect(tpl);
+    setTimeout(() => { sel.value = ''; }, 0); // reset after change fires
+  });
+  return sel;
+}
+
+// ─── HAT parser (spec v1.3.0) ─────────────────────────────────────────────────
+
+// Valid hit symbols per HAT-spec §2: D T K S d • -
 const HAT_HITS = new Set(['D', 'T', 'K', 'S', 'd', '•', '-']);
+
+function _isNote(hit) {
+  return !!hit && hit.length > 1;
+}
+
+function _isValidHit(hit) {
+  if (!hit) return false;
+  if (HAT_HITS.has(hit)) return true;
+  // Note name: [A-G][#b]?\d
+  return /^[A-G][#b]?\d$/.test(hit);
+}
+
+function _parseHatCell(tok) {
+  const t = tok.trim();
+  if (!t) return { hit: '-', mod: null };
+  const c = t[0];
+  // Note names: A,B,C,E,F,G always; D if followed by digit or #/b
+  if ('ABCEFG'.includes(c) || (c === 'D' && t.length > 1 && '#b0123456789'.includes(t[1]))) {
+    const acc = (t[1] === '#' || t[1] === 'b') ? t[1] : '';
+    const di  = 1 + acc.length;
+    const oct = (t[di] && /\d/.test(t[di])) ? t[di] : '';
+    const mi  = di + oct.length;
+    const mod = t[mi] === '*' ? '*' : null;
+    return { hit: c + acc + oct, mod };  // hit is e.g. 'F#4', 'D4', 'A4'
+  }
+  // Regular hit symbol (D, T, K, S, d, •, -)
+  const mod = t[1] === '*' ? '*' : null;
+  return { hit: c, mod };
+}
 
 function _parseHatBar(barStr) {
   const tokens = barStr.trim().split(/\s+/).filter(t => t.length);
@@ -3131,9 +3635,7 @@ function _parseHatBar(barStr) {
   const subBefore = new Set();          // cell index preceded by a '|'
   for (const tok of tokens) {
     if (tok === '|') { subBefore.add(cells.length); continue; }
-    const hit = tok[0];
-    const mod = tok.length > 1 && tok[1] !== ' ' ? tok[1] : null;
-    cells.push({ hit, mod });
+    cells.push(_parseHatCell(tok));
   }
   return { cells, subBefore };
 }
@@ -3145,10 +3647,28 @@ function _parseHatLine(line) {
 
 function parseHAT(text) {
   const meta = {};
-  const body = [];
+  const bodyLines = [];   // { line: string, sectionHeader?: {name,repeat} }
+  let pendingSection = undefined;  // undefined = not set
+
   for (const raw of text.split(/\r?\n/)) {
-    const line = raw.trim();
+    // Comment stripping for non-;; lines
+    let line = raw;
+    if (!line.trimStart().startsWith(';;')) {
+      const ci = line.indexOf('%');
+      if (ci >= 0) line = line.slice(0, ci);
+      line = line.trim();
+    } else {
+      line = raw.trim();
+    }
     if (!line) continue;
+
+    // Section label  [name] or [name xN]
+    const secM = line.match(/^\[(\S+?)(?:\s+x(\d+))?\]$/);
+    if (secM) {
+      pendingSection = { name: secM[1], repeat: parseInt(secM[2] || '1', 10) };
+      continue;
+    }
+
     if (line.startsWith(';;')) {
       const m  = line.slice(2).trim();
       const vm = m.match(/^HAT\s+v([\d.]+)/i);
@@ -3156,19 +3676,31 @@ function parseHAT(text) {
       const kv = m.match(/^([^:]+):\s*(.*)$/);
       if (kv) meta[kv[1].trim().toLowerCase()] = kv[2].trim();
     } else if (/^[RL]\s*:/.test(line)) {
-      body.push(line);
+      const entry = { line };
+      if (pendingSection !== undefined) {
+        entry.sectionHeader = pendingSection;
+        pendingSection = undefined;
+      }
+      bodyLines.push(entry);
     }
   }
 
   const result = { meta, bars: [], cols: [], ok: true, error: null };
+  const fieldsSet = meta.fields
+    ? new Set(meta.fields.split(/\s+/).filter(Boolean))
+    : null;
+
   try {
-    for (let i = 0; i < body.length; i++) {
-      if (!/^R\s*:/.test(body[i])) continue;
-      const lLine = body[i + 1];
-      if (!lLine || !/^L\s*:/.test(lLine))
+    // Pair R/L lines
+    const entries = bodyLines;
+    for (let i = 0; i < entries.length; i++) {
+      if (!/^R\s*:/.test(entries[i].line)) continue;
+      const lEntry = entries[i + 1];
+      if (!lEntry || !/^L\s*:/.test(lEntry.line))
         throw new Error('every R: line must be followed by an L: line');
-      const R = _parseHatLine(body[i]);
-      const L = _parseHatLine(lLine);
+      const R = _parseHatLine(entries[i].line);
+      const L = _parseHatLine(lEntry.line);
+      const sh = entries[i].sectionHeader;  // may be object or undefined
       i++;
       if (R.length !== L.length)
         throw new Error(`bar count differs (R has ${R.length}, L has ${L.length})`);
@@ -3179,20 +3711,27 @@ function parseHAT(text) {
         const cols = [];
         for (let c = 0; c < rb.cells.length; c++) {
           const rc = rb.cells[c], lc = lb.cells[c];
-          if (!HAT_HITS.has(rc.hit) || !HAT_HITS.has(lc.hit))
-            throw new Error(`unknown symbol in bar ${b + 1}`);
-          // HAT-spec v1.2.2 §7: any of (active,-) (-,active) (active,active)
-          // (-,-) is valid; (-,-) is a silent time step. No other constraint.
+          // Validate: either a known hit symbol or a valid note name
+          if (!_isValidHit(rc.hit) || !_isValidHit(lc.hit))
+            throw new Error(`unknown symbol "${rc.hit}/${lc.hit}" in bar ${b + 1}`);
+          if (fieldsSet) {
+            if (_isNote(rc.hit) && !fieldsSet.has(rc.hit))
+              throw new Error(`note "${rc.hit}" not in ;;fields list`);
+            if (_isNote(lc.hit) && !fieldsSet.has(lc.hit))
+              throw new Error(`note "${lc.hit}" not in ;;fields list`);
+          }
           cols.push({ R: rc, L: lc, sub: rb.subBefore.has(c) });
         }
-        result.bars.push({ cols });
+        const bar = { cols };
+        // Attach section header only to the first bar of the R/L pair with this label
+        if (b === 0 && sh !== undefined) bar.sectionHeader = sh;
+        result.bars.push(bar);
       }
     }
     if (!result.bars.length) throw new Error('no R:/L: body found');
-    // Flatten to a single timeline
     result.bars.forEach((bar, bi) => {
       bar.cols.forEach((col, ci) => {
-        result.cols.push({ ...col, barStart: ci === 0, barIndex: bi });
+        result.cols.push({ ...col, barStart: ci === 0, barIndex: bi, colInBar: ci });
       });
     });
   } catch (e) {
@@ -3208,6 +3747,201 @@ function getParsed(idx) {
   return _parseCache[p.id];
 }
 
+// ─── HAT serializer (model → text) ────────────────────────────────────────────
+// The keystone of the editor: gives a faithful reverse path so any model edit
+// can be written back to p.hat. Invariant: parseHAT(serializeHAT(p)) keeps the
+// same flattened timeline (cols) as p.
+
+// Binary ladder and triplet ladder — doubling/halving stays within each family.
+const GRID_STEPS          = ['4th', '8th', '16th', '32nd'];
+const GRID_STEPS_TRIPLET  = ['triplet-4th', 'triplet-8th', 'triplet-16th'];
+
+function _normGrid(g) {
+  g = (g || '8th').toLowerCase();
+  return ({ quarter: '4th', eighth: '8th', sixteenth: '16th',
+            'triplet4th': 'triplet-4th', 'triplet8th': 'triplet-8th',
+            'triplet16th': 'triplet-16th' })[g] || g;
+}
+
+function _isTripletGrid(g) { return (g || '').startsWith('triplet-'); }
+
+// Switch a model between binary and triplet grid families at the same subdivision level.
+// Binary ↔ triplet pairs: 4th↔triplet-4th, 8th↔triplet-8th, 16th↔triplet-16th (32nd has no triplet pair).
+function _toggleTripletGrid(model) {
+  const cur = _normGrid(model.meta.grid);
+  const pairs = { '4th': 'triplet-4th', '8th': 'triplet-8th', '16th': 'triplet-16th',
+                  'triplet-4th': '4th', 'triplet-8th': '8th', 'triplet-16th': '16th' };
+  if (!pairs[cur]) return { ok: false, error: `no triplet pair for grid "${cur}" (32nd has no triplet equivalent)` };
+  model.meta.grid = pairs[cur];
+  return { ok: true };
+}
+
+// Canonical meta key order; unknown keys are appended after these.
+const _META_ORDER = ['title', 'tempo', 'time', 'grid', 'tuning', 'fields'];
+
+function serializeHAT(parsed) {
+  const meta = parsed.meta || {};
+  const lines = [`;;HAT v1.3.0`];
+  const seen = new Set(['version']);
+  for (const k of _META_ORDER) {
+    if (meta[k] != null && meta[k] !== '') { lines.push(`;;${k}: ${meta[k]}`); seen.add(k); }
+  }
+  for (const k of Object.keys(meta)) {
+    if (seen.has(k)) continue;
+    // Skip internal editor keys emitted separately
+    if (['accents'].includes(k)) continue;
+    if (meta[k] != null && meta[k] !== '') lines.push(`;;${k}: ${meta[k]}`);
+  }
+  // Emit accents as a comment if present (not official spec)
+  if (meta.accents) lines.push(`;;accents: ${meta.accents}`);
+  lines.push('');
+
+  // Always use Style A: every cell token is padded to exactly 3 characters.
+  // The parser trims tokens, so this is fully round-trip safe.
+  const fmtCell = (ev) => (ev.hit + (ev.mod || '')).padEnd(3);
+
+  // Group consecutive bars into stanzas, breaking at section headers
+  let i = 0;
+  while (i < parsed.bars.length) {
+    const bar = parsed.bars[i];
+    // Emit section label if this bar starts a new labeled section
+    if (bar.sectionHeader) {
+      const sh = bar.sectionHeader;
+      const rpt = sh.repeat > 1 ? ` x${sh.repeat}` : '';
+      lines.push(`[${sh.name}${rpt}]`);
+    }
+    // Collect all bars until the next section header (or end)
+    const stanzaBars = [];
+    while (i < parsed.bars.length && (stanzaBars.length === 0 || !parsed.bars[i].sectionHeader)) {
+      stanzaBars.push(parsed.bars[i]);
+      i++;
+    }
+    // Serialize this stanza
+    const barR = stanzaBars.map(b => {
+      const toks = [];
+      b.cols.forEach((col, ci) => {
+        if (col.sub && ci > 0) toks.push('|');
+        toks.push(fmtCell(col.R));
+      });
+      return toks.join(' ');
+    });
+    const barL = stanzaBars.map(b => {
+      const toks = [];
+      b.cols.forEach((col, ci) => {
+        if (col.sub && ci > 0) toks.push('|');
+        toks.push(fmtCell(col.L));
+      });
+      return toks.join(' ');
+    });
+    lines.push(`R: || ${barR.join(' || ')} ||`);
+    lines.push(`L: || ${barL.join(' || ')} ||`);
+  }
+  return lines.join('\n');
+}
+
+// Deep clone of a parsed model's editable structure (bars/meta only; cols are
+// a derived flattened view rebuilt by reparsing on save).
+function _cloneModel(parsed) {
+  return {
+    meta: { ...parsed.meta },
+    bars: parsed.bars.map(bar => {
+      const b = {
+        cols: bar.cols.map(c => ({
+          R: { hit: c.R.hit, mod: c.R.mod || null },
+          L: { hit: c.L.hit, mod: c.L.mod || null },
+          sub: !!c.sub,
+        })),
+      };
+      if (bar.sectionHeader !== undefined) b.sectionHeader = bar.sectionHeader
+        ? { ...bar.sectionHeader } : null;
+      return b;
+    }),
+  };
+}
+
+// Rebuild the flattened .cols timeline on a model (mirrors parseHAT's flatten).
+function _reflatten(model) {
+  model.cols = [];
+  model.bars.forEach((bar, bi) => {
+    bar.cols.forEach((col, ci) => {
+      model.cols.push({ ...col, barStart: ci === 0, barIndex: bi, colInBar: ci });
+    });
+  });
+  model.ok = true;
+  model.error = null;
+  return model;
+}
+
+// Console self-test: every library pattern must round-trip (text→model→text→
+// model) with an identical flattened timeline. Call _hatRoundTripTest() in the
+// devtools console.
+function _hatRoundTripTest() {
+  let pass = 0, fail = 0;
+  const sig = p => p.cols.map(c =>
+    `${c.R.hit}${c.R.mod || ''}/${c.L.hit}${c.L.mod || ''}${c.sub ? '|' : ''}${c.barStart ? 'B' : ''}`
+  ).join(',');
+  HAT_PATTERNS.forEach(pat => {
+    const a = parseHAT(pat.hat);
+    if (!a.ok) { console.warn('skip (parse fail):', pat.id, a.error); return; }
+    const b = parseHAT(serializeHAT(a));
+    if (b.ok && sig(a) === sig(b)) { pass++; }
+    else { fail++; console.error('ROUNDTRIP FAIL:', pat.id, b.error || 'timeline mismatch'); }
+  });
+  console.log(`HAT round-trip: ${pass} pass, ${fail} fail`);
+  return fail === 0;
+}
+
+// ─── Grid subdivision transforms ──────────────────────────────────────────────
+// Doubling steps the grid one resolution finer (e.g. 8th→16th) and inserts a
+// silent cell after every existing cell. The audible rhythm and total duration
+// are unchanged (cell time halves, cell count doubles) — it just opens editable
+// off-cells for ornamentation. Halving is the lossless inverse.
+
+const _restCol = sub => ({ R: { hit: '-', mod: null }, L: { hit: '-', mod: null }, sub: !!sub });
+
+function doubleSubdivision(model) {
+  const cur    = _normGrid(model.meta.grid);
+  const ladder = _isTripletGrid(cur) ? GRID_STEPS_TRIPLET : GRID_STEPS;
+  const i      = ladder.indexOf(cur);
+  if (i < 0) return { ok: false, error: `unknown grid "${cur}"` };
+  if (i >= ladder.length - 1)
+    return { ok: false, error: `already at finest grid (${cur})` };
+  model.meta.grid = ladder[i + 1];
+  model.bars.forEach(bar => {
+    const out = [];
+    bar.cols.forEach(c => { out.push(c); out.push(_restCol(false)); });
+    bar.cols = out;
+  });
+  _reflatten(model);
+  return { ok: true };
+}
+
+function halveSubdivision(model) {
+  const cur    = _normGrid(model.meta.grid);
+  const ladder = _isTripletGrid(cur) ? GRID_STEPS_TRIPLET : GRID_STEPS;
+  const i      = ladder.indexOf(cur);
+  if (i < 0) return { ok: false, error: `unknown grid "${cur}"` };
+  if (i <= 0) return { ok: false, error: `already at coarsest grid (${cur})` };
+  // Lossless only if every odd-index cell in every bar is a true rest with no
+  // subdivision marker, and every bar has an even cell count.
+  for (let b = 0; b < model.bars.length; b++) {
+    const cols = model.bars[b].cols;
+    if (cols.length % 2 !== 0)
+      return { ok: false, error: `bar ${b + 1} has an odd cell count — not halvable` };
+    for (let c = 1; c < cols.length; c += 2) {
+      const o = cols[c];
+      if (o.R.hit !== '-' || o.L.hit !== '-' || o.sub)
+        return { ok: false, error: `bar ${b + 1} has content on an off-cell — halving would lose it` };
+    }
+  }
+  model.meta.grid = ladder[i - 1];
+  model.bars.forEach(bar => {
+    bar.cols = bar.cols.filter((_, c) => c % 2 === 0);
+  });
+  _reflatten(model);
+  return { ok: true };
+}
+
 // ─── Timing ───────────────────────────────────────────────────────────────────
 
 const GRID_Q = {           // grid value → length in quarter notes
@@ -3215,6 +3949,9 @@ const GRID_Q = {           // grid value → length in quarter notes
   '8th': 0.5, 'eighth': 0.5,
   '16th': 0.25, 'sixteenth': 0.25,
   '32nd': 0.125,
+  'triplet-4th': 2/3,      // quarter-note triplet (3 fit in 2 beats)
+  'triplet-8th': 1/3,      // eighth-note triplet  (3 fit in 1 beat)
+  'triplet-16th': 1/6,     // sixteenth-note triplet
 };
 
 function secPerCell(meta) {
@@ -3225,15 +3962,16 @@ function secPerCell(meta) {
 // ─── Render ───────────────────────────────────────────────────────────────────
 
 function _cellKind(hit) {
-  if (hit === '-')  return 'k-rest';
-  if (hit === '•')  return 'k-ghost';
+  if (hit === '-')          return 'k-rest';
+  if (hit === '•')          return 'k-ghost';
+  if (_isNote(hit))         return 'k-note';
   if (hit === hit.toLowerCase() && hit !== hit.toUpperCase()) return 'k-mute';
   return 'k-hit';
 }
 
-function buildHatGrid(parsed, idx) {
+function buildHatGrid(parsed, idx, editable) {
   const wrap = document.createElement('div');
-  wrap.className = 'hat-grid-wrap';
+  wrap.className = 'hat-grid-wrap' + (editable ? ' editable' : '');
 
   if (!parsed.ok) {
     const err = document.createElement('div');
@@ -3243,54 +3981,243 @@ function buildHatGrid(parsed, idx) {
     return wrap;
   }
 
-  const cols = parsed.cols;
-  const grid = document.createElement('div');
-  grid.className = 'hat-grid';
-  grid.dataset.hatIdx = idx;
-  grid.style.gridTemplateColumns = `22px repeat(${cols.length}, max-content)`;
+  // Parse accent set — keys are flat col indices
+  const accentSet = new Set(
+    ((parsed.meta && parsed.meta.accents) || '').split(',').filter(x => x.trim()).map(Number)
+  );
 
-  // Row 1 — markers (bar numbers)
-  grid.appendChild(document.createElement('div')); // corner
-  cols.forEach((col, ci) => {
-    const m = document.createElement('div');
-    m.className = 'hat-marker' + (col.barStart && ci ? ' bar-start' : '');
-    m.textContent = col.barStart ? String(col.barIndex + 1) : '';
-    grid.appendChild(m);
+  // Flex-wrap row container — bars flow onto new lines automatically
+  const rowsWrap = document.createElement('div');
+  rowsWrap.className = 'hat-grid-rows';
+  rowsWrap.dataset.hatIdx = idx;
+
+  let flatIdx = 0; // running flat col index across all bars
+
+  parsed.bars.forEach((bar, barIdx) => {
+    const n = bar.cols.length;
+
+    // ── Section label (forces a new row in flex-wrap) ──────────────────────
+    if (bar.sectionHeader) {
+      const sh = bar.sectionHeader;
+      const lblDiv = document.createElement('div');
+      lblDiv.className = 'hat-section-lbl';
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'hat-section-name';
+      nameSpan.textContent = sh.name;
+      lblDiv.appendChild(nameSpan);
+      if (sh.repeat > 1) {
+        const rptSpan = document.createElement('span');
+        rptSpan.className = 'hat-section-repeat';
+        rptSpan.textContent = `×${sh.repeat}`;
+        lblDiv.appendChild(rptSpan);
+      }
+      if (editable) {
+        const editBtn = document.createElement('button');
+        editBtn.className = 'hat-section-edit-btn';
+        editBtn.textContent = '✎';
+        editBtn.title = 'Edit section label';
+        editBtn.addEventListener('click', e => {
+          e.stopPropagation();
+          _editSectionLabel(barIdx, sh);
+        });
+        lblDiv.appendChild(editBtn);
+        const delBtn = document.createElement('button');
+        delBtn.className = 'hat-section-edit-btn';
+        delBtn.textContent = '✕';
+        delBtn.title = 'Remove section label';
+        delBtn.addEventListener('click', e => {
+          e.stopPropagation();
+          _editPushUndo();
+          delete _editModel.bars[barIdx].sectionHeader;
+          renderRhythms();
+        });
+        lblDiv.appendChild(delBtn);
+      }
+      rowsWrap.appendChild(lblDiv);
+    }
+
+    // ── Bar unit (header + mini-grid) ──────────────────────────────────────
+    const unit = document.createElement('div');
+    unit.className = 'hat-bar-unit';
+
+    // Header: bar number + optional copy button
+    const hdr = document.createElement('div');
+    hdr.className = 'hat-bar-hdr' + (_copiedBar && editable ? ' pasteable' : '');
+    hdr.textContent = String(barIdx + 1);
+    if (editable) {
+      hdr.title = _copiedBar ? 'Click to paste copied bar here' : 'Hover for copy button';
+      if (_copiedBar) {
+        hdr.addEventListener('click', e => {
+          e.stopPropagation();
+          _editPushUndo();
+          _editModel.bars[barIdx].cols = JSON.parse(JSON.stringify(_copiedBar));
+          _reflatten(_editModel);
+          editMsg = 'Bar pasted';
+          renderRhythms();
+        });
+      }
+      const copyBtn = document.createElement('span');
+      copyBtn.className = 'hat-bar-copy-btn';
+      copyBtn.textContent = '⧉';
+      copyBtn.title = 'Copy this bar';
+      copyBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        _copiedBar = JSON.parse(JSON.stringify(parsed.bars[barIdx].cols));
+        editMsg = 'Bar copied — click another bar number to paste';
+        renderRhythms();
+      });
+      hdr.appendChild(copyBtn);
+
+      // Group pattern tag — click to open the subdivision editor
+      const pat = _getGroupPattern(bar.cols);
+      const patTag = document.createElement('span');
+      patTag.className = 'hat-bar-pattern';
+      patTag.textContent = pat;
+      patTag.title = `Beat grouping ${pat} — click to edit`;
+      patTag.addEventListener('click', e => {
+        e.stopPropagation();
+        _openGroupEditor(patTag, barIdx);
+      });
+      hdr.appendChild(patTag);
+    }
+    unit.appendChild(hdr);
+
+    // Mini-grid: accent row (edit) + R row + L row + controls row (edit)
+    const miniGrid = document.createElement('div');
+    miniGrid.className = 'hat-grid';
+    miniGrid.style.gridTemplateColumns = `22px repeat(${n}, max-content)`;
+
+    // Accent toggle row (editable only)
+    if (editable) {
+      miniGrid.appendChild(document.createElement('div')); // corner spacer
+      bar.cols.forEach((col, ci) => {
+        const fi = flatIdx + ci;
+        const isBeat = ci === 0 || col.sub;
+        const btn = document.createElement('div');
+        btn.className = 'hat-accent-btn' + (accentSet.has(fi) ? ' on' : '');
+        if (isBeat) {
+          btn.textContent = accentSet.has(fi) ? '▲' : '△';
+          btn.title = accentSet.has(fi) ? 'Remove accent' : 'Mark as accented beat';
+          btn.addEventListener('click', e => { e.stopPropagation(); editToggleAccent(fi); });
+        }
+        miniGrid.appendChild(btn);
+      });
+    }
+
+    // Sub-beat divider toggle row (editable only) — click to toggle beat/sub-beat boundary
+    if (editable) {
+      miniGrid.appendChild(document.createElement('div')); // corner spacer
+      bar.cols.forEach((col, ci) => {
+        const btn = document.createElement('div');
+        if (ci === 0) {
+          btn.className = 'hat-subdiv-btn bar-start';
+          btn.title = 'Bar start';
+        } else {
+          const isOn = !!col.sub;
+          btn.className = 'hat-subdiv-btn' + (isOn ? ' on' : '');
+          btn.title = isOn ? 'Beat start — click to remove divider' : 'Sub-beat — click to make beat start';
+          btn.addEventListener('click', e => {
+            e.stopPropagation();
+            _editPushUndo();
+            _editModel.bars[barIdx].cols[ci].sub = !_editModel.bars[barIdx].cols[ci].sub;
+            _reflatten(_editModel);
+            renderRhythms();
+          });
+        }
+        miniGrid.appendChild(btn);
+      });
+    }
+
+    // R and L rows
+    for (const hand of ['R', 'L']) {
+      const lbl = document.createElement('div');
+      lbl.className = `hat-rowlbl hand-${hand}`;
+      lbl.textContent = hand;
+      miniGrid.appendChild(lbl);
+
+      bar.cols.forEach((col, ci) => {
+        const fi  = flatIdx + ci;
+        const ev   = col[hand];
+        const kind = _cellKind(ev.hit);
+        const cell = document.createElement('div');
+        let cls = `hat-cell hand-${hand} ${kind}`;
+        if (ci > 0 && col.sub) cls += ' sub-start';
+        if (accentSet.has(fi)) cls += ' k-accent';
+        if (editable)           cls += ' edit-cell';
+        cell.className = cls;
+        cell.dataset.col      = fi;          // flat index (used by playback highlight)
+        cell.dataset.barIndex = barIdx;
+        cell.dataset.colInBar = ci;
+        cell.dataset.hand     = hand;
+        cell.textContent = ev.hit + (ev.mod || '');
+        if (ev.mod) cell.dataset.mod = ev.mod;
+        if (editable) {
+          cell.title = 'Click to cycle · hover + key (D T K S d • -) · n = note name';
+          cell.addEventListener('mouseenter', () => {
+            _hoveredCell = cell;
+            if (_paintKey && _paintDown && _editModel)
+              setCell(+cell.dataset.barIndex, +cell.dataset.colInBar, cell.dataset.hand, _paintKey);
+          });
+          cell.addEventListener('mouseleave', () => { if (_hoveredCell === cell) _hoveredCell = null; });
+          cell.addEventListener('mousedown', e => {
+            if (_paintKey && _editModel) {
+              e.stopPropagation();
+              _editPushUndo();
+              setCell(+cell.dataset.barIndex, +cell.dataset.colInBar, cell.dataset.hand, _paintKey);
+            }
+          });
+          cell.addEventListener('click', e => {
+            e.stopPropagation();
+            _lastClickedCell = cell;
+            if (!_paintKey) { _editPushUndo(); cycleCell(barIdx, ci, hand); }
+          });
+        }
+        miniGrid.appendChild(cell);
+      });
+    }
+
+    // +/− controls row (editable only)
+    if (editable) {
+      miniGrid.appendChild(document.createElement('div')); // corner spacer
+      const ctrl = document.createElement('div');
+      ctrl.className = 'hat-bar-ctrl';
+      ctrl.style.gridColumn = `span ${n}`;
+      const addBtn = document.createElement('button');
+      addBtn.className = 'hat-bar-ctrl-btn';
+      addBtn.textContent = '+';
+      addBtn.title = 'Add column to this bar';
+      addBtn.addEventListener('click', e => { e.stopPropagation(); editAddColToBar(barIdx); });
+      const remBtn = document.createElement('button');
+      remBtn.className = 'hat-bar-ctrl-btn';
+      remBtn.textContent = '−';
+      remBtn.title = 'Remove last column from this bar';
+      remBtn.addEventListener('click', e => { e.stopPropagation(); editRemoveLastColFromBar(barIdx); });
+      ctrl.appendChild(addBtn);
+      ctrl.appendChild(remBtn);
+      miniGrid.appendChild(ctrl);
+    }
+
+    unit.appendChild(miniGrid);
+    rowsWrap.appendChild(unit);
+    flatIdx += n;
   });
 
-  // Rows 2 & 3 — R then L
-  for (const hand of ['R', 'L']) {
-    const lbl = document.createElement('div');
-    lbl.className = `hat-rowlbl hand-${hand}`;
-    lbl.textContent = hand;
-    grid.appendChild(lbl);
-
-    cols.forEach((col, ci) => {
-      const ev   = col[hand];
-      const kind = _cellKind(ev.hit);
-      const cell = document.createElement('div');
-      let cls = `hat-cell hand-${hand} ${kind}`;
-      if (col.barStart && ci) cls += ' bar-start';
-      else if (col.sub)       cls += ' sub-start';
-      cell.className = cls;
-      cell.dataset.col = ci;
-      cell.textContent = ev.hit + (ev.mod || '');
-      grid.appendChild(cell);
-    });
-  }
-
-  wrap.appendChild(grid);
+  wrap.appendChild(rowsWrap);
   return wrap;
 }
 
 function buildHatCard(idx) {
-  const p      = HAT_PATTERNS[idx];
-  const parsed = getParsed(idx);
-  const meta   = parsed.meta;
+  const p         = HAT_PATTERNS[idx];
+  const isEditing = editingHatIdx === idx;
+  const isFocus   = focusedHatIdx === idx;
+  const model     = isEditing ? _editModel : getParsed(idx);
+  const meta      = model.meta;
 
   const card = document.createElement('div');
-  card.className = 'hat-card' + (activeHatIdx === idx ? ' selected' : '');
-  card.addEventListener('click', () => selectHat(idx));
+  card.className = 'hat-card'
+    + (activeHatIdx === idx ? ' selected' : '')
+    + (isEditing ? ' editing' : '');
+  card.addEventListener('click', () => { if (!isEditing) selectHat(idx); });
 
   const head = document.createElement('div');
   head.className = 'hat-card-head';
@@ -3298,19 +4225,38 @@ function buildHatCard(idx) {
   title.className = 'hat-card-title';
   title.textContent = meta.title || p.id;
   head.appendChild(title);
-  for (const b of [meta.time, meta.grid && `${meta.grid} grid`,
-                   meta.tempo && `♩${meta.tempo}`, meta.tuning]) {
+  // During editing, always show the inferred time sig (never a stale stored value).
+  // The _refreshEditGrid path may lag behind _autoTimeSig, so compute here too.
+  const displayTime = isEditing
+    ? (_inferTimeSig(model.bars, meta.grid) || null)
+    : (meta.time || null);
+
+  for (const b of [displayTime, meta.grid, meta.tempo && `♩${meta.tempo}`, meta.tuning]) {
     if (!b) continue;
     const badge = document.createElement('span');
     badge.className = 'hat-badge';
     badge.textContent = b;
     head.appendChild(badge);
   }
+  if (meta.fields) {
+    const parts = meta.fields.split(/\s+/).filter(Boolean);
+    const fb = document.createElement('span');
+    fb.className = 'hat-badge hat-fields-badge';
+    fb.textContent = '⬡ ' + parts.slice(0, 4).join(' ') + (parts.length > 4 ? '…' : '');
+    fb.title = 'Fields: ' + meta.fields;
+    head.appendChild(fb);
+  }
   if (p.cat === 'imported') {
     const ib = document.createElement('span');
     ib.className = 'hat-badge imported';
     ib.textContent = 'imported';
     head.appendChild(ib);
+  }
+  if (p.edited) {
+    const eb = document.createElement('span');
+    eb.className = 'hat-badge edited';
+    eb.textContent = 'edited';
+    head.appendChild(eb);
   }
   if (focusedHatIdx == null) {
     const fb = document.createElement('button');
@@ -3324,30 +4270,173 @@ function buildHatCard(idx) {
       renderRhythms();
     });
     head.appendChild(fb);
+  } else if (isFocus && !isEditing) {
+    const eb = document.createElement('button');
+    eb.className = 'hat-focus-btn';
+    eb.textContent = '✎ Edit';
+    eb.title = 'Edit this rhythm';
+    eb.addEventListener('click', e => { e.stopPropagation(); enterEditMode(); });
+    head.appendChild(eb);
   }
   card.appendChild(head);
 
-  if (p.desc) {
+  if (isEditing) card.appendChild(_buildEditToolbar());
+
+  if (p.desc && !isEditing) {
     const desc = document.createElement('div');
     desc.className = 'hat-card-desc';
     desc.textContent = p.desc;
     card.appendChild(desc);
   }
 
-  card.appendChild(buildHatGrid(parsed, idx));
+  card.appendChild(buildHatGrid(model, idx, isEditing));
 
   const src = document.createElement('details');
   src.className = 'hat-src';
+  if (_hatSrcOpen) src.open = true;
   const sum = document.createElement('summary');
-  sum.textContent = 'HAT source';
-  sum.addEventListener('click', e => e.stopPropagation());
-  const pre = document.createElement('pre');
-  pre.textContent = p.hat;
+  sum.addEventListener('click', e => {
+    e.stopPropagation();
+    setTimeout(() => { _hatSrcOpen = src.open; }, 0);
+  });
+  const sumLbl = document.createElement('span');
+  sumLbl.textContent = isEditing ? 'HAT source — edit live ✎' : 'HAT source';
+  sum.appendChild(sumLbl);
+  // Copy-to-clipboard button (always visible, not just when open)
+  const cpyBtn = document.createElement('button');
+  cpyBtn.className = 'hat-src-copy-btn';
+  cpyBtn.textContent = '⎘ copy';
+  cpyBtn.title = 'Copy HAT text to clipboard';
+  cpyBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    e.preventDefault(); // don't toggle the <details>
+    const text = (isEditing && _editModel) ? serializeHAT(_editModel) : p.hat;
+    navigator.clipboard.writeText(text).then(() => {
+      cpyBtn.textContent = '✓ copied';
+      setTimeout(() => { cpyBtn.textContent = '⎘ copy'; }, 1600);
+    }).catch(() => {
+      cpyBtn.textContent = '✗ failed';
+      setTimeout(() => { cpyBtn.textContent = '⎘ copy'; }, 1600);
+    });
+  });
+  sum.appendChild(cpyBtn);
   src.appendChild(sum);
-  src.appendChild(pre);
+
+  if (isEditing) {
+    // Editable textarea: changes are parsed and reflected in the visual grid
+    const ta = document.createElement('textarea');
+    ta.className = 'hat-src-ta';
+    ta.spellcheck = false;
+    // Always set from the model — this textarea is only created during full renderRhythms(),
+    // which only happens on visual edits (not from the textarea's own input handler).
+    ta.value = serializeHAT(_editModel);
+    ta.id = 'hat-src-ta';
+    ta.addEventListener('click', e => e.stopPropagation());
+    ta.addEventListener('input', () => {
+      clearTimeout(_hatTextTimer);
+      ta.classList.remove('hat-src-ta-err');
+      _hatTextTimer = setTimeout(() => {
+        const parsed = parseHAT(ta.value);
+        if (!parsed.ok) {
+          ta.classList.add('hat-src-ta-err');
+          return;
+        }
+        _editPushUndo();
+        _editModel = parsed;
+        // Targeted in-place update — textarea element is never touched
+        _refreshEditGrid();
+      }, 350);
+    });
+    src.appendChild(ta);
+  } else {
+    const pre = document.createElement('pre');
+    pre.textContent = p.hat;
+    src.appendChild(pre);
+  }
+
   card.appendChild(src);
 
   return card;
+}
+
+function _buildEditToolbar() {
+  const bar = document.createElement('div');
+  bar.className = 'hat-edit-toolbar';
+  const mk = (label, title, cls, fn) => {
+    const b = document.createElement('button');
+    b.className = 'hat-edit-btn' + (cls ? ' ' + cls : '');
+    b.textContent = label;
+    b.title = title;
+    b.addEventListener('click', e => { e.stopPropagation(); fn(); });
+    return b;
+  };
+  bar.appendChild(mk('↩ Undo', 'Undo last edit (Ctrl+Z)', '', editUndo));
+  bar.appendChild(mk('⨯2 Subdivision', 'Double the grid resolution (insert silent off-cells)', '', _editDouble));
+  bar.appendChild(mk('⨯½ Subdivision', 'Halve the grid resolution (lossless only)', '', _editHalve));
+  const isTriplet = _isTripletGrid(_editModel.meta.grid);
+  bar.appendChild(mk(isTriplet ? '⅓ Triplet ON' : '⅓ Triplet', isTriplet ? 'Switch to binary grid (same subdivision level)' : 'Switch to triplet grid (same subdivision level)', isTriplet ? 'active' : '', _editToggleTriplet));
+  bar.appendChild(mk('＋ Col', 'Append a rest column to the last bar', '', () => editAddColToBar(_editModel.bars.length - 1)));
+  bar.appendChild(mk('＋ Bar', 'Append a new bar (copies column structure of the last bar)', '', editAddBar));
+  bar.appendChild(mk('＋ Section', 'Add a section label before the last bar', '', () => _editAddSection()));
+  bar.appendChild(_buildScaleSelect(tpl => {
+    _editPushUndo();
+    _editModel.meta.tuning = tpl.tuning;
+    _editModel.meta.fields = tpl.fields;
+    editMsg = `Scale → ${tpl.tuning}`;
+    renderRhythms();
+  }));
+  const spacer = document.createElement('span');
+  spacer.className = 'hat-edit-spacer';
+  bar.appendChild(spacer);
+  bar.appendChild(mk('✓ Save', 'Write changes back to the pattern', 'save', saveEdit));
+  bar.appendChild(mk('✕ Cancel', 'Discard changes', 'cancel', cancelEdit));
+  if (editMsg) {
+    const msg = document.createElement('div');
+    msg.className = 'hat-edit-msg' + (editMsg.startsWith('⚠') ? ' err' : '');
+    msg.textContent = editMsg;
+    bar.appendChild(msg);
+  }
+  const hint = document.createElement('div');
+  hint.className = 'hat-edit-hint';
+  hint.textContent = 'Click to cycle · hover/click + key: D T K S d • - · 1–9 = field note · n = note picker · drag to paint';
+  bar.appendChild(hint);
+  // Fields palette
+  if (_editModel.meta && _editModel.meta.fields) {
+    const palette = document.createElement('div');
+    palette.className = 'hat-fields-palette';
+    const lbl = document.createElement('span');
+    lbl.className = 'hat-fields-lbl';
+    lbl.textContent = 'Fields:';
+    palette.appendChild(lbl);
+    _editModel.meta.fields.split(/\s+/).filter(Boolean).forEach((note, i) => {
+      const nb = document.createElement('button');
+      nb.className = 'hat-field-btn';
+      const badge = _fieldKeyBadge(i);
+      nb.title = `Set cell to ${note}${badge ? ` (key ${badge})` : ''}`;
+      if (badge) {
+        const num = document.createElement('span');
+        num.className = 'hat-field-num';
+        num.textContent = badge;
+        nb.appendChild(num);
+      }
+      nb.appendChild(document.createTextNode(note));
+      nb.addEventListener('click', e => {
+        e.stopPropagation();
+        const target = _hoveredCell || _lastClickedCell;
+        if (target) {
+          _editPushUndo();
+          setCell(+target.dataset.barIndex, +target.dataset.colInBar,
+                  target.dataset.hand, note);
+        } else {
+          editMsg = `⚠ Click or hover a cell first, then click a field`;
+          renderRhythms();
+        }
+      });
+      palette.appendChild(nb);
+    });
+    bar.appendChild(palette);
+  }
+  return bar;
 }
 
 function buildCatPills() {
@@ -3390,15 +4479,49 @@ function _filteredIndices() {
   }, []);
 }
 
+// Targeted in-place refresh used when the HAT source textarea drives a change.
+// Replaces only the grid wrap and the edit toolbar — leaves the textarea element
+// completely untouched so cursor position, focus, and scroll are preserved.
+function _refreshEditGrid() {
+  if (!_editModel || editingHatIdx == null) return;
+
+  // Swap the grid wrap
+  const oldWrap = document.querySelector(`#rhy-list .hat-grid-wrap`);
+  if (oldWrap) {
+    oldWrap.replaceWith(buildHatGrid(_editModel, editingHatIdx, true));
+  }
+
+  // Swap the toolbar (carries the updated meta / fields palette)
+  const oldBar = document.querySelector(`#rhy-list .hat-edit-toolbar`);
+  if (oldBar) {
+    oldBar.replaceWith(_buildEditToolbar());
+  }
+
+  // Keep card head badges in sync (grid / tempo changed via text)
+  const oldHead = document.querySelector(`#rhy-list .hat-card-head`);
+  if (oldHead) {
+    const dummy = buildHatCard(editingHatIdx);
+    const newHead = dummy.querySelector('.hat-card-head');
+    if (newHead) oldHead.replaceWith(newHead);
+  }
+}
+
 function renderRhythms() {
+  // Keep meta.time consistent with actual bar structure after every visual edit.
+  // Text-path edits call _refreshEditGrid() instead, so they preserve whatever
+  // the user typed in ;;time:.
+  if (_editModel) _autoTimeSig();
+
   const el = document.getElementById('rhy-list');
   el.innerHTML = '';
   if (focusedHatIdx != null && HAT_PATTERNS[focusedHatIdx]) {
     el.classList.add('focused');
+    const editing = editingHatIdx === focusedHatIdx;
     const back = document.createElement('div');
     back.className = 'hat-back';
-    back.textContent = '←  All patterns';
-    back.addEventListener('click', () => { focusedHatIdx = null; renderRhythms(); });
+    back.textContent = editing ? '←  Finish editing first' : '←  All patterns';
+    if (editing) back.classList.add('disabled');
+    else back.addEventListener('click', () => { focusedHatIdx = null; renderRhythms(); });
     el.appendChild(back);
     el.appendChild(buildHatCard(focusedHatIdx));
     return;
@@ -3425,6 +4548,611 @@ function selectHat(idx) {
     document.getElementById('bpm-input').value = tempo;
   }
   if (rhythmPlaying && !wasSelected) { stopPlay(); startPlay(); }
+  renderRhythms();
+}
+
+// ─── Pattern editor (focus view) ──────────────────────────────────────────────
+
+function enterEditMode() {
+  if (focusedHatIdx == null) return;
+  editingHatIdx = focusedHatIdx;
+  _editModel = _cloneModel(getParsed(focusedHatIdx));
+  _reflatten(_editModel);
+  editMsg = '';
+  _editHistory = [];
+  _copiedBar = null;
+  renderRhythms();
+}
+
+function cancelEdit() {
+  editingHatIdx = null;
+  _editModel = null;
+  editMsg = '';
+  _editHistory = [];
+  _copiedBar = null;
+  clearTimeout(_hatTextTimer);
+  renderRhythms();
+}
+
+function saveEdit() {
+  if (editingHatIdx == null || !_editModel) return;
+  const p = HAT_PATTERNS[editingHatIdx];
+  p.hat = serializeHAT(_editModel);
+  p.edited = true;
+  delete _parseCache[p.id];
+  const idx = editingHatIdx;
+  editingHatIdx = null;
+  _editModel = null;
+  editMsg = '';
+  _editHistory = [];
+  _copiedBar = null;
+  clearTimeout(_hatTextTimer);
+  if (rhythmPlaying && activeHatIdx === idx) { stopPlay(); startPlay(); }
+  renderRhythms();
+}
+
+function _editDouble() {
+  if (!_editModel) return;
+  _editPushUndo();
+  const r = doubleSubdivision(_editModel);
+  editMsg = r.ok ? `Subdivision doubled → ${_editModel.meta.grid} grid` : `⚠ ${r.error}`;
+  renderRhythms();
+}
+
+function _editHalve() {
+  if (!_editModel) return;
+  _editPushUndo();
+  const r = halveSubdivision(_editModel);
+  editMsg = r.ok ? `Subdivision halved → ${_editModel.meta.grid} grid` : `⚠ ${r.error}`;
+  renderRhythms();
+}
+
+function _editToggleTriplet() {
+  if (!_editModel) return;
+  _editPushUndo();
+  const r = _toggleTripletGrid(_editModel);
+  if (!r.ok) { editMsg = `⚠ ${r.error}`; renderRhythms(); return; }
+
+  // Rebuild every bar to match the new cell count, mapping hits to nearest positions.
+  const newGrid  = _editModel.meta.grid;
+  const time     = _editModel.meta.time || '4/4';
+  const newCount = _computeCellsPerBar(time, newGrid);
+  const beatCols = _computeBeatCols(time, newGrid);
+
+  _editModel.bars = _editModel.bars.map(bar => {
+    const old = bar.cols;
+    const n   = old.length;
+    const cols = Array.from({ length: newCount }, (_, j) => {
+      const src = old[Math.min(Math.round(j * n / newCount), n - 1)];
+      return {
+        R:   { hit: src.R.hit, mod: src.R.mod },
+        L:   { hit: src.L.hit, mod: src.L.mod },
+        sub: j > 0 && (j % beatCols === 0),
+      };
+    });
+    const result = { cols };
+    if (bar.sectionHeader) result.sectionHeader = bar.sectionHeader;
+    return result;
+  });
+
+  _reflatten(_editModel);
+  editMsg = `Grid → ${_editModel.meta.grid} (${newCount} cells/bar)`;
+  renderRhythms();
+}
+
+// Append a new bar that mirrors the column structure (count + sub positions) of the last bar.
+function editAddBar() {
+  if (!_editModel) return;
+  _editPushUndo();
+  const last = _editModel.bars[_editModel.bars.length - 1];
+  const newBar = {
+    cols: last.cols.map((c, i) => ({ ...(_restCol(c.sub)), sub: i > 0 && c.sub }))
+  };
+  _editModel.bars.push(newBar);
+  _reflatten(_editModel);
+  editMsg = `Bar ${_editModel.bars.length} added`;
+  renderRhythms();
+}
+
+// ─── Feature 1: Add / remove columns ─────────────────────────────────────────
+
+function editAddColToBar(barIdx) {
+  if (!_editModel) return;
+  _editPushUndo();
+  _editModel.bars[barIdx].cols.push(_restCol(false));
+  _reflatten(_editModel);
+  editMsg = '';
+  renderRhythms();
+}
+
+function editRemoveLastColFromBar(barIdx) {
+  if (!_editModel) return;
+  const cols = _editModel.bars[barIdx].cols;
+  if (cols.length <= 1) { editMsg = '⚠ A bar must have at least 1 column'; renderRhythms(); return; }
+  _editPushUndo();
+  cols.pop();
+  _reflatten(_editModel);
+  editMsg = '';
+  renderRhythms();
+}
+
+// ─── Feature 2: Undo ──────────────────────────────────────────────────────────
+
+function _editPushUndo() {
+  if (!_editModel) return;
+  _editHistory.push(JSON.stringify({ meta: _editModel.meta, bars: _editModel.bars }));
+}
+
+function editUndo() {
+  if (!_editHistory.length) { editMsg = '⚠ Nothing to undo'; renderRhythms(); return; }
+  const snap = JSON.parse(_editHistory.pop());
+  _editModel.meta = snap.meta;
+  _editModel.bars = snap.bars;
+  _reflatten(_editModel);
+  editMsg = 'Undone';
+  renderRhythms();
+}
+
+// ─── Feature 6: Accent toggle ─────────────────────────────────────────────────
+
+function editToggleAccent(flatColIdx) {
+  if (!_editModel) return;
+  _editPushUndo();
+  const s = new Set((_editModel.meta.accents || '').split(',').filter(x => x.trim()).map(Number));
+  if (s.has(flatColIdx)) s.delete(flatColIdx); else s.add(flatColIdx);
+  _editModel.meta.accents = [...s].sort((a, b) => a - b).join(',');
+  renderRhythms();
+}
+
+// ─── Feature 4: Create new pattern ───────────────────────────────────────────
+
+// Cells per bar at 8th-note resolution (binary); triplet grids use 3 cells per beat instead of 2.
+const _TIMESIG_BEATS = { '4/4': 4, '3/4': 3, '6/8': 2, '5/4': 5, '7/8': 7 };
+
+function _computeCellsPerBar(time, grid) {
+  const beats  = _TIMESIG_BEATS[time] || 4;
+  const isTri  = _isTripletGrid(grid);
+  const perBeat = isTri
+    ? (grid === 'triplet-4th' ? 1 : grid === 'triplet-16th' ? 6 : 3)
+    : (grid === '4th' ? 1 : grid === '16th' ? 4 : 2);
+  return beats * perBeat;
+}
+
+function _computeBeatCols(time, grid) {
+  const isTri   = _isTripletGrid(grid);
+  return isTri
+    ? (grid === 'triplet-4th' ? 1 : grid === 'triplet-16th' ? 6 : 3)
+    : (grid === '4th' ? 1 : grid === '16th' ? 4 : 2);
+}
+
+// Returns the beat-grouping as a "+"-joined string, e.g. "2+2+2+2" or "3+3+2".
+// col.sub === true marks a beat start (secondary — first cell is always the bar start).
+function _getGroupPattern(cols) {
+  const groups = [];
+  let count = 1;
+  for (let i = 1; i < cols.length; i++) {
+    if (cols[i].sub) { groups.push(count); count = 1; }
+    else count++;
+  }
+  groups.push(count);
+  return groups.join('+');
+}
+
+// Parses "3+3+2" and sets col.sub accordingly.  Returns true on success.
+function _applyGroupPattern(cols, patternStr) {
+  const groups = patternStr.trim().split(/\s*\+\s*/).map(Number);
+  if (groups.some(g => !Number.isInteger(g) || g < 1)) return false;
+  if (groups.reduce((a, b) => a + b, 0) !== cols.length) return false;
+  cols.forEach(col => { col.sub = false; });
+  let pos = 0;
+  for (let i = 0; i < groups.length - 1; i++) {
+    pos += groups[i];
+    cols[pos].sub = true;
+  }
+  return true;
+}
+
+// Infer the most likely time signature from the first bar's cell count and beat grouping.
+// Returns a string like "4/4", "6/8", "7/8", or null when the structure is non-standard.
+function _inferTimeSig(bars, grid) {
+  if (!bars || bars.length === 0) return null;
+  const cols  = bars[0].cols;
+  const total = cols.length;
+  const g     = _normGrid(grid || '8th');
+  // Cells per one simple beat for each grid type
+  const perBeat = { '4th':1, '8th':2, '16th':4, '32nd':8,
+                    'triplet-4th':1, 'triplet-8th':3, 'triplet-16th':6 }[g];
+  if (!perBeat) return null;
+
+  const groups = _getGroupPattern(cols).split('+').map(Number);
+  const allEq  = groups.every(x => x === groups[0]);
+  const gs     = groups[0];
+  const nb     = groups.length;
+
+  if (allEq) {
+    // Simple meter — every group equals exactly one beat
+    if (gs === perBeat) {
+      return ({2:'2/4',3:'3/4',4:'4/4',5:'5/4',6:'6/4',7:'7/4',8:'8/4'})[nb] ?? null;
+    }
+    // Compound meter — every group equals one dotted beat (3 simple subdivisions)
+    const dotted = perBeat * 3 / 2;
+    if (Number.isInteger(dotted) && gs === dotted) {
+      return ({2:'6/8',3:'9/8',4:'12/8'})[nb] ?? null;
+    }
+  }
+
+  // Odd / asymmetric meters — identify by total cell count within recognisable families
+  if (g === '8th')  return ({5:'5/8', 7:'7/8',11:'11/8',13:'13/8'})[total] ?? null;
+  if (g === '16th') return ({5:'5/16',7:'7/16'})[total] ?? null;
+  return null;
+}
+
+// Update _editModel.meta.time to the inferred value (null when not recognisable).
+// Called at the start of every full re-render triggered by visual edits.
+function _autoTimeSig() {
+  if (!_editModel) return;
+  const ts = _inferTimeSig(_editModel.bars, _editModel.meta.grid);
+  _editModel.meta.time = ts ?? null;
+}
+
+function _createNewPattern(title, time, grid, bpm, tuning, fields) {
+  const cellsPerBar = _computeCellsPerBar(time, grid);
+  const beatCols    = _computeBeatCols(time, grid);
+  const bar = { cols: Array.from({ length: cellsPerBar }, () => _restCol(false)) };
+  for (let c = beatCols; c < cellsPerBar; c += beatCols) bar.cols[c].sub = true;
+  const id   = 'user-' + Date.now();
+  const metaObj = { title, tempo: String(bpm), time, grid };
+  if (tuning) metaObj.tuning = tuning;
+  if (fields) metaObj.fields = fields;
+  const model = { meta: metaObj, bars: [bar], cols: [], ok: true, error: null };
+  _reflatten(model);
+  const hatText = serializeHAT(model);
+  HAT_PATTERNS.push({ id, cat: 'imported', desc: '', hat: hatText, edited: true });
+  focusedHatIdx = HAT_PATTERNS.length - 1;
+  activeHatCat  = 'all';
+  enterEditMode();
+  buildCatPills();
+  renderRhythms();
+}
+
+function showNewPatternModal() {
+  if (document.getElementById('new-pat-modal')) return;
+  const overlay = document.createElement('div');
+  overlay.id = 'new-pat-modal';
+  overlay.innerHTML = `
+    <div class="modal-box">
+      <h3>＋ New Pattern</h3>
+      <label>Title<input id="np-title" type="text" placeholder="My Pattern" value="New Pattern"></label>
+      <label>Time Signature
+        <select id="np-time">
+          <option value="4/4" selected>4/4</option>
+          <option value="3/4">3/4</option>
+          <option value="6/8">6/8</option>
+          <option value="5/4">5/4</option>
+          <option value="7/8">7/8</option>
+        </select>
+      </label>
+      <label>Grid
+        <select id="np-grid">
+          <option value="4th">4th (quarter notes)</option>
+          <option value="8th" selected>8th (eighth notes)</option>
+          <option value="16th">16th (sixteenth notes)</option>
+          <option value="triplet-4th">Triplet 4th (3 per 2 beats)</option>
+          <option value="triplet-8th">Triplet 8th (3 per beat)</option>
+          <option value="triplet-16th">Triplet 16th (6 per beat)</option>
+        </select>
+      </label>
+      <label>BPM<input id="np-bpm" type="number" value="90" min="20" max="400"></label>
+      <label>Scale template<select id="np-scale"><option value="">— custom —</option></select></label>
+      <label>Tuning<input id="np-tuning" type="text" placeholder="D Kurd" style="width:100%"></label>
+      <label>Fields<input id="np-fields" type="text" placeholder="D4 E4 F#4 A4 B4 …" style="width:100%"></label>
+      <div class="modal-btns">
+        <button class="btn" id="np-cancel" style="font-size:11px;padding:3px 10px;">Cancel</button>
+        <button class="btn" id="np-ok" style="font-size:11px;padding:3px 10px;border-color:#3a6040;color:#7ab878;">Create</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  // Populate scale template select
+  const npScale = overlay.querySelector('#np-scale');
+  HAT_SCALE_TEMPLATES.forEach(group => {
+    const og = document.createElement('optgroup');
+    og.label = group.group;
+    group.scales.forEach(tpl => {
+      const opt = document.createElement('option');
+      opt.value = JSON.stringify({ tuning: tpl.tuning, fields: tpl.fields });
+      opt.textContent = tpl.name;
+      og.appendChild(opt);
+    });
+    npScale.appendChild(og);
+  });
+  npScale.addEventListener('change', () => {
+    if (!npScale.value) return;
+    const tpl = JSON.parse(npScale.value);
+    overlay.querySelector('#np-tuning').value = tpl.tuning;
+    overlay.querySelector('#np-fields').value = tpl.fields;
+  });
+  overlay.querySelector('#np-cancel').addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  overlay.querySelector('#np-ok').addEventListener('click', () => {
+    const title  = overlay.querySelector('#np-title').value.trim() || 'New Pattern';
+    const time   = overlay.querySelector('#np-time').value;
+    const grid   = overlay.querySelector('#np-grid').value;
+    const bpm    = parseInt(overlay.querySelector('#np-bpm').value, 10) || 90;
+    const tuning = overlay.querySelector('#np-tuning').value.trim();
+    const fields = overlay.querySelector('#np-fields').value.trim();
+    overlay.remove();
+    _createNewPattern(title, time, grid, bpm, tuning, fields);
+  });
+  overlay.querySelector('#np-title').focus();
+}
+
+// ─── Section label editing ────────────────────────────────────────────────────
+
+function _editAddSection() {
+  if (!_editModel || !_editModel.bars.length) return;
+  const bi = _editModel.bars.length - 1;
+  _editPushUndo();
+  _editModel.bars[bi].sectionHeader = { name: 'section', repeat: 1 };
+  editMsg = 'Section added — click ✎ to rename';
+  renderRhythms();
+}
+
+function _editSectionLabel(barIdx, current) {
+  const name = prompt('Section name:', current.name);
+  if (name === null) return;
+  const rptStr = prompt('Repeat count (1 = play once):', String(current.repeat));
+  if (rptStr === null) return;
+  _editPushUndo();
+  _editModel.bars[barIdx].sectionHeader = {
+    name: name.trim() || 'section',
+    repeat: Math.max(1, parseInt(rptStr, 10) || 1),
+  };
+  renderRhythms();
+}
+
+// ─── Inline note-name input ───────────────────────────────────────────────────
+
+// Opens the beat-grouping editor anchored to the pattern tag in a bar header.
+function _openGroupEditor(anchorEl, barIdx) {
+  document.getElementById('hat-group-popup')?.remove();
+
+  const cols     = _editModel.bars[barIdx].cols;
+  const total    = cols.length;
+  const curPat   = _getGroupPattern(cols);
+  const rect     = anchorEl.getBoundingClientRect();
+
+  const popup = document.createElement('div');
+  popup.id = 'hat-group-popup';
+  popup.className = 'hat-group-popup';
+  popup.style.left = `${Math.min(rect.left, window.innerWidth - 240)}px`;
+  popup.style.top  = `${rect.bottom + 4}px`;
+
+  const lbl = document.createElement('div');
+  lbl.className = 'hat-group-lbl';
+  lbl.textContent = `${total} cells — enter grouping (e.g. ${Array(Math.ceil(total / 2)).fill(2).slice(0, total / 2).join('+')} or 3+3+2):`;
+  popup.appendChild(lbl);
+
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  inp.value = curPat;
+  inp.className = 'hat-group-inp';
+  inp.spellcheck = false;
+
+  // Quick-pick preset chips for common groupings
+  const presets = document.createElement('div');
+  presets.className = 'hat-group-presets';
+  const suggestions = _groupSuggestions(total);
+  suggestions.forEach(s => {
+    const chip = document.createElement('button');
+    chip.className = 'hat-group-chip' + (s === curPat ? ' active' : '');
+    chip.textContent = s;
+    chip.addEventListener('mousedown', e => { e.preventDefault(); inp.value = s; tryApply(); });
+    presets.appendChild(chip);
+  });
+  popup.appendChild(presets);
+  popup.appendChild(inp);
+
+  const errLbl = document.createElement('div');
+  errLbl.className = 'hat-group-err';
+  popup.appendChild(errLbl);
+
+  const tryApply = () => {
+    errLbl.textContent = '';
+    inp.style.borderColor = '';
+    const groups = inp.value.trim().split(/\s*\+\s*/).map(Number);
+    const valid  = groups.every(g => Number.isInteger(g) && g >= 1);
+    const sum    = valid ? groups.reduce((a, b) => a + b, 0) : -1;
+    if (!valid || sum !== total) {
+      inp.style.borderColor = '#c04040';
+      errLbl.textContent = valid ? `Sum is ${sum}, need ${total}` : 'Use numbers joined by +';
+      return;
+    }
+    _editPushUndo();
+    _applyGroupPattern(_editModel.bars[barIdx].cols, inp.value);
+    _reflatten(_editModel);
+    popup.remove();
+    document.removeEventListener('mousedown', outsideClose);
+    renderRhythms();
+  };
+
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter')  { e.stopPropagation(); tryApply(); }
+    if (e.key === 'Escape') { e.stopPropagation(); popup.remove(); document.removeEventListener('mousedown', outsideClose); }
+  });
+  // Live validation feedback
+  inp.addEventListener('input', () => {
+    errLbl.textContent = '';
+    inp.style.borderColor = '';
+    const groups = inp.value.trim().split(/\s*\+\s*/).map(Number);
+    const valid  = groups.every(g => Number.isInteger(g) && g >= 1);
+    const sum    = valid ? groups.reduce((a, b) => a + b, 0) : -1;
+    if (inp.value.trim()) {
+      if (!valid) { inp.style.borderColor = '#804040'; errLbl.textContent = 'Use numbers joined by +'; }
+      else if (sum !== total) { inp.style.borderColor = '#c08020'; errLbl.textContent = `${sum} of ${total}`; }
+      else { inp.style.borderColor = '#3a8a5a'; errLbl.textContent = `✓ ${sum}`; }
+    }
+  });
+
+  document.body.appendChild(popup);
+  inp.focus();
+  inp.select();
+
+  // Flip above if near viewport bottom
+  requestAnimationFrame(() => {
+    if (popup.getBoundingClientRect().bottom > window.innerHeight - 8)
+      popup.style.top = `${rect.top - popup.offsetHeight - 4}px`;
+  });
+
+  const outsideClose = e => {
+    if (!popup.contains(e.target) && e.target !== anchorEl) {
+      popup.remove();
+      document.removeEventListener('mousedown', outsideClose);
+    }
+  };
+  setTimeout(() => document.addEventListener('mousedown', outsideClose), 0);
+}
+
+// Generate sensible grouping suggestions for a bar with `total` cells.
+function _groupSuggestions(total) {
+  const seen = new Set();
+  const out  = [];
+  const add  = p => { if (!seen.has(p)) { seen.add(p); out.push(p); } };
+  // Even split
+  if (total % 2 === 0) add(Array(total / 2).fill(2).join('+'));
+  if (total % 3 === 0) add(Array(total / 3).fill(3).join('+'));
+  if (total % 4 === 0) add(Array(total / 4).fill(4).join('+'));
+  // Tresillo / son clave variants
+  if (total === 8)  { add('3+3+2'); add('3+2+3'); add('2+3+3'); add('4+4'); }
+  if (total === 12) { add('3+3+3+3'); add('4+4+4'); add('3+3+2+2+2'); add('4+3+3+2'); }
+  if (total === 6)  { add('3+3'); add('2+2+2'); add('2+4'); add('4+2'); }
+  if (total === 9)  { add('3+3+3'); add('4+3+2'); add('2+3+4'); }
+  if (total === 16) { add('4+4+4+4'); add('3+3+3+3+4'); add('4+3+3+3+3'); }
+  if (total === 5)  { add('3+2'); add('2+3'); }
+  if (total === 7)  { add('3+2+2'); add('2+2+3'); add('2+3+2'); }
+  if (total === 10) { add('4+3+3'); add('3+4+3'); add('3+3+4'); add('5+5'); }
+  return out.slice(0, 8);
+}
+
+function _openNoteInput(cellEl) {
+  // Remove any existing popup
+  document.getElementById('hat-note-popup')?.remove();
+
+  const fields = (_editModel && _editModel.meta && _editModel.meta.fields || '')
+    .split(/\s+/).filter(Boolean);
+
+  const rect = cellEl.getBoundingClientRect();
+  const popup = document.createElement('div');
+  popup.id = 'hat-note-popup';
+  popup.className = 'hat-note-popup';
+
+  // Position below cell, flip up if near bottom of viewport
+  const topBelow = rect.bottom + 6;
+  const topAbove = rect.top - 6;
+  popup.style.left = `${Math.min(rect.left, window.innerWidth - 240)}px`;
+  popup.style.top  = `${topBelow}px`;
+
+  const commitNote = (note) => {
+    popup.remove();
+    if (!note || !_isValidHit(note) || !_isNote(note)) {
+      if (note) { editMsg = `⚠ "${note}" is not a valid note name (e.g. F#4, A4, D5)`; renderRhythms(); }
+      return;
+    }
+    _editPushUndo();
+    setCell(+cellEl.dataset.barIndex, +cellEl.dataset.colInBar, cellEl.dataset.hand, note);
+  };
+
+  if (fields.length > 0) {
+    const label = document.createElement('div');
+    label.className = 'hat-note-popup-lbl';
+    label.textContent = 'Pick note (or type below):';
+    popup.appendChild(label);
+    const grid = document.createElement('div');
+    grid.className = 'hat-note-popup-grid';
+    fields.forEach((note, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'hat-note-popup-btn';
+      const num = document.createElement('span');
+      num.className = 'hat-npop-num';
+      num.textContent = _fieldKeyBadge(i);
+      btn.appendChild(num);
+      btn.appendChild(document.createTextNode(note));
+      btn.title = `Set to ${note} (key ${i + 1})`;
+      btn.addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); commitNote(note); });
+      grid.appendChild(btn);
+    });
+    popup.appendChild(grid);
+  }
+
+  // Text input at the bottom (always shown as fallback / custom note)
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  inp.placeholder = fields.length ? 'or type: F#4…' : 'Note name, e.g. F#4';
+  inp.maxLength = 4;
+  inp.className = 'hat-note-popup-inp';
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.stopPropagation(); commitNote(inp.value.trim()); }
+    if (e.key === 'Escape') { e.stopPropagation(); popup.remove(); }
+  });
+  popup.appendChild(inp);
+
+  document.body.appendChild(popup);
+  inp.focus();
+
+  // Flip above cell if popup overflows viewport bottom
+  requestAnimationFrame(() => {
+    if (popup.getBoundingClientRect().bottom > window.innerHeight - 8) {
+      popup.style.top = `${topAbove - popup.offsetHeight}px`;
+    }
+  });
+
+  // Close on outside mousedown
+  const close = e => {
+    if (!popup.contains(e.target) && e.target !== cellEl) {
+      popup.remove();
+      document.removeEventListener('mousedown', close);
+    }
+  };
+  setTimeout(() => document.addEventListener('mousedown', close), 0);
+}
+
+// Letters not used by rhythm symbols (D T K S d t k s • -) or the note-picker (n).
+// These map to field indices 10, 11, 12, … (displayed as a b c e f g h i j l m o p q r u v w x y z)
+const _FIELD_LETTER_KEYS = ['a','b','c','e','f','g','h','i','j','l','m','o','p','q','r','u','v','w','x','y','z'];
+
+// Key badge for field index i: '1'–'9' for i 0–8, '0' for i=9, letter for i 10+, '' if out of range
+function _fieldKeyBadge(i) {
+  if (i < 9)  return String(i + 1);
+  if (i === 9) return '0';
+  const li = i - 10;
+  return li < _FIELD_LETTER_KEYS.length ? _FIELD_LETTER_KEYS[li] : '';
+}
+
+// Symbol cycle order differs per hand (T = tak on R line, K = tak on L line).
+const _CYCLE = { R: ['-', 'D', 'T', 'S', 'd', '•'], L: ['-', 'D', 'K', 'S', 'd', '•'] };
+
+function cycleCell(barIdx, colIdx, hand) {
+  if (!_editModel) return;
+  const ev  = _editModel.bars[barIdx].cols[colIdx][hand];
+  const seq = _CYCLE[hand];
+  let i = seq.indexOf(ev.hit);
+  if (i < 0) i = 0;
+  ev.hit = seq[(i + 1) % seq.length];
+  ev.mod = null;
+  _reflatten(_editModel);
+  editMsg = '';
+  renderRhythms();
+}
+
+// Valid symbols the user can type directly onto a hovered cell
+const _VALID_HITS = new Set(['D','T','K','S','d','t','k','s','•','-']);
+
+function setCell(barIdx, colIdx, hand, sym) {
+  if (!_editModel) return;
+  const ev = _editModel.bars[barIdx].cols[colIdx][hand];
+  ev.hit = sym;
+  ev.mod = null;
+  _reflatten(_editModel);
+  editMsg = '';
   renderRhythms();
 }
 
@@ -3510,9 +5238,9 @@ function animatePlayhead() {
   const elapsed = _audioCtx.currentTime - lat - _playStartTime;
   const cur     = elapsed < 0 ? -1 : Math.floor(elapsed / dt) % n;
 
-  const gridEl = document.querySelector(`.hat-grid[data-hat-idx="${activeHatIdx}"]`);
-  if (gridEl) {
-    gridEl.querySelectorAll('.hat-cell').forEach(cell => {
+  const rowsEl = document.querySelector(`.hat-grid-rows[data-hat-idx="${activeHatIdx}"]`);
+  if (rowsEl) {
+    rowsEl.querySelectorAll('.hat-cell').forEach(cell => {
       cell.classList.toggle('col-current', +cell.dataset.col === cur);
     });
   }
