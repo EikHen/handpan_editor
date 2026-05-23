@@ -46,7 +46,8 @@ body {
 .btn-group { display: flex; gap: 3px; }
 
 /* ── Workspace ───────────────────────────────────────────────────────── */
-#workspace { display: flex; flex: 1; overflow: hidden; }
+#workspace { display: flex; flex: 1; overflow: hidden; flex-direction: column; }
+#workspace-row { display: flex; flex: 1; overflow: hidden; }
 
 /* ── Sidebar ─────────────────────────────────────────────────────────── */
 #sidebar {
@@ -318,71 +319,125 @@ body {
 .play-legend span { display: flex; align-items: center; gap: 3px; }
 
 /* ── Rhythm panel ────────────────────────────────────────────────────── */
+/* ── Rhythm Panel (bottom layout) ──────────────────────────────────────────── */
 #rhythm-panel {
-  width: 320px; min-width: 220px;
   background: #1a1a2e;
-  border-right: 1px solid #2a2a4a;
+  border-top: 1px solid #2a2a4a;
   display: none; flex-direction: column;
   overflow: hidden; flex-shrink: 0;
+  height: 300px; min-height: 180px;
   position: relative;
 }
 #rhythm-panel.open { display: flex; }
 #rhythm-resize-handle {
-  position: absolute; right: 0; top: 0; bottom: 0; width: 4px;
-  cursor: col-resize; background: transparent; transition: background .15s; z-index: 10;
+  position: absolute; left: 0; right: 0; top: 0; height: 4px;
+  cursor: row-resize; background: transparent; transition: background .15s; z-index: 10;
 }
 #rhythm-resize-handle:hover, #rhythm-resize-handle.dragging { background: #5b8db8; }
-.rhy-header {
-  padding: 10px 14px 9px;
+
+/* Main body: browser sidebar + editor */
+.rhy-body {
+  display: flex; flex: 1; overflow: hidden;
+}
+
+/* ── Browser sidebar ──────────────────────────────────────────────────────── */
+.rhy-browser {
+  width: 220px; min-width: 180px; max-width: 320px;
+  display: flex; flex-direction: column;
+  border-right: 1px solid #2a2a4a;
+  flex-shrink: 0; overflow: hidden;
+  transition: width .15s, min-width .15s;
+}
+.rhy-browser.collapsed { width: 0; min-width: 0; border-right: none; overflow: hidden; }
+/* Expand tab — visible when browser is collapsed */
+.rhy-browser-expand-tab {
+  display: none; /* hidden by default, shown via JS when collapsed */
+  width: 20px; flex-shrink: 0;
+  background: #16162a; border: none; border-right: 1px solid #2a2a4a;
+  color: #5b8db8; font-size: 10px; cursor: pointer;
+  transition: background .1s, color .1s;
+  padding: 0;
+}
+.rhy-browser-expand-tab:hover { background: #1e2040; color: #8bc4e8; }
+.rhy-browser-head {
+  padding: 7px 10px 6px;
   border-bottom: 1px solid #2a2a4a;
   display: flex; align-items: center; justify-content: space-between;
   flex-shrink: 0;
 }
-.rhy-header-title { font-size: 12px; text-transform: uppercase; letter-spacing: .7px; color: #5b8db8; font-weight: bold; }
-.rhy-beta-badge {
-  font-size: 9px; font-weight: bold; letter-spacing: .5px;
-  background: #3a2010; border: 1px solid #7a4020; color: #c87040;
-  border-radius: 8px; padding: 1px 6px; text-transform: uppercase; flex-shrink: 0;
+.rhy-browser-title { font-size: 10px; text-transform: uppercase; letter-spacing: .7px; color: #5b8db8; font-weight: bold; }
+.rhy-browser-collapse {
+  font-size: 11px; padding: 1px 5px; border-radius: 3px;
+  border: 1px solid #3a4060; background: transparent; color: #667;
+  cursor: pointer; transition: color .1s, border-color .1s;
 }
-.rhy-section { padding: 9px 12px 8px; border-bottom: 1px solid #2a2a4a; flex-shrink: 0; }
-.rhy-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: .6px; color: #556; margin-bottom: 7px; }
+.rhy-browser-collapse:hover { border-color: #5b8db8; color: #8bc4e8; }
 /* Category pills */
-.rhy-cat-pills { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 5px; padding-bottom: 6px; scrollbar-width: none; }
+.rhy-cat-pills { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 4px; padding: 6px 10px; scrollbar-width: none; flex-shrink: 0; }
 .rhy-cat-pills::-webkit-scrollbar { display: none; }
 .rhy-cat-pill {
   background: #1f2547; color: #889;
   border: 1px solid #3a4060; border-radius: 12px;
-  padding: 4px 11px; font-size: 11px; cursor: pointer;
+  padding: 3px 9px; font-size: 10px; cursor: pointer;
   transition: background .12s, border-color .12s, color .12s; white-space: nowrap;
 }
 .rhy-cat-pill:hover { border-color: #5b8db8; color: #ccd; }
 .rhy-cat-pill.active { background: #253060; border-color: #5b8db8; color: #8bc4e8; }
-/* Tempo row */
-.rhy-tempo-row { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
-.rhy-tempo-label { font-size: 14px; color: #7ab; flex-shrink: 0; }
-#bpm-input {
-  width: 50px; background: #101828; border: 1px solid #3a4060; border-radius: 3px;
-  color: #dde; padding: 3px 6px; font-size: 13px; text-align: center; outline: none;
+#rhy-search {
+  width: calc(100% - 20px); margin: 0 10px 6px; box-sizing: border-box;
+  background: #101828; border: 1px solid #3a4060; border-radius: 4px;
+  color: #ccd; padding: 4px 8px; font-size: 11px; outline: none; flex-shrink: 0;
 }
-#bpm-input:focus { border-color: #5b8db8; }
-.rhy-tap-btn { padding: 4px 10px; font-size: 11px; }
-.rhy-play-btn { padding: 4px 12px; font-size: 11px; }
-.rhy-play-btn.playing { background: #3a2020; border-color: #c05050; color: #e08080; }
-.rhy-play-btn.playing:hover { background: #4a2828; }
-/* Rhythm list */
-.rhy-list { flex: 1; overflow-y: auto; padding: 10px 0 14px; }
+#rhy-search:focus { border-color: #5b8db8; }
+#rhy-search::placeholder { color: #446; }
+/* Browser pattern list */
+.rhy-browser-list { flex: 1; overflow-y: auto; padding: 4px 0; }
+.rhy-bcard {
+  margin: 0 6px 3px; padding: 6px 9px;
+  background: #12121f; border: 1px solid #252540; border-radius: 5px;
+  cursor: pointer; transition: border-color .12s, background .12s;
+  display: flex; align-items: center; gap: 6px;
+}
+.rhy-bcard:hover { border-color: #3a4a60; background: #16162a; }
+.rhy-bcard.active { border-color: #5b8db8; background: #141c30; }
+.rhy-bcard-title {
+  font-size: 11px; color: #bcc; font-weight: 600; flex: 1; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.rhy-bcard.active .rhy-bcard-title { color: #dde; }
+.rhy-bcard-badges { display: flex; gap: 3px; flex-shrink: 0; }
+.rhy-bcard-badge {
+  font-size: 8px; color: #5b8db8; background: #16203a;
+  border: 1px solid #243a55; border-radius: 6px; padding: 1px 5px;
+  letter-spacing: .2px;
+}
+.rhy-bcard-badge.edited { background: #2e2410; border-color: #6a5020; color: #c8a050; }
+.rhy-bcard-badge.imported { background: #1e3020; border-color: #3a6040; color: #7ab878; }
+.rhy-no-results { font-size: 11px; color: #446; padding: 18px 10px; text-align: center; }
+
+/* ── Editor area ──────────────────────────────────────────────────────────── */
+.rhy-editor {
+  flex: 1; display: flex; flex-direction: column;
+  overflow: hidden; min-width: 0;
+}
+.rhy-editor-empty {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+}
+.rhy-welcome { text-align: center; }
+.rhy-welcome-icon { font-size: 32px; color: #2a3050; margin-bottom: 8px; }
+.rhy-welcome-title { font-size: 14px; color: #556; font-weight: bold; margin-bottom: 6px; }
+.rhy-welcome-hint { font-size: 11px; color: #445; margin-bottom: 14px; line-height: 1.5; }
+.rhy-welcome-actions { display: flex; gap: 8px; justify-content: center; }
+.rhy-editor-content { flex: 1; overflow-y: auto; padding: 10px 14px; }
+/* Editor card — the single active pattern */
 .hat-card {
-  margin: 0 10px 12px; padding: 10px 11px 9px;
-  background: #12121f; border: 1px solid #252540; border-radius: 6px;
-  cursor: pointer; transition: border-color .12s, box-shadow .12s;
+  padding: 0; background: transparent; border: none; border-radius: 0;
 }
-.hat-card:hover { border-color: #3a4a60; }
-.hat-card.selected { border-color: #5b8db8; box-shadow: 0 0 0 1px #5b8db8; }
 .hat-card-head {
   display: flex; align-items: baseline; gap: 7px;
-  margin-bottom: 9px; flex-wrap: wrap;
+  margin-bottom: 8px; flex-wrap: wrap;
 }
-.hat-card-title { font-size: 13px; color: #cdd; font-weight: bold; flex: 1; min-width: 0; }
+.hat-card-title { font-size: 14px; color: #cdd; font-weight: bold; flex: 1; min-width: 0; }
 .hat-badge {
   font-size: 9px; color: #5b8db8; background: #16203a;
   border: 1px solid #243a55; border-radius: 8px; padding: 1px 7px;
@@ -391,20 +446,65 @@ body {
 .hat-err { font-size: 11px; color: #d87a5a; padding: 4px 0; }
 .hat-card-desc { font-size: 10px; color: #556; margin-bottom: 7px; line-height: 1.4; }
 .hat-badge.imported { background: #1e3020; border-color: #3a6040; color: #7ab878; }
-#rhy-search {
-  width: 100%; margin-top: 7px; box-sizing: border-box;
-  background: #101828; border: 1px solid #3a4060; border-radius: 4px;
-  color: #ccd; padding: 4px 8px; font-size: 11px; outline: none;
+.hat-badge.edited { background: #2e2410; border-color: #6a5020; color: #c8a050; }
+
+/* ── Transport bar (footer) ──────────────────────────────────────────────── */
+.rhy-transport {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 5px 12px; border-top: 1px solid #2a2a4a;
+  flex-shrink: 0; background: #141428;
 }
-#rhy-search:focus { border-color: #5b8db8; }
-#rhy-search::placeholder { color: #446; }
-.rhy-no-results { font-size: 11px; color: #446; padding: 18px 14px; text-align: center; }
+.rhy-tempo-label { font-size: 13px; color: #7ab; flex-shrink: 0; }
+#bpm-input {
+  width: 48px; background: #101828; border: 1px solid #3a4060; border-radius: 3px;
+  color: #dde; padding: 3px 6px; font-size: 12px; text-align: center; outline: none;
+}
+#bpm-input:focus { border-color: #5b8db8; }
+.rhy-tap-btn { padding: 3px 9px; font-size: 11px; }
+.rhy-play-btn { padding: 3px 10px; font-size: 11px; }
+.rhy-play-btn.playing { background: #3a2020; border-color: #c05050; color: #e08080; }
+.rhy-play-btn.playing:hover { background: #4a2828; }
+.rhy-ghost-toggle {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 10px; color: #889; white-space: nowrap;
+}
+.rhy-ghost-toggle input[type=range] {
+  width: 44px; accent-color: #5b8db8; margin: 0; cursor: pointer;
+  height: 3px; padding: 0;
+}
+.rhy-transport-spacer { flex: 1; }
+.rhy-transport .btn { padding: 2px 8px; font-size: 11px; }
+
+/* ── Legend tooltip ─────────────────────────────────────────────────────────── */
+.rhy-legend-tip {
+  position: relative; display: inline-flex;
+}
+.rhy-legend-btn {
+  font-size: 11px; padding: 2px 6px; border-radius: 3px;
+  border: 1px solid #3a4060; background: transparent; color: #667;
+  cursor: pointer; transition: color .1s, border-color .1s;
+}
+.rhy-legend-btn:hover { border-color: #5b8db8; color: #8bc4e8; }
+.rhy-legend-popup {
+  display: none; position: absolute; bottom: 100%; right: 0; margin-bottom: 6px;
+  background: #0d1222; border: 1px solid #3a4060; border-radius: 6px;
+  padding: 8px 12px; white-space: nowrap; z-index: 100;
+  box-shadow: 0 4px 16px #0008;
+}
+.rhy-legend-tip:hover .rhy-legend-popup { display: flex; flex-direction: column; gap: 4px; }
+.rhy-legend-row { display: flex; gap: 6px; align-items: center; }
+.rhy-lbadge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 3px; border: 1px solid #252545;
+  font-family: 'Courier New', Courier, monospace; font-size: 11px; font-weight: bold;
+}
+.rhy-lbadge.hand-R { background: #163150; color: #7ab8e8; border-color: #244a6a; }
+.rhy-lbadge.hand-L { background: #3a1808; color: #e89058; border-color: #5a2810; }
+.rhy-ltext { font-size: 9px; color: #778; }
 
 /* ── HAT two-row grid ──────────────────────────────────────────────────────── */
 .hat-grid-wrap { overflow-x: auto; padding-bottom: 2px; }
-/* Bar-wrapping flex container — bars flow to new rows when they don't fit */
 .hat-grid-rows { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: flex-start; }
-/* Each bar is an independent unit: header + mini-grid */
 .hat-bar-unit {
   display: flex; flex-direction: column;
   border: 1px solid #1a1a30; border-radius: 4px; overflow: hidden;
@@ -431,12 +531,13 @@ body {
   position: relative;
 }
 .hat-cell {
-  min-width: 26px; height: 30px; margin-right: 2px;
+  min-width: 30px; height: 34px; margin-right: 2px;
   border-radius: 3px; border: 1px solid #1e1e3a;
   display: flex; align-items: center; justify-content: center;
   font-family: 'Courier New', Courier, monospace;
-  font-size: 14px; font-weight: bold;
+  font-size: 15px; font-weight: bold;
   user-select: none; transition: filter .05s;
+  position: relative; cursor: pointer;
 }
 /* Right hand = blue family */
 .hat-cell.hand-R.k-hit   { background: #163150; color: #7ab8e8; border-color: #244a6a; }
@@ -461,12 +562,12 @@ body {
   filter: brightness(1.7);
   box-shadow: 0 0 0 1px #5b8db8;
 }
-
-/* Focus / selected hint */
-.hat-card.selected .hat-card-title::after {
-  content: ' ◀ playing target';
-  font-size: 9px; color: #5b8db8; font-weight: normal; letter-spacing: .3px;
+/* Edit hover */
+.hat-cell.edit-cell { cursor: pointer; }
+.hat-cell.edit-cell:hover {
+  outline: 1px solid #c8a050; outline-offset: -1px; filter: brightness(1.35);
 }
+.hat-cell.edit-cell[title] { cursor: pointer; }
 
 /* HAT source disclosure */
 .hat-src { margin-top: 9px; }
@@ -493,7 +594,7 @@ body {
 }
 .hat-src-ta {
   display: block; width: 100%; margin: 6px 0 0;
-  padding: 8px 10px; min-height: 120px; resize: vertical;
+  padding: 8px 10px; min-height: 100px; resize: vertical;
   background: #0b0b16; border: 1px solid #2a3050; border-radius: 4px;
   font-family: 'Courier New', Courier, monospace; font-size: 10px;
   color: #aab8d0; line-height: 1.45; outline: none;
@@ -501,119 +602,48 @@ body {
 }
 .hat-src-ta:focus { border-color: #4a6090; color: #ccd8ee; }
 .hat-src-ta.hat-src-ta-err { border-color: #803030 !important; color: #cc8080; }
-#rhythm-panel.expanded .hat-src-ta { font-size: 12px; min-height: 160px; }
-
-/* Notation legend */
-.rhy-legend {
-  display: flex; gap: 7px; padding: 6px 12px 2px; flex-shrink: 0;
-  flex-wrap: wrap; align-items: center;
+.hat-src-err {
+  font-size: 10px; color: #d87a5a; padding: 4px 4px 0;
+  font-family: 'Courier New', Courier, monospace; line-height: 1.4;
 }
-.rhy-lbadge {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 18px; height: 18px; border-radius: 3px; border: 1px solid #252545;
-  font-family: 'Courier New', Courier, monospace; font-size: 11px; font-weight: bold;
-}
-.rhy-lbadge.hand-R { background: #163150; color: #7ab8e8; border-color: #244a6a; }
-.rhy-lbadge.hand-L { background: #3a1808; color: #e89058; border-color: #5a2810; }
-.rhy-ltext { font-size: 9px; color: #556; margin-right: 5px; }
 
-/* ── Expanded (full-window) rhythm mode ────────────────────────────────────── */
+/* ── Expanded (full-window) mode ──────────────────────────────────────────── */
 #rhythm-panel.expanded {
-  position: fixed; inset: 0; width: 100vw !important; min-width: 0 !important;
-  max-width: none; z-index: 2000; border-right: none;
+  position: fixed; inset: 0; height: 100vh !important; min-height: 0 !important;
+  z-index: 2000; border-top: none;
 }
 #rhythm-panel.expanded #rhythm-resize-handle { display: none; }
-#rhythm-panel.expanded .rhy-list {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(440px, 1fr));
-  gap: 14px; padding: 16px 18px 28px; align-content: start;
-}
-#rhythm-panel.expanded .hat-card { margin: 0; }
 #rhythm-panel.expanded .hat-cell {
-  min-width: 38px; height: 42px; font-size: 19px;
+  min-width: 42px; height: 48px; font-size: 20px;
 }
 #rhythm-panel.expanded .hat-cell.k-mute,
-#rhythm-panel.expanded .hat-cell.k-ghost { font-size: 16px; }
+#rhythm-panel.expanded .hat-cell.k-ghost { font-size: 17px; }
 #rhythm-panel.expanded .hat-rowlbl { font-size: 14px; }
-#rhythm-panel.expanded .hat-marker { font-size: 10px; min-width: 38px; }
+#rhythm-panel.expanded .hat-marker { font-size: 10px; min-width: 42px; }
 #rhythm-panel.expanded .hat-card-title { font-size: 16px; }
 #rhythm-panel.expanded .hat-src pre { font-size: 12px; }
+#rhythm-panel.expanded .hat-src-ta { font-size: 12px; min-height: 160px; }
+#rhythm-panel.expanded .rhy-browser { width: 260px; }
 
-/* Ghost-volume control */
-.rhy-ghost-toggle {
-  display: flex; align-items: center; gap: 4px;
-  font-size: 10px; color: #889; white-space: nowrap;
-}
-.rhy-ghost-toggle input[type=range] {
-  width: 44px; accent-color: #5b8db8; margin: 0; cursor: pointer;
-  height: 3px; padding: 0;
-}
-
-/* Per-card focus button */
-.hat-focus-btn {
-  font-size: 11px; padding: 1px 7px; border-radius: 8px;
-  border: 1px solid #3a4060; background: #1a1a2e; color: #667;
-  cursor: pointer; flex-shrink: 0; transition: border-color .1s, color .1s;
-}
-.hat-focus-btn:hover { border-color: #5b8db8; color: #8bc4e8; }
-
-/* Single-rhythm focus view */
-.hat-back {
-  display: flex; align-items: center; gap: 6px;
-  margin: 0 10px 12px; padding: 7px 11px;
-  font-size: 12px; color: #5b8db8; cursor: pointer;
-  background: #12121f; border: 1px solid #252540; border-radius: 6px;
-}
-.hat-back:hover { color: #8bc4e8; border-color: #3a4a60; }
-.rhy-list.focused .hat-card { cursor: default; }
-#rhythm-panel.expanded .rhy-list.focused {
-  display: block; padding: 18px 24px 28px;
-}
-#rhythm-panel.expanded .rhy-list.focused .hat-card,
-#rhythm-panel.expanded .rhy-list.focused .hat-back { max-width: 1200px; margin-left: auto; margin-right: auto; }
-#rhythm-panel.expanded .rhy-list.focused .hat-cell { min-width: 48px; height: 52px; font-size: 23px; }
-#rhythm-panel.expanded .rhy-list.focused .hat-cell.k-mute,
-#rhythm-panel.expanded .rhy-list.focused .hat-cell.k-ghost { font-size: 19px; }
-
-/* ── Pattern editor ────────────────────────────────────────────────────────── */
-.hat-back.disabled { color: #556; cursor: default; opacity: .6; }
-.hat-back.disabled:hover { color: #556; border-color: #252540; }
-.hat-badge.edited { background: #2e2410; border-color: #6a5020; color: #c8a050; }
-.hat-card.editing { border-color: #c8a050; box-shadow: 0 0 0 1px #6a5020; cursor: default; }
-
-/* ── Larger cells in edit mode ──────────────────────────────────────────────── */
-.hat-card.editing .hat-cell {
-  min-width: 42px; height: 46px; font-size: 20px; margin-right: 3px;
-}
-.hat-card.editing .hat-cell.k-mute,
-.hat-card.editing .hat-cell.k-ghost { font-size: 16px; }
-.hat-card.editing .hat-cell.k-note  { font-size: 11px; min-width: 40px; }
-.hat-card.editing .hat-rowlbl { font-size: 14px; width: 24px; }
-.hat-card.editing .hat-accent-btn { height: 22px; line-height: 22px; font-size: 11px; }
-.hat-card.editing .hat-subdiv-btn { height: 10px; font-size: 9px; }
-.hat-card.editing .hat-bar-ctrl-btn { font-size: 11px; padding: 3px 8px; }
-/* Even larger when also in expanded focused view */
-#rhythm-panel.expanded .hat-card.editing .hat-cell {
-  min-width: 56px; height: 60px; font-size: 26px;
-}
-#rhythm-panel.expanded .hat-card.editing .hat-cell.k-mute,
-#rhythm-panel.expanded .hat-card.editing .hat-cell.k-ghost { font-size: 21px; }
-#rhythm-panel.expanded .hat-card.editing .hat-cell.k-note  { font-size: 12px; }
+/* ── Edit toolbar ─────────────────────────────────────────────────────────── */
 .hat-edit-toolbar {
-  display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
-  margin: 2px 0 11px; padding: 8px 9px;
-  background: #16140c; border: 1px solid #3a3018; border-radius: 5px;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 5px;
+  margin-bottom: 10px; padding: 6px 8px;
+  background: #12121f; border: 1px solid #252540; border-radius: 5px;
+  flex-shrink: 0;
 }
 .hat-edit-btn {
-  font-size: 11px; padding: 4px 10px; border-radius: 5px;
-  border: 1px solid #4a4060; background: #1f1d2e; color: #ccd;
+  font-size: 10px; padding: 3px 8px; border-radius: 4px;
+  border: 1px solid #3a4060; background: #1a1a2e; color: #aab;
   cursor: pointer; transition: border-color .1s, background .1s, color .1s;
 }
-.hat-edit-btn:hover { border-color: #c8a050; color: #e8c878; }
-.hat-edit-btn.save { border-color: #3a6040; color: #7ab878; }
-.hat-edit-btn.save:hover { background: #16240f; border-color: #5a8050; }
-.hat-edit-btn.cancel { border-color: #6a3030; color: #d08080; }
-.hat-edit-btn.cancel:hover { background: #240f0f; border-color: #904040; }
+.hat-edit-btn:hover { border-color: #5b8db8; color: #8bc4e8; }
+.hat-edit-btn.revert { border-color: #6a5020; color: #c8a050; }
+.hat-edit-btn.revert:hover { background: #2a2010; border-color: #8a6830; }
 .hat-edit-btn.active { border-color: #5b8db8; color: #7ab8e8; background: #0d1e30; }
+.hat-edit-sep {
+  width: 1px; height: 18px; background: #2a2a4a; margin: 0 2px; flex-shrink: 0;
+}
 .hat-scale-sel {
   font-size: 10px; padding: 2px 4px;
   background: #101828; border: 1px solid #3a4060; border-radius: 3px;
@@ -626,15 +656,45 @@ body {
   flex-basis: 100%; font-size: 10px; color: #8a9; padding-top: 2px;
 }
 .hat-edit-msg.err { color: #d88a5a; }
-.hat-edit-hint {
-  flex-basis: 100%; font-size: 9px; color: #667;
-  font-family: 'Courier New', Courier, monospace; padding-top: 1px;
+/* Shortcut reference panel */
+.hat-shortcut-panel {
+  position: absolute; top: 8px; right: 8px; bottom: 8px;
+  width: 300px; max-width: calc(100% - 16px);
+  background: #0d1222; border: 1px solid #3a4060; border-radius: 8px;
+  box-shadow: 0 8px 30px #000b; z-index: 50;
+  display: flex; flex-direction: column; overflow: hidden;
 }
-.hat-grid-wrap.editable .hat-cell.edit-cell { cursor: pointer; }
-.hat-grid-wrap.editable .hat-cell.edit-cell:hover {
-  outline: 1px solid #c8a050; outline-offset: -1px; filter: brightness(1.35);
+.hat-sc-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px 8px; border-bottom: 1px solid #2a2a4a;
 }
-/* Feature 1 — per-bar +/− controls */
+.hat-sc-title { font-size: 12px; font-weight: bold; color: #8bc4e8; letter-spacing: .5px; }
+.hat-sc-close {
+  font-size: 11px; padding: 2px 6px; border-radius: 3px;
+  border: 1px solid #3a4060; background: transparent; color: #667;
+  cursor: pointer;
+}
+.hat-sc-close:hover { border-color: #5b8db8; color: #8bc4e8; }
+.hat-sc-body { flex: 1; overflow-y: auto; padding: 10px 14px 14px; }
+.hat-sc-section { margin-bottom: 12px; }
+.hat-sc-section:last-child { margin-bottom: 0; }
+.hat-sc-heading {
+  font-size: 9px; text-transform: uppercase; letter-spacing: .8px;
+  color: #5b8db8; margin-bottom: 6px; font-weight: bold;
+}
+.hat-sc-row {
+  font-size: 11px; color: #99a; line-height: 1.7;
+  display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap;
+}
+.hat-sc-row kbd {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 10px; padding: 1px 5px;
+  background: #1a1a2e; border: 1px solid #3a4060; border-radius: 3px;
+  color: #ccd; white-space: nowrap;
+}
+.hat-sc-row span { flex: 1; min-width: 0; }
+
+/* Per-bar +/− controls */
 .hat-bar-ctrl-row { display: contents; }
 .hat-bar-ctrl { display: flex; align-items: center; justify-content: center; gap: 3px; padding: 2px 0; }
 .hat-bar-ctrl-btn {
@@ -643,8 +703,7 @@ body {
   cursor: pointer; transition: border-color .1s, color .1s;
 }
 .hat-bar-ctrl-btn:hover { border-color: #c8a050; color: #e8c878; }
-/* Feature 2 — undo button: inherits .hat-edit-btn */
-/* Feature 3 — copied bar marker */
+/* Copied bar marker */
 .hat-marker.pasteable { cursor: pointer; }
 .hat-marker.pasteable:hover { color: #5b8db8; }
 .hat-bar-copy-btn {
@@ -656,10 +715,9 @@ body {
 .hat-marker:hover .hat-bar-copy-btn,
 .hat-bar-hdr:hover .hat-bar-copy-btn { display: block; }
 .hat-marker.copied { outline: 2px solid #5b8db8; outline-offset: -1px; border-radius: 2px; }
-/* Feature 5 — paint mode */
+/* Paint mode */
 .hat-cell.edit-cell.paint-active { outline: 2px solid #f1c40f !important; outline-offset: -1px; }
-/* Feature 6 — accent indicators */
-.hat-cell { position: relative; }
+/* Accent indicators */
 .hat-cell.k-accent { border-top: 2px solid #f1c40f; }
 .hat-accent-row { display: contents; }
 .hat-accent-btn {
@@ -670,15 +728,15 @@ body {
 }
 .hat-accent-btn:hover { color: #f1c40f; }
 .hat-accent-btn.on { color: #f1c40f; }
-/* ── Note cells ─────────────────────────────────────────────────────────────── */
+/* Note cells */
 .hat-cell.k-note { font-size: 9px; font-weight: bold; letter-spacing: -.3px;
                    min-width: 32px; }
 .hat-cell.k-note.hand-R { background: #0f2a1a; color: #6ae88a; border-color: #1e4a2a; }
 .hat-cell.k-note.hand-L { background: #2a1a08; color: #e8c068; border-color: #4a3010; }
 
-/* ── Section labels ──────────────────────────────────────────────────────────── */
+/* Section labels */
 .hat-section-lbl {
-  flex-basis: 100%; /* forces new row in flex-wrap */
+  flex-basis: 100%;
   display: flex; align-items: center; gap: 6px;
   padding: 6px 2px 3px; margin-top: 4px;
   border-top: 1px solid #2a3050;
@@ -699,17 +757,16 @@ body {
 }
 .hat-section-edit-btn:hover { border-color: #5b8db8; color: #7ab8e8; }
 
-/* ── Bar group pattern tag ──────────────────────────────────────────────────── */
+/* Bar group pattern tag */
 .hat-bar-pattern {
-  font-size: 8px; color: #4a6888; margin-left: 6px; letter-spacing: .5px;
+  font-size: 9px; color: #4a6888; margin-left: 6px; letter-spacing: .5px;
   cursor: pointer; border-radius: 3px; padding: 1px 4px;
   border: 1px solid transparent;
   transition: color .1s, background .1s, border-color .1s;
 }
 .hat-bar-pattern:hover { color: #7abedc; background: #0c1a28; border-color: #2a4a68; }
-.hat-card.editing .hat-bar-pattern { font-size: 10px; padding: 2px 6px; }
 
-/* ── Beat-grouping editor popup ─────────────────────────────────────────────── */
+/* Beat-grouping editor popup */
 .hat-group-popup {
   position: fixed; z-index: 3000;
   background: #0d1222; border: 1px solid #3a4060; border-radius: 8px;
@@ -737,7 +794,7 @@ body {
 .hat-group-inp:focus { border-color: #5b8db8; }
 .hat-group-err { font-size: 11px; color: #887040; min-height: 14px; }
 
-/* ── Sub-beat divider toggle row ────────────────────────────────────────────── */
+/* Sub-beat divider toggle row */
 .hat-subdiv-btn {
   height: 8px; display: flex; align-items: center; justify-content: center;
   font-size: 8px; line-height: 1; color: #22223a; cursor: pointer;
@@ -751,7 +808,7 @@ body {
 .hat-subdiv-btn.bar-start::after { content: '|'; }
 .hat-subdiv-btn:not(.bar-start):hover { color: #7ab8e8; background: #0e1a30; }
 
-/* ── Note picker popup ───────────────────────────────────────────────────────── */
+/* Note picker popup */
 .hat-note-popup {
   position: fixed; z-index: 3000;
   background: #0d1222; border: 1px solid #3a4060; border-radius: 7px;
@@ -759,12 +816,8 @@ body {
   box-shadow: 0 6px 24px #0009;
   display: flex; flex-direction: column; gap: 6px;
 }
-.hat-note-popup-lbl {
-  font-size: 9px; color: #445; letter-spacing: .3px;
-}
-.hat-note-popup-grid {
-  display: flex; flex-wrap: wrap; gap: 4px;
-}
+.hat-note-popup-lbl { font-size: 9px; color: #445; letter-spacing: .3px; }
+.hat-note-popup-grid { display: flex; flex-wrap: wrap; gap: 4px; }
 .hat-note-popup-btn {
   font-size: 10px; padding: 3px 7px;
   background: #0f2a1a; border: 1px solid #2a5a3a;
@@ -786,7 +839,7 @@ body {
 }
 .hat-note-popup-inp:focus { border-color: #5b8db8; }
 
-/* ── Fields palette ──────────────────────────────────────────────────────────── */
+/* Fields palette */
 .hat-fields-palette {
   display: flex; align-items: center; gap: 4px;
   flex-wrap: wrap; padding: 4px 0 0;
@@ -808,10 +861,10 @@ body {
   text-align: center; font-family: Arial, sans-serif;
 }
 
-/* ── Fields badge ────────────────────────────────────────────────────────────── */
+/* Fields badge */
 .hat-badge.hat-fields-badge { background: #0f2218; border-color: #2a5a3a; color: #6ae88a; }
 
-/* ── Flam indicator ──────────────────────────────────────────────────────────── */
+/* Flam indicator */
 .hat-cell[data-mod="*"]::before {
   content: '✦'; font-size: 6px; position: absolute;
   top: 2px; right: 2px; color: #f1c40f; opacity: .7;
@@ -851,6 +904,7 @@ body {
 
 <!-- ══ Workspace ════════════════════════════════════════════════════════ -->
 <div id="workspace">
+  <div id="workspace-row">
 
   <div id="sidebar">
 
@@ -989,44 +1043,6 @@ body {
 
   </div><!-- /sidebar -->
 
-  <!-- ══ Rhythm Panel ══════════════════════════════════════════════════════ -->
-  <div id="rhythm-panel">
-    <div id="rhythm-resize-handle"></div>
-    <div class="rhy-header">
-      <div style="display:flex;align-items:center;gap:7px;">
-        <span class="rhy-header-title">♩ Rhythm</span>
-      </div>
-      <div style="display:flex;gap:4px;">
-        <button class="btn" style="padding:2px 8px;font-size:11px;" onclick="showNewPatternModal()" title="Create a new blank pattern">＋ New</button>
-        <button class="btn" style="padding:2px 8px;font-size:11px;" onclick="importHatFile()" title="Import HAT patterns from a Markdown file">⬆ Import</button>
-        <input type="file" id="hat-import-input" accept=".md,.hat,.txt" style="display:none">
-        <button class="btn" style="padding:2px 8px;font-size:11px;" onclick="exportRhythmsZip()" title="Export all styles as PNG images">⬇ ZIP</button>
-        <button class="btn" id="rhy-expand-btn" style="padding:2px 8px;font-size:11px;" onclick="toggleRhythmExpand()" title="Expand to full window">⤢ Expand</button>
-        <button class="btn" style="padding:2px 7px;font-size:11px;" onclick="toggleRhythm()">✕</button>
-      </div>
-    </div>
-    <div class="rhy-section" style="padding-bottom:7px;">
-      <div class="rhy-cat-pills" id="rhy-cat-pills"></div>
-      <input type="search" id="rhy-search" placeholder="Search rhythms…" autocomplete="off">
-    </div>
-    <div class="rhy-section rhy-tempo-row">
-      <span class="rhy-tempo-label">♩ =</span>
-      <input type="number" id="bpm-input" value="90" min="30" max="300">
-      <button class="btn rhy-tap-btn" onclick="tapTempo()">Tap</button>
-      <button class="btn rhy-play-btn" id="rhy-play-btn" onclick="togglePlay()" disabled>▶ Play</button>
-      <label class="rhy-ghost-toggle" title="Ghost note volume">
-        <span style="color:#556;">ghost volume</span> <input type="range" id="ghost-vol-slider" min="0" max="100" value="50"><span id="ghost-vol-val">50</span>%
-      </label>
-    </div>
-    <div class="rhy-legend">
-      <span class="rhy-lbadge hand-R">R</span><span class="rhy-ltext">right hand</span>
-      <span class="rhy-lbadge hand-L">L</span><span class="rhy-ltext">left hand</span>
-      <span class="rhy-ltext" style="margin:0;color:#445;">·</span>
-      <span class="rhy-ltext">D Doum&nbsp;&nbsp;T Tak (R)&nbsp;&nbsp;K Tak (L)&nbsp;&nbsp;S Slap&nbsp;&nbsp;d muted&nbsp;&nbsp;• ghost&nbsp;&nbsp;- rest</span>
-    </div>
-    <div class="rhy-list" id="rhy-list"></div>
-  </div>
-
   <div id="canvas-wrap">
     <svg id="canvas" viewBox="0 0 1000 1400">
       <rect id="bg" width="1000" height="1400" fill="white"/>
@@ -1135,6 +1151,64 @@ body {
 
       <button class="btn full" onclick="exportAllChordsZip()">⬇ Export ZIP</button>
       <div id="export-status"></div>
+    </div>
+  </div>
+
+  </div><!-- /workspace-row -->
+
+  <!-- ══ Rhythm Panel (bottom) ═══════════════════════════════════════════ -->
+  <div id="rhythm-panel">
+    <div id="rhythm-resize-handle"></div>
+    <div class="rhy-body">
+      <!-- Browser sidebar -->
+      <div class="rhy-browser" id="rhy-browser">
+        <div class="rhy-browser-head">
+          <span class="rhy-browser-title">Patterns</span>
+          <button class="rhy-browser-collapse" id="rhy-browser-toggle" onclick="toggleRhyBrowser()" title="Collapse browser">◀</button>
+        </div>
+        <div class="rhy-cat-pills" id="rhy-cat-pills"></div>
+        <input type="search" id="rhy-search" placeholder="Search rhythms…" autocomplete="off">
+        <div class="rhy-browser-list" id="rhy-browser-list"></div>
+      </div>
+      <!-- Expand tab (visible when browser is collapsed) -->
+      <button class="rhy-browser-expand-tab" id="rhy-browser-expand-tab" onclick="toggleRhyBrowser()" title="Show pattern browser">▶</button>
+      <!-- Editor area -->
+      <div class="rhy-editor" id="rhy-editor">
+        <div class="rhy-editor-empty" id="rhy-editor-empty">
+          <div class="rhy-welcome">
+            <div class="rhy-welcome-icon">♩</div>
+            <div class="rhy-welcome-title">Rhythm Editor</div>
+            <div class="rhy-welcome-hint">Pick a pattern from the sidebar to start editing, or create a new one.</div>
+            <div class="rhy-welcome-actions">
+              <button class="btn" onclick="showNewPatternModal()" style="font-size:11px;padding:4px 12px;">+ New Pattern</button>
+              <button class="btn" onclick="importHatFile()" style="font-size:11px;padding:4px 12px;">Import</button>
+            </div>
+          </div>
+        </div>
+        <div class="rhy-editor-content" id="rhy-editor-content" style="display:none"></div>
+      </div>
+    </div>
+    <!-- Transport footer -->
+    <div class="rhy-transport">
+      <span class="rhy-tempo-label">♩ =</span>
+      <input type="number" id="bpm-input" value="90" min="30" max="300">
+      <button class="btn rhy-tap-btn" onclick="tapTempo()">Tap</button>
+      <button class="btn rhy-play-btn" id="rhy-play-btn" onclick="togglePlay()" disabled>▶ Play</button>
+      <label class="rhy-ghost-toggle" title="Ghost note volume">
+        <span style="color:#556;">ghost</span> <input type="range" id="ghost-vol-slider" min="0" max="100" value="50"><span id="ghost-vol-val">50</span>%
+      </label>
+      <span class="rhy-transport-spacer"></span>
+      <div class="rhy-legend-tip">
+        <button class="rhy-legend-btn" title="Notation legend">?</button>
+        <div class="rhy-legend-popup">
+          <div class="rhy-legend-row"><span class="rhy-lbadge hand-R">R</span><span class="rhy-ltext">right hand</span></div>
+          <div class="rhy-legend-row"><span class="rhy-lbadge hand-L">L</span><span class="rhy-ltext">left hand</span></div>
+          <div class="rhy-legend-row"><span class="rhy-ltext">D Doum · T Tak (R) · K Tak (L) · S Slap · d muted · • ghost · - rest</span></div>
+        </div>
+      </div>
+      <button class="btn" id="rhy-expand-btn" onclick="toggleRhythmExpand()" title="Expand to full window">⤢</button>
+      <button class="btn" onclick="toggleRhythm()" title="Close rhythm panel">✕</button>
+      <input type="file" id="hat-import-input" accept=".md,.hat,.txt" style="display:none">
     </div>
   </div>
 
@@ -2248,22 +2322,23 @@ let enharmonicMode = '-'; // '-' | 'proper' | '#' | 'b'
 
 // Rhythm panel state
 let rhythmOpen     = false;
-let activeHatIdx   = null;   // index into HAT_PATTERNS selected for playback
-let focusedHatIdx  = null;   // index shown alone (single-rhythm focus view)
+let activeHatIdx   = null;   // index into HAT_PATTERNS — the active/editing pattern
 let ghostVol       = 0.025;  // ghost note volume (• notes); 0 = silent
 let activeHatCat   = 'all';  // currently selected category pill
 let hatSearchQuery = '';     // current search string
-let editingHatIdx  = null;   // idx being edited (focus view), or null
 let _editModel     = null;   // working clone while editing; null otherwise
+let _savedHatText  = null;   // original HAT text before editing (for revert)
 let _hoveredCell   = null;   // hat-cell DOM element currently under the pointer (edit mode)
 let _lastClickedCell = null; // last cell clicked (fallback for field palette when hover is gone)
 let _hatSrcOpen    = false;  // whether the HAT source disclosure is open (persist across re-renders)
 let _hatTextTimer  = null;   // debounce timer for live HAT text editing
 let editMsg        = '';     // transient toolbar status/error message
-let _editHistory   = [];     // undo stack of JSON snapshots (Feature 2)
-let _copiedBar     = null;   // deep-cloned bar cols for copy/paste (Feature 3)
-let _paintKey      = null;   // symbol held for drag-paint (Feature 5)
-let _paintDown     = false;  // mouse button held (Feature 5)
+let _editMsgTimer  = null;  // auto-clear timer for editMsg
+let _editHistory   = [];     // undo stack of JSON snapshots
+let _copiedBar     = null;   // deep-cloned bar cols for copy/paste
+let _paintKey      = null;   // symbol held for drag-paint
+let _paintDown     = false;  // mouse button held
+let _rhyBrowserOpen = true;  // browser sidebar visibility
 let globalBpm      = 90;
 let rhythmPlaying  = false;
 let _tapTimes      = [];
@@ -3918,12 +3993,20 @@ function toggleRhythm() {
   btn.style.borderColor = rhythmOpen ? '#5b8db8' : '';
   btn.style.color       = rhythmOpen ? '#8bc4e8' : '';
   if (rhythmOpen) { buildCatPills(); renderRhythms(); }
-  else { document.getElementById('rhythm-panel').classList.remove('expanded');
-         focusedHatIdx = null;
-         editingHatIdx = null; _editModel = null; editMsg = '';
+  else { panel.classList.remove('expanded');
+         _autoSaveEdit();
+         activeHatIdx = null; _editModel = null; editMsg = '';
          const eb = document.getElementById('rhy-expand-btn');
-         if (eb) eb.textContent = '⤢ Expand'; }
+         if (eb) eb.textContent = '⤢'; }
   resizeCanvas();
+}
+
+function toggleRhyBrowser() {
+  _rhyBrowserOpen = !_rhyBrowserOpen;
+  const browser = document.getElementById('rhy-browser');
+  const expandTab = document.getElementById('rhy-browser-expand-tab');
+  browser.classList.toggle('collapsed', !_rhyBrowserOpen);
+  if (expandTab) expandTab.style.display = _rhyBrowserOpen ? 'none' : '';
 }
 
 function toggleRhythmExpand() {
@@ -3931,7 +4014,7 @@ function toggleRhythmExpand() {
   const on    = !panel.classList.contains('expanded');
   panel.classList.toggle('expanded', on);
   const btn = document.getElementById('rhy-expand-btn');
-  if (btn) btn.textContent = on ? '⤡ Collapse' : '⤢ Expand';
+  if (btn) btn.textContent = on ? '⤡' : '⤢';
   resizeCanvas();
 }
 
@@ -4718,18 +4801,13 @@ function buildHatGrid(parsed, idx, editable) {
   return wrap;
 }
 
-function buildHatCard(idx) {
-  const p         = HAT_PATTERNS[idx];
-  const isEditing = editingHatIdx === idx;
-  const isFocus   = focusedHatIdx === idx;
-  const model     = isEditing ? _editModel : getParsed(idx);
-  const meta      = model.meta;
+function buildEditorCard(idx) {
+  const p     = HAT_PATTERNS[idx];
+  const model = _editModel || getParsed(idx);
+  const meta  = model.meta;
 
   const card = document.createElement('div');
-  card.className = 'hat-card'
-    + (activeHatIdx === idx ? ' selected' : '')
-    + (isEditing ? ' editing' : '');
-  card.addEventListener('click', () => { if (!isEditing) selectHat(idx); });
+  card.className = 'hat-card';
 
   const head = document.createElement('div');
   head.className = 'hat-card-head';
@@ -4737,9 +4815,8 @@ function buildHatCard(idx) {
   title.className = 'hat-card-title';
   title.textContent = meta.title || p.id;
   head.appendChild(title);
-  // During editing, always show the inferred time sig (never a stale stored value).
-  // The _refreshEditGrid path may lag behind _autoTimeSig, so compute here too.
-  const displayTime = isEditing
+
+  const displayTime = _editModel
     ? (_inferTimeSig(model.bars, meta.grid) || null)
     : (meta.time || null);
 
@@ -4770,39 +4847,14 @@ function buildHatCard(idx) {
     eb.textContent = 'edited';
     head.appendChild(eb);
   }
-  if (focusedHatIdx == null) {
-    const fb = document.createElement('button');
-    fb.className = 'hat-focus-btn';
-    fb.textContent = '⤢ Focus';
-    fb.title = 'Focus on this rhythm';
-    fb.addEventListener('click', e => {
-      e.stopPropagation();
-      selectHat(idx);
-      focusedHatIdx = idx;
-      renderRhythms();
-    });
-    head.appendChild(fb);
-  } else if (isFocus && !isEditing) {
-    const eb = document.createElement('button');
-    eb.className = 'hat-focus-btn';
-    eb.textContent = '✎ Edit';
-    eb.title = 'Edit this rhythm';
-    eb.addEventListener('click', e => { e.stopPropagation(); enterEditMode(); });
-    head.appendChild(eb);
-  }
   card.appendChild(head);
 
-  if (isEditing) card.appendChild(_buildEditToolbar());
+  // Always show edit toolbar
+  if (_editModel) card.appendChild(_buildEditToolbar());
 
-  if (p.desc && !isEditing) {
-    const desc = document.createElement('div');
-    desc.className = 'hat-card-desc';
-    desc.textContent = p.desc;
-    card.appendChild(desc);
-  }
+  card.appendChild(buildHatGrid(model, idx, !!_editModel));
 
-  card.appendChild(buildHatGrid(model, idx, isEditing));
-
+  // HAT source
   const src = document.createElement('details');
   src.className = 'hat-src';
   if (_hatSrcOpen) src.open = true;
@@ -4812,17 +4864,16 @@ function buildHatCard(idx) {
     setTimeout(() => { _hatSrcOpen = src.open; }, 0);
   });
   const sumLbl = document.createElement('span');
-  sumLbl.textContent = isEditing ? 'HAT source — edit live ✎' : 'HAT source';
+  sumLbl.textContent = 'HAT source — edit live ✎';
   sum.appendChild(sumLbl);
-  // Copy-to-clipboard button (always visible, not just when open)
   const cpyBtn = document.createElement('button');
   cpyBtn.className = 'hat-src-copy-btn';
   cpyBtn.textContent = '⎘ copy';
   cpyBtn.title = 'Copy HAT text to clipboard';
   cpyBtn.addEventListener('click', e => {
     e.stopPropagation();
-    e.preventDefault(); // don't toggle the <details>
-    const text = (isEditing && _editModel) ? serializeHAT(_editModel) : p.hat;
+    e.preventDefault();
+    const text = _editModel ? serializeHAT(_editModel) : p.hat;
     navigator.clipboard.writeText(text).then(() => {
       cpyBtn.textContent = '✓ copied';
       setTimeout(() => { cpyBtn.textContent = '⎘ copy'; }, 1600);
@@ -4834,42 +4885,44 @@ function buildHatCard(idx) {
   sum.appendChild(cpyBtn);
   src.appendChild(sum);
 
-  if (isEditing) {
-    // Editable textarea: changes are parsed and reflected in the visual grid
-    const ta = document.createElement('textarea');
-    ta.className = 'hat-src-ta';
-    ta.spellcheck = false;
-    // Always set from the model — this textarea is only created during full renderRhythms(),
-    // which only happens on visual edits (not from the textarea's own input handler).
-    ta.value = serializeHAT(_editModel);
-    ta.id = 'hat-src-ta';
-    ta.addEventListener('click', e => e.stopPropagation());
-    ta.addEventListener('input', () => {
-      clearTimeout(_hatTextTimer);
-      ta.classList.remove('hat-src-ta-err');
-      _hatTextTimer = setTimeout(() => {
-        const parsed = parseHAT(ta.value);
-        if (!parsed.ok) {
-          ta.classList.add('hat-src-ta-err');
-          return;
-        }
-        _editPushUndo();
-        _editModel = parsed;
-        // Targeted in-place update — textarea element is never touched
-        _refreshEditGrid();
-      }, 350);
-    });
-    src.appendChild(ta);
-  } else {
-    const pre = document.createElement('pre');
-    pre.textContent = p.hat;
-    src.appendChild(pre);
-  }
+  // Always editable textarea
+  const ta = document.createElement('textarea');
+  ta.className = 'hat-src-ta';
+  ta.spellcheck = false;
+  ta.value = _editModel ? serializeHAT(_editModel) : p.hat;
+  ta.id = 'hat-src-ta';
+  ta.addEventListener('click', e => e.stopPropagation());
+  const errDiv = document.createElement('div');
+  errDiv.className = 'hat-src-err';
+  errDiv.id = 'hat-src-err';
+  ta.addEventListener('input', () => {
+    clearTimeout(_hatTextTimer);
+    ta.classList.remove('hat-src-ta-err');
+    errDiv.textContent = '';
+    errDiv.style.display = 'none';
+    _hatTextTimer = setTimeout(() => {
+      const parsed = parseHAT(ta.value);
+      if (!parsed.ok) {
+        ta.classList.add('hat-src-ta-err');
+        errDiv.textContent = '⚠ ' + (parsed.error || 'Parse error');
+        errDiv.style.display = '';
+        return;
+      }
+      _editPushUndo();
+      _editModel = parsed;
+      _refreshEditGrid();
+    }, 350);
+  });
+  src.appendChild(ta);
+  errDiv.style.display = 'none';
+  src.appendChild(errDiv);
 
   card.appendChild(src);
-
   return card;
 }
+
+// Alias for backward compatibility
+function buildHatCard(idx) { return buildEditorCard(idx); }
 
 function _buildEditToolbar() {
   const bar = document.createElement('div');
@@ -4882,14 +4935,22 @@ function _buildEditToolbar() {
     b.addEventListener('click', e => { e.stopPropagation(); fn(); });
     return b;
   };
-  bar.appendChild(mk('↩ Undo', 'Undo last edit (Ctrl+Z)', '', editUndo));
-  bar.appendChild(mk('⨯2 Subdivision', 'Double the grid resolution (insert silent off-cells)', '', _editDouble));
-  bar.appendChild(mk('⨯½ Subdivision', 'Halve the grid resolution (lossless only)', '', _editHalve));
+  const sep = () => { const s = document.createElement('span'); s.className = 'hat-edit-sep'; return s; };
+
+  // Grid ops group
+  bar.appendChild(mk('×2', 'Double grid resolution', '', _editDouble));
+  bar.appendChild(mk('×½', 'Halve grid resolution', '', _editHalve));
   const isTriplet = _isTripletGrid(_editModel.meta.grid);
-  bar.appendChild(mk(isTriplet ? '⅓ Triplet ON' : '⅓ Triplet', isTriplet ? 'Switch to binary grid (same subdivision level)' : 'Switch to triplet grid (same subdivision level)', isTriplet ? 'active' : '', _editToggleTriplet));
-  bar.appendChild(mk('＋ Col', 'Append a rest column to the last bar', '', () => editAddColToBar(_editModel.bars.length - 1)));
-  bar.appendChild(mk('＋ Bar', 'Append a new bar (copies column structure of the last bar)', '', editAddBar));
-  bar.appendChild(mk('＋ Section', 'Add a section label before the last bar', '', () => _editAddSection()));
+  bar.appendChild(mk('⅓', isTriplet ? 'Switch to binary grid' : 'Switch to triplet grid', isTriplet ? 'active' : '', _editToggleTriplet));
+  bar.appendChild(sep());
+
+  // Structure group
+  bar.appendChild(mk('+Col', 'Append rest column', '', () => editAddColToBar(_editModel.bars.length - 1)));
+  bar.appendChild(mk('+Bar', 'Append new bar', '', editAddBar));
+  bar.appendChild(mk('+Sec', 'Add section label', '', () => _editAddSection()));
+  bar.appendChild(sep());
+
+  // Scale select
   bar.appendChild(_buildScaleSelect(tpl => {
     _editPushUndo();
     _editModel.meta.tuning = tpl.tuning;
@@ -4897,21 +4958,29 @@ function _buildEditToolbar() {
     editMsg = `Scale → ${tpl.tuning}`;
     renderRhythms();
   }));
+
   const spacer = document.createElement('span');
   spacer.className = 'hat-edit-spacer';
   bar.appendChild(spacer);
-  bar.appendChild(mk('✓ Save', 'Write changes back to the pattern', 'save', saveEdit));
-  bar.appendChild(mk('✕ Cancel', 'Discard changes', 'cancel', cancelEdit));
+
+  // Actions group
+  bar.appendChild(mk('↩', 'Undo (Ctrl+Z)', '', editUndo));
+  bar.appendChild(mk('Revert', 'Revert all changes', 'revert', revertEdit));
+  bar.appendChild(sep());
+  bar.appendChild(mk('+ New', 'Create new pattern', '', showNewPatternModal));
+  bar.appendChild(mk('⬆', 'Import HAT patterns', '', importHatFile));
+  bar.appendChild(mk('⬇', 'Export all as ZIP', '', exportRhythmsZip));
+
+  // Shortcuts button
+  bar.appendChild(mk('?', 'Show keyboard shortcuts', '', _toggleShortcutPanel));
+
+  // Status message
   if (editMsg) {
     const msg = document.createElement('div');
     msg.className = 'hat-edit-msg' + (editMsg.startsWith('⚠') ? ' err' : '');
     msg.textContent = editMsg;
     bar.appendChild(msg);
   }
-  const hint = document.createElement('div');
-  hint.className = 'hat-edit-hint';
-  hint.textContent = 'Click to cycle · hover/click + key: D T K S d • - · 1–9 = field note · n = note picker · drag to paint';
-  bar.appendChild(hint);
   // Fields palette
   if (_editModel.meta && _editModel.meta.fields) {
     const palette = document.createElement('div');
@@ -4995,50 +5064,49 @@ function _filteredIndices() {
 // Replaces only the grid wrap and the edit toolbar — leaves the textarea element
 // completely untouched so cursor position, focus, and scroll are preserved.
 function _refreshEditGrid() {
-  if (!_editModel || editingHatIdx == null) return;
+  if (!_editModel || activeHatIdx == null) return;
 
   // Swap the grid wrap
-  const oldWrap = document.querySelector(`#rhy-list .hat-grid-wrap`);
+  const oldWrap = document.querySelector(`#rhy-editor-content .hat-grid-wrap`);
   if (oldWrap) {
-    oldWrap.replaceWith(buildHatGrid(_editModel, editingHatIdx, true));
+    oldWrap.replaceWith(buildHatGrid(_editModel, activeHatIdx, true));
   }
 
   // Swap the toolbar (carries the updated meta / fields palette)
-  const oldBar = document.querySelector(`#rhy-list .hat-edit-toolbar`);
+  const oldBar = document.querySelector(`#rhy-editor-content .hat-edit-toolbar`);
   if (oldBar) {
     oldBar.replaceWith(_buildEditToolbar());
   }
 
   // Keep card head badges in sync (grid / tempo changed via text)
-  const oldHead = document.querySelector(`#rhy-list .hat-card-head`);
+  const oldHead = document.querySelector(`#rhy-editor-content .hat-card-head`);
   if (oldHead) {
-    const dummy = buildHatCard(editingHatIdx);
+    const dummy = buildEditorCard(activeHatIdx);
     const newHead = dummy.querySelector('.hat-card-head');
     if (newHead) oldHead.replaceWith(newHead);
   }
 }
 
-function renderRhythms() {
-  // Keep meta.time consistent with actual bar structure after every visual edit.
-  // Text-path edits call _refreshEditGrid() instead, so they preserve whatever
-  // the user typed in ;;time:.
-  if (_editModel) _autoTimeSig();
+// ─── Auto-save current edits ──────────────────────────────────────────────────
 
-  const el = document.getElementById('rhy-list');
-  el.innerHTML = '';
-  if (focusedHatIdx != null && HAT_PATTERNS[focusedHatIdx]) {
-    el.classList.add('focused');
-    const editing = editingHatIdx === focusedHatIdx;
-    const back = document.createElement('div');
-    back.className = 'hat-back';
-    back.textContent = editing ? '←  Finish editing first' : '←  All patterns';
-    if (editing) back.classList.add('disabled');
-    else back.addEventListener('click', () => { focusedHatIdx = null; renderRhythms(); });
-    el.appendChild(back);
-    el.appendChild(buildHatCard(focusedHatIdx));
-    return;
+function _autoSaveEdit() {
+  if (activeHatIdx == null || !_editModel) return;
+  const p = HAT_PATTERNS[activeHatIdx];
+  const newHat = serializeHAT(_editModel);
+  if (newHat !== _savedHatText) {
+    p.hat = newHat;
+    p.edited = true;
+    delete _parseCache[p.id];
   }
-  el.classList.remove('focused');
+  clearTimeout(_hatTextTimer);
+}
+
+// ─── Render: browser sidebar ─────────────────────────────────────────────────
+
+function renderBrowser() {
+  const el = document.getElementById('rhy-browser-list');
+  if (!el) return;
+  el.innerHTML = '';
   const indices = _filteredIndices();
   if (indices.length === 0) {
     const msg = document.createElement('div');
@@ -5047,59 +5115,120 @@ function renderRhythms() {
     el.appendChild(msg);
     return;
   }
-  indices.forEach(idx => el.appendChild(buildHatCard(idx)));
+  indices.forEach(idx => {
+    const p = HAT_PATTERNS[idx];
+    const parsed = getParsed(idx);
+    const meta = parsed.meta;
+    const card = document.createElement('div');
+    card.className = 'rhy-bcard' + (activeHatIdx === idx ? ' active' : '');
+    card.addEventListener('click', () => selectHat(idx));
+
+    const title = document.createElement('span');
+    title.className = 'rhy-bcard-title';
+    title.textContent = meta.title || p.id;
+    card.appendChild(title);
+
+    const badges = document.createElement('span');
+    badges.className = 'rhy-bcard-badges';
+    if (meta.time) {
+      const b = document.createElement('span');
+      b.className = 'rhy-bcard-badge';
+      b.textContent = meta.time;
+      badges.appendChild(b);
+    }
+    if (p.edited) {
+      const b = document.createElement('span');
+      b.className = 'rhy-bcard-badge edited';
+      b.textContent = '✎';
+      badges.appendChild(b);
+    }
+    if (p.cat === 'imported') {
+      const b = document.createElement('span');
+      b.className = 'rhy-bcard-badge imported';
+      b.textContent = '↑';
+      badges.appendChild(b);
+    }
+    card.appendChild(badges);
+    el.appendChild(card);
+  });
+}
+
+// ─── Render: editor area ─────────────────────────────────────────────────────
+
+function renderEditor() {
+  const empty = document.getElementById('rhy-editor-empty');
+  const content = document.getElementById('rhy-editor-content');
+  if (activeHatIdx == null) {
+    empty.style.display = '';
+    content.style.display = 'none';
+    content.innerHTML = '';
+    return;
+  }
+  empty.style.display = 'none';
+  content.style.display = '';
+  content.innerHTML = '';
+  content.appendChild(buildEditorCard(activeHatIdx));
+}
+
+function renderRhythms() {
+  if (_editModel) _autoTimeSig();
+  renderBrowser();
+  renderEditor();
+  // Auto-clear transient messages
+  clearTimeout(_editMsgTimer);
+  if (editMsg && !editMsg.startsWith('⚠')) {
+    _editMsgTimer = setTimeout(() => { editMsg = ''; renderEditor(); }, 3000);
+  }
 }
 
 function selectHat(idx) {
-  const wasSelected = activeHatIdx === idx;
+  if (activeHatIdx === idx) return;
+  // Auto-save previous pattern
+  _autoSaveEdit();
+  // Enter edit mode for new pattern
   activeHatIdx = idx;
-  document.getElementById('rhy-play-btn').disabled = false;
-  const tempo = parseInt(getParsed(idx).meta.tempo);
-  if (tempo >= 30 && tempo <= 300) {
-    globalBpm = tempo;
-    document.getElementById('bpm-input').value = tempo;
-  }
-  if (rhythmPlaying && !wasSelected) { stopPlay(); startPlay(); }
-  renderRhythms();
-}
-
-// ─── Pattern editor (focus view) ──────────────────────────────────────────────
-
-function enterEditMode() {
-  if (focusedHatIdx == null) return;
-  editingHatIdx = focusedHatIdx;
-  _editModel = _cloneModel(getParsed(focusedHatIdx));
+  const p = HAT_PATTERNS[idx];
+  _savedHatText = p.hat;
+  _editModel = _cloneModel(getParsed(idx));
   _reflatten(_editModel);
   editMsg = '';
   _editHistory = [];
   _copiedBar = null;
-  renderRhythms();
-}
-
-function cancelEdit() {
-  editingHatIdx = null;
-  _editModel = null;
-  editMsg = '';
-  _editHistory = [];
-  _copiedBar = null;
   clearTimeout(_hatTextTimer);
+  // Sync tempo
+  document.getElementById('rhy-play-btn').disabled = false;
+  const tempo = parseInt(_editModel.meta.tempo);
+  if (tempo >= 30 && tempo <= 300) {
+    globalBpm = tempo;
+    document.getElementById('bpm-input').value = tempo;
+  }
+  if (rhythmPlaying) { stopPlay(); startPlay(); }
   renderRhythms();
 }
 
-function saveEdit() {
-  if (editingHatIdx == null || !_editModel) return;
-  const p = HAT_PATTERNS[editingHatIdx];
-  p.hat = serializeHAT(_editModel);
-  p.edited = true;
+// ─── Revert to saved state ───────────────────────────────────────────────────
+
+function revertEdit() {
+  if (activeHatIdx == null || !_savedHatText) return;
+  const p = HAT_PATTERNS[activeHatIdx];
+  p.hat = _savedHatText;
+  p.edited = false;
   delete _parseCache[p.id];
-  const idx = editingHatIdx;
-  editingHatIdx = null;
-  _editModel = null;
-  editMsg = '';
+  _editModel = _cloneModel(getParsed(activeHatIdx));
+  _reflatten(_editModel);
+  editMsg = 'Reverted to saved state';
   _editHistory = [];
   _copiedBar = null;
   clearTimeout(_hatTextTimer);
-  if (rhythmPlaying && activeHatIdx === idx) { stopPlay(); startPlay(); }
+  renderRhythms();
+}
+
+// Keep old function names as aliases for compatibility
+function enterEditMode() { /* no-op: always in edit mode */ }
+function cancelEdit() { revertEdit(); }
+function saveEdit() {
+  _autoSaveEdit();
+  editMsg = 'Saved';
   renderRhythms();
 }
 
@@ -5203,6 +5332,49 @@ function editUndo() {
   _reflatten(_editModel);
   editMsg = 'Undone';
   renderRhythms();
+}
+
+// ─── Shortcut reference panel ─────────────────────────────────────────────────
+
+function _toggleShortcutPanel() {
+  const existing = document.getElementById('hat-shortcut-panel');
+  if (existing) { existing.remove(); return; }
+  const panel = document.createElement('div');
+  panel.id = 'hat-shortcut-panel';
+  panel.className = 'hat-shortcut-panel';
+  panel.innerHTML = `
+    <div class="hat-sc-header">
+      <span class="hat-sc-title">Keyboard Shortcuts</span>
+      <button class="hat-sc-close" onclick="document.getElementById('hat-shortcut-panel').remove()">✕</button>
+    </div>
+    <div class="hat-sc-body">
+      <div class="hat-sc-section">
+        <div class="hat-sc-heading">Cell Editing</div>
+        <div class="hat-sc-row"><kbd>Click</kbd> <span>Cycle through symbols (D T K S d \u2022 -)</span></div>
+        <div class="hat-sc-row"><kbd>D</kbd> <kbd>T</kbd> <kbd>K</kbd> <kbd>S</kbd> <kbd>d</kbd> <kbd>.</kbd> <kbd>-</kbd> <span>Set cell to symbol (hover or click cell first)</span></div>
+        <div class="hat-sc-row"><kbd>1</kbd>-<kbd>9</kbd>, <kbd>0</kbd> <span>Set cell to 1st\u201310th field note</span></div>
+        <div class="hat-sc-row"><kbd>a</kbd>-<kbd>z</kbd> <span>Set cell to 11th+ field notes</span></div>
+        <div class="hat-sc-row"><kbd>n</kbd> <span>Open note name picker popup</span></div>
+      </div>
+      <div class="hat-sc-section">
+        <div class="hat-sc-heading">Paint Mode</div>
+        <div class="hat-sc-row"><span>Hold a symbol key + click & drag across cells to paint</span></div>
+        <div class="hat-sc-row"><span>Release key to stop painting</span></div>
+      </div>
+      <div class="hat-sc-section">
+        <div class="hat-sc-heading">Grid Editing</div>
+        <div class="hat-sc-row"><kbd>Click \u25B3/\u25B2</kbd> <span>Toggle accent on beat</span></div>
+        <div class="hat-sc-row"><kbd>Click \u00B7/|</kbd> <span>Toggle beat/sub-beat boundary</span></div>
+        <div class="hat-sc-row"><kbd>Click bar#</kbd> <span>Paste copied bar (after copying)</span></div>
+        <div class="hat-sc-row"><kbd>Click \u29C9</kbd> <span>Copy bar contents</span></div>
+        <div class="hat-sc-row"><kbd>Click grouping tag</kbd> <span>Edit beat grouping (e.g. 3+3+2)</span></div>
+      </div>
+      <div class="hat-sc-section">
+        <div class="hat-sc-heading">General</div>
+        <div class="hat-sc-row"><kbd>Ctrl+Z</kbd> <span>Undo last edit</span></div>
+      </div>
+    </div>`;
+  document.getElementById('rhy-editor').appendChild(panel);
 }
 
 // ─── Feature 6: Accent toggle ─────────────────────────────────────────────────
@@ -5320,11 +5492,9 @@ function _createNewPattern(title, time, grid, bpm, tuning, fields) {
   _reflatten(model);
   const hatText = serializeHAT(model);
   HAT_PATTERNS.push({ id, cat: 'imported', desc: '', hat: hatText, edited: true });
-  focusedHatIdx = HAT_PATTERNS.length - 1;
   activeHatCat  = 'all';
-  enterEditMode();
   buildCatPills();
-  renderRhythms();
+  selectHat(HAT_PATTERNS.length - 1);
 }
 
 function showNewPatternModal() {
@@ -5923,19 +6093,19 @@ async function exportRhythmsZip() {
   setTimeout(() => setExportStatus(''), 5000);
 }
 
-// ─── Rhythm panel resize ──────────────────────────────────────────────────────
+// ─── Rhythm panel resize (vertical — top edge drag) ──────────────────────────
 (function () {
   const handle = document.getElementById('rhythm-resize-handle');
   const panel  = document.getElementById('rhythm-panel');
-  let active = false, startX = 0, startW = 0;
+  let active = false, startY = 0, startH = 0;
   handle.addEventListener('mousedown', e => {
-    active = true; startX = e.clientX; startW = panel.offsetWidth;
+    active = true; startY = e.clientY; startH = panel.offsetHeight;
     handle.classList.add('dragging'); e.preventDefault();
   });
   document.addEventListener('mousemove', e => {
     if (!active) return;
-    const w = Math.max(220, Math.min(560, startW + (e.clientX - startX)));
-    panel.style.width = w + 'px'; panel.style.minWidth = w + 'px';
+    const h = Math.max(180, Math.min(window.innerHeight - 120, startH - (e.clientY - startY)));
+    panel.style.height = h + 'px';
     resizeCanvas();
   });
   document.addEventListener('mouseup', () => {
