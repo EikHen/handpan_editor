@@ -1,3 +1,20 @@
+<!--
+  Handpan Scale Generator v2
+  Copyright (C) 2026 EikHen
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with this program. If not, see <https://www.gnu.org/licenses/>.
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3789,14 +3806,14 @@ function renderChords() {
 function buildProgressionsSVG(moodId) {
   const mood  = MOODS.find(m => m.id === moodId);
   const progs = PROGRESSIONS.filter(p => p.moods.includes(moodId));
-  const W = 1000, H = 1400, ML = 50;
+  const W = 1000, ML = 50;
   const innerW  = W - ML * 2;
   const headerH = 100;
   const legendH = 55;
   const gap     = 18;
-  const availH  = H - headerH - 36 - legendH;
-  const cardH   = Math.min(248, Math.floor((availH - (progs.length - 1) * gap) / progs.length));
+  const cardH   = 160;
   const tileH   = cardH - 50;
+  const H       = headerH + 26 + progs.length * (cardH + gap) + legendH;
 
   let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
 <rect width="${W}" height="${H}" fill="white"/>
@@ -3882,7 +3899,7 @@ async function buildDetailedProgressionPng(prog, rootPc) {
 
   // Source crop: tight bounding box around ALL notes (including outliers) + pan body
   const { cx: panCx, cy: panCy, r: panR } = state.pan;
-  const margin = 20;
+  const margin = 40;
   let bx0 = panCx - panR, by0 = panCy - panR;
   let bx1 = panCx + panR, by1 = panCy + panR;
   for (const n of state.notes) {
