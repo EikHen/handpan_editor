@@ -282,7 +282,7 @@ body {
   padding: 5px 6px 4px; cursor: pointer; flex: 1; min-width: 48px;
   display: flex; flex-direction: column; align-items: center; gap: 1px;
   transition: background .12s, border-color .12s;
-  user-select: none;
+  user-select: none; position: relative;
 }
 .chord-row--grid4 .chord-tile { flex: unset; min-width: 0; }
 .chord-tile:hover { background: #253060; border-color: #5b8db8; }
@@ -994,6 +994,7 @@ body {
           <option value="none">None</option>
           <option value="note">By Note (pitch class)</option>
           <option value="chord">By Chord</option>
+          <option value="selection">By Selection</option>
         </select>
       </div>
 
@@ -1019,6 +1020,25 @@ body {
         </div>
         <div id="hl-chord-info"></div>
       </div>
+
+      <!-- By-selection options -->
+      <div id="hl-selection-opts" style="display:none;">
+        <div id="hl-selection-info"></div>
+      </div>
+    </div>
+
+    <!-- Audio -->
+    <div class="panel">
+      <div class="panel-title">Audio</div>
+      <div style="font-size:11px;color:#667;margin-bottom:6px;">Alt+Click notes, chords or tiles to hear them</div>
+      <div class="row">
+        <label>Volume: <b id="audio-vol-val">50</b>%</label>
+        <input type="range" id="audio-vol" min="0" max="100" step="5" value="50"/>
+      </div>
+      <div class="row">
+        <label>Sustain: <b id="audio-sustain-val">0.8</b>s</label>
+        <input type="range" id="audio-sustain" min="0.2" max="4" step="0.1" value="0.8"/>
+      </div>
     </div>
 
     <!-- Shortcuts -->
@@ -1037,7 +1057,8 @@ body {
         <code>Ctrl+A</code> — select all<br>
         <code>Ctrl+D</code> — duplicate<br>
         <code>Ctrl+Z/Y</code> — undo/redo<br>
-        <code>Esc</code> — deselect
+        <code>Esc</code> — deselect<br>
+        <b>Alt+Click</b> — play note/chord
       </div>
     </div>
 
@@ -2178,7 +2199,15 @@ function getDisplayNames() {
     if (!best || best.acc === '') return PC_NAMES;
     return best.acc === '#' ? SHARP_NAMES : FLAT_NAMES;
   }
-  return PC_NAMES; // '-' default
+  // '-' default: derive from user's note labels
+  const userNames = [...PC_NAMES];
+  for (const n of state.notes) {
+    const pc = parsePitchClass(n.label);
+    if (pc < 0) continue;
+    const m = n.label.match(/^([A-G][#♯b♭]?)/i);
+    if (m) userNames[pc] = fmtLabel(m[1]);
+  }
+  return userNames;
 }
 
 function rewriteLabel(label) {
@@ -2417,6 +2446,17 @@ function getHighlightedPcs() {
     if (!ivs) return null;
     return new Set(ivs.map(i => (hlChordRoot + i) % 12));
   }
+  if (hlMode === 'selection') {
+    if (selectedIds.size === 0) return null;
+    const pcs = new Set();
+    for (const n of state.notes) {
+      if (selectedIds.has(n.id)) {
+        const pc = parsePitchClass(n.label);
+        if (pc >= 0) pcs.add(pc);
+      }
+    }
+    return pcs.size > 0 ? pcs : null;
+  }
   return null;
 }
 
@@ -2426,6 +2466,18 @@ function noteVisual(note, isSelected) {
   const pc   = parsePitchClass(note.label);
 
   if (isSelected) return { stroke: '#f90', strokeW: 3.5, opacity: 1, fill: 'white' };
+
+  // Selection mode: grey out notes that can't form any chord with current selection
+  if (hlMode === 'selection' && selectedIds.size > 0) {
+    const viable = getViableSelectionPcs();
+    if (viable && !viable.has(pc)) {
+      return { stroke: '#555', strokeW: 1.5, opacity: 0.2, fill: '#1a1a2e' };
+    }
+    if (viable && viable.has(pc)) {
+      const col = pc >= 0 ? PC_COLORS[pc] : ACCENT;
+      return { stroke: col, strokeW: 4, opacity: 1, fill: 'white' };
+    }
+  }
 
   if (hpcs === null) return { stroke: ACCENT, strokeW: 2.5, opacity: 1, fill: 'white' };
 
@@ -2540,6 +2592,8 @@ function onNoteDown(e) {
   const id = e.currentTarget.getAttribute('data-id');
   const note = state.notes.find(n => n.id === id);
   if (!note) return;
+
+  if (e.altKey) { playNote(note.label); e.preventDefault(); return; }
 
   if (e.shiftKey) {
     selectedIds.has(id) ? selectedIds.delete(id) : selectedIds.add(id);
@@ -2658,9 +2712,11 @@ function updateHighlightPanel() {
   document.getElementById('note-legend-wrap').style.display = hlMode !== 'none' ? '' : 'none';
   document.getElementById('hl-note-opts').style.display     = hlMode === 'note'  ? '' : 'none';
   document.getElementById('hl-chord-opts').style.display    = hlMode === 'chord' ? '' : 'none';
+  document.getElementById('hl-selection-opts').style.display = hlMode === 'selection' ? '' : 'none';
 
   if (hlMode !== 'none') buildNoteLegend();
   if (hlMode === 'chord') updateChordInfo();
+  if (hlMode === 'selection') updateSelectionInfo();
 }
 
 // ─── Color palette popup ──────────────────────────────────────────────────────
@@ -2843,8 +2899,116 @@ function updateChordInfo() {
       ? `<span style="color:#a80;font-size:10px;letter-spacing:.3px;">◐ Root on pan, incomplete</span>`
       : `<span style="color:#667;font-size:10px;letter-spacing:.3px;">○ Root not on pan</span>`;
 
+  const playHtml = `<button onclick="playChordAudio(_chordLabels(${hlChordRoot},'${hlChordType}'))" style="background:none;border:1px solid #445;color:#5b8db8;cursor:pointer;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px;">♪ Play</button>`;
+
   document.getElementById('hl-chord-info').innerHTML =
-    `${nativeBadge}<br>${noteHtml}<br><span style="color:${all?'#5d8':'#e05'}">${status}</span>`;
+    `${nativeBadge}<br>${noteHtml}<br><span style="color:${all?'#5d8':'#e05'}">${status}</span>${playHtml}`;
+}
+
+// ─── Chord-by-selection ──────────────────────────────────────────────────────
+
+function identifyChord(pcs) {
+  if (!pcs || pcs.size < 2) return [];
+  const pcArr = [...pcs];
+  const matches = [];
+  for (const [typeName, ivs] of Object.entries(CHORD_TYPES)) {
+    for (let root = 0; root < 12; root++) {
+      const chordPcs = new Set(ivs.map(i => (root + i) % 12));
+      if (pcArr.every(p => chordPcs.has(p)) && chordPcs.size === pcs.size) {
+        const names = getDisplayNames();
+        const sym = CHORD_SYMBOLS[typeName] ?? typeName;
+        matches.push({ root, type: typeName, sym, name: `${names[root]} ${typeName}`, rootName: names[root] });
+      }
+    }
+  }
+  return matches;
+}
+
+function getViableSelectionPcs() {
+  if (hlMode !== 'selection' || selectedIds.size === 0) return null;
+  const selectedPcs = new Set();
+  for (const n of state.notes) {
+    if (selectedIds.has(n.id)) {
+      const pc = parsePitchClass(n.label);
+      if (pc >= 0) selectedPcs.add(pc);
+    }
+  }
+  if (selectedPcs.size === 0) return null;
+  const viable = new Set(selectedPcs);
+  const selArr = [...selectedPcs];
+  for (let candidatePc = 0; candidatePc < 12; candidatePc++) {
+    if (selectedPcs.has(candidatePc)) continue;
+    for (const [, ivs] of Object.entries(CHORD_TYPES)) {
+      let found = false;
+      for (let root = 0; root < 12; root++) {
+        const chordPcs = new Set(ivs.map(i => (root + i) % 12));
+        if ([...selArr, candidatePc].every(p => chordPcs.has(p))) {
+          viable.add(candidatePc);
+          found = true; break;
+        }
+      }
+      if (found) break;
+    }
+  }
+  return viable;
+}
+
+function updateSelectionInfo() {
+  const el = document.getElementById('hl-selection-info');
+  if (!el) return;
+  if (selectedIds.size === 0) {
+    el.innerHTML = '<div style="color:#667;font-size:11px;text-align:center;padding:8px 0;">Select notes on the pan to identify chords.<br>Shift+Click to multi-select.</div>';
+    return;
+  }
+  const pcs = new Set();
+  for (const n of state.notes) {
+    if (selectedIds.has(n.id)) {
+      const pc = parsePitchClass(n.label);
+      if (pc >= 0) pcs.add(pc);
+    }
+  }
+  const names = getDisplayNames();
+  const noteNames = [...pcs].map(pc =>
+    `<span style="display:inline-flex;align-items:center;gap:3px;"><span style="width:8px;height:8px;border-radius:50%;background:${PC_COLORS[pc]};display:inline-block;"></span>${names[pc]}</span>`
+  ).join(' &nbsp; ');
+
+  const chords = identifyChord(pcs);
+
+  let html = `<div style="margin-bottom:6px;">${noteNames}</div>`;
+
+  if (pcs.size < 2) {
+    html += '<div style="color:#667;font-size:11px;">Select more notes to identify a chord</div>';
+  } else if (chords.length === 0) {
+    html += '<div style="color:#e05;font-size:12px;">No matching chord</div>';
+  } else {
+    // Show chords as prominent tiles
+    html += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">';
+    for (const c of chords) {
+      const panPcs = new Set(state.notes.map(n => parsePitchClass(n.label)).filter(p => p >= 0));
+      const ivs = CHORD_TYPES[c.type];
+      const chordNotes = ivs.map(i => {
+        const pc = (c.root + i) % 12;
+        return { name: names[pc], has: panPcs.has(pc) };
+      });
+      const all = chordNotes.every(n => n.has);
+      const dotColor = all ? '#44cc88' : '#cc8800';
+      const dotChar = all ? '●' : '◕';
+      const chordNoteStr = chordNotes.map(n =>
+        `<span style="color:${n.has ? '#aab' : '#e05'}">${n.name}${n.has ? '' : '✗'}</span>`
+      ).join(' · ');
+
+      html += `<div style="background:#1c1c35;border:1px solid #3a4060;border-radius:6px;padding:8px 12px;cursor:pointer;flex:1;min-width:100px;text-align:center;" onclick="playChordAudio(_chordLabels(${c.root},'${c.type}'))">` +
+        `<div style="font-size:18px;font-weight:bold;color:#ccd;line-height:1.2;">${c.rootName}<span style="font-size:12px;color:#7ab;margin-left:2px;">${c.sym}</span></div>` +
+        `<div style="font-size:10px;color:#667;margin-top:2px;">${c.type}</div>` +
+        `<div style="font-size:10px;margin-top:4px;">${chordNoteStr}</div>` +
+        `<div style="font-size:9px;color:${dotColor};margin-top:2px;">${dotChar} ${all ? 'All on pan' : 'Partial'}</div>` +
+        `<div style="font-size:9px;color:#5b8db8;margin-top:3px;">click to play</div>` +
+        `</div>`;
+    }
+    html += '</div>';
+  }
+
+  el.innerHTML = html;
 }
 
 // ─── Sidebar controls wiring ──────────────────────────────────────────────────
@@ -2902,6 +3066,16 @@ document.getElementById('enharmonic-mode').addEventListener('change', function()
   if (progOpen)   { buildRootBar(); buildMoodPills(); renderProgressions(); buildProgExportRootBar(); }
   if (chordsOpen) { buildChordTypePills(); renderChords(); }
   updateChordInfo(); buildNoteLegend();
+});
+
+// Audio controls
+document.getElementById('audio-vol').addEventListener('input', function() {
+  audioPreviewVol = this.value / 100;
+  document.getElementById('audio-vol-val').textContent = this.value;
+});
+document.getElementById('audio-sustain').addEventListener('input', function() {
+  audioPreviewSustain = parseFloat(this.value);
+  document.getElementById('audio-sustain-val').textContent = this.value;
 });
 
 // Templates dropdown
@@ -3432,6 +3606,10 @@ function renderProgressions() {
     header.appendChild(expandBtn);
     card.appendChild(header);
 
+    card.addEventListener('click', e => {
+      if (e.altKey) { playProgression(prog.chords, rootPc); e.stopPropagation(); }
+    });
+
     const row = document.createElement('div');
     row.className = 'chord-row';
 
@@ -3451,7 +3629,8 @@ function renderProgressions() {
         `<span class="t-sym">${sym}</span>` +
         playDot(play);
 
-      tile.addEventListener('click', () => {
+      tile.addEventListener('click', (e) => {
+        if (e.altKey) { e.stopPropagation(); playChordAudio(_chordLabels(chordRoot, c.t)); return; }
         _activeTile = { progName: prog.name, chordIdx: ci };
         hlMode      = 'chord';
         hlChordRoot = chordRoot;
@@ -3584,7 +3763,8 @@ function renderChords() {
         `<span class="t-sym">${sym}</span>` +
         playDot(play);
 
-      tile.addEventListener('click', () => {
+      tile.addEventListener('click', (e) => {
+        if (e.altKey) { playChordAudio(_chordLabels(rootPc, typeName)); return; }
         _activeTile  = null;
         hlMode       = 'chord';
         hlChordRoot  = rootPc;
@@ -5836,6 +6016,60 @@ function setCell(barIdx, colIdx, hand, sym) {
   _reflatten(_editModel);
   editMsg = '';
   renderRhythms();
+}
+
+// ─── Note / chord audio preview ──────────────────────────────────────────────
+
+let audioPreviewVol     = 0.5;
+let audioPreviewSustain = 0.8;
+
+function midiToFreq(midi) { return 440 * Math.pow(2, (midi - 69) / 12); }
+
+function playNote(label, duration) {
+  if (duration === undefined) duration = audioPreviewSustain;
+  ensureAudioCtx();
+  const midi = midiNote(label);
+  const freq = midiToFreq(midi);
+  const t    = _audioCtx.currentTime;
+  const master = _audioCtx.createGain();
+  master.gain.setValueAtTime(0.3 * audioPreviewVol, t);
+  master.gain.exponentialRampToValueAtTime(0.001, t + duration);
+  master.connect(_audioCtx.destination);
+  for (const [mult, vol] of [[1, 1], [2, 0.3], [3, 0.1]]) {
+    const osc = _audioCtx.createOscillator();
+    const g   = _audioCtx.createGain();
+    osc.type  = 'sine';
+    osc.frequency.value = freq * mult;
+    g.gain.value = vol;
+    osc.connect(g); g.connect(master);
+    osc.start(t); osc.stop(t + duration + 0.05);
+  }
+}
+
+function playChordAudio(labels, duration, strum = 0.05) {
+  if (duration === undefined) duration = Math.max(audioPreviewSustain, 0.8);
+  labels.forEach((label, i) => {
+    setTimeout(() => playNote(label, duration), i * strum * 1000);
+  });
+}
+
+function _chordLabels(rootPc, typeName) {
+  const ivs = CHORD_TYPES[typeName];
+  if (!ivs) return [];
+  return ivs.map(iv => {
+    const pc = (rootPc + iv) % 12;
+    const panNote = state.notes.find(n => parsePitchClass(n.label) === pc);
+    return panNote ? panNote.label : getDisplayNames()[pc] + '3';
+  });
+}
+
+function playProgression(progChords, rootPc, tempo = 90) {
+  const beatDur = 60 / tempo;
+  progChords.forEach((c, i) => {
+    const chordRoot = (rootPc + c.s) % 12;
+    const labels = _chordLabels(chordRoot, c.t);
+    if (labels.length) setTimeout(() => playChordAudio(labels), i * beatDur * 1000);
+  });
 }
 
 // ─── Web Audio playback ───────────────────────────────────────────────────────
