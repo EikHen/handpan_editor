@@ -582,8 +582,11 @@ body {
   background: var(--surface-panel-2); border-bottom: 1px solid var(--border-card);
   border-radius: 3px 3px 0 0;
 }
-.hat-bar-hdr.pasteable { color: var(--accent); cursor: pointer; }
+.hat-bar-hdr { cursor: pointer; }
+.hat-bar-hdr.pasteable { color: var(--accent); }
 .hat-bar-hdr.pasteable:hover { color: var(--hand-r); }
+.hat-bar-unit.bar-selected { border-color: var(--accent); }
+.hat-bar-hdr.bar-selected { background: var(--accent-fill); color: var(--accent-bright); }
 .hat-grid { display: grid; gap: 3px 0; width: max-content; }
 .hat-rowlbl {
   display: flex; align-items: center; justify-content: center;
@@ -2531,6 +2534,7 @@ let editMsg        = '';     // transient toolbar status/error message
 let _editMsgTimer  = null;  // auto-clear timer for editMsg
 let _editHistory   = [];     // undo stack of JSON snapshots
 let _copiedBar     = null;   // deep-cloned bar cols for copy/paste
+let _selectedBarIdx = null;  // index of currently selected bar
 let _paintKey      = null;   // symbol held for drag-paint
 let _paintDown     = false;  // mouse button held
 let _rhyBrowserOpen = true;  // browser sidebar visibility
@@ -3371,9 +3375,44 @@ document.addEventListener('keydown', e => {
       (e.key==='z' && (e.ctrlKey||e.metaKey) && e.shiftKey)) { e.preventDefault(); redo(); }
   if (e.key==='d' && (e.ctrlKey||e.metaKey)) { e.preventDefault(); duplicateSelected(); }
 
+  // ── Rhythm bar copy / paste ──────────────────────────────────────────────
+  if (_editModel && (e.ctrlKey || e.metaKey) && e.key === 'c') {
+    const targetCell = _hoveredCell || _lastClickedCell;
+    const bi = _selectedBarIdx !== null ? _selectedBarIdx
+             : (targetCell ? +targetCell.dataset.barIndex : null);
+    if (bi !== null) {
+      e.preventDefault();
+      _copiedBar = JSON.parse(JSON.stringify(_editModel.bars[bi].cols));
+      _selectedBarIdx = bi;
+      editMsg = `Bar ${bi + 1} copied — click bar header or Ctrl+V to paste`;
+      renderRhythms();
+    }
+  }
+  if (_editModel && (e.ctrlKey || e.metaKey) && e.key === 'v' && _copiedBar) {
+    e.preventDefault();
+    _editPushUndo();
+    const insertAfter = _selectedBarIdx !== null ? _selectedBarIdx : _editModel.bars.length - 1;
+    _editModel.bars.splice(insertAfter + 1, 0, { cols: JSON.parse(JSON.stringify(_copiedBar)) });
+    _selectedBarIdx = insertAfter + 1;
+    _reflatten(_editModel);
+    editMsg = `Bar pasted after bar ${insertAfter + 1}`;
+    renderRhythms();
+  }
+
   // ── Rhythm cell keyboard shortcuts ──────────────────────────────────────
   if (_editModel && !inInput && !e.ctrlKey && !e.metaKey && !e.altKey) {
     const _targetCell = _hoveredCell || _lastClickedCell;
+    // i = insert a rest column before the hovered cell
+    if (e.key === 'i' && _targetCell) {
+      e.preventDefault();
+      _editPushUndo();
+      const { barIndex, colInBar } = _targetCell.dataset;
+      _editModel.bars[+barIndex].cols.splice(+colInBar, 0, _restCol(+colInBar > 0));
+      _reflatten(_editModel);
+      editMsg = '';
+      renderRhythms();
+      return;
+    }
     // n = open note picker popup (field notes or fallback text input)
     if (e.key === 'n' && _targetCell) {
       e.preventDefault();
@@ -5110,20 +5149,28 @@ function buildHatGrid(parsed, idx, editable) {
 
     // Header: bar number + optional copy button
     const hdr = document.createElement('div');
-    hdr.className = 'hat-bar-hdr' + (_copiedBar && editable ? ' pasteable' : '');
+    let hdrCls = 'hat-bar-hdr';
+    if (_copiedBar && editable)           hdrCls += ' pasteable';
+    if (_selectedBarIdx === barIdx && editable) hdrCls += ' bar-selected';
+    hdr.className = hdrCls;
     hdr.textContent = String(barIdx + 1);
     if (editable) {
-      hdr.title = _copiedBar ? 'Click to paste copied bar here' : 'Hover for copy button';
-      if (_copiedBar) {
-        hdr.addEventListener('click', e => {
-          e.stopPropagation();
+      hdr.title = _copiedBar
+        ? 'Click to paste · Ctrl+C to copy'
+        : `Click to select (bar ${barIdx + 1}) · Ctrl+C to copy`;
+      hdr.addEventListener('click', e => {
+        e.stopPropagation();
+        if (_copiedBar) {
           _editPushUndo();
           _editModel.bars[barIdx].cols = JSON.parse(JSON.stringify(_copiedBar));
           _reflatten(_editModel);
           editMsg = 'Bar pasted';
           renderRhythms();
-        });
-      }
+        } else {
+          _selectedBarIdx = (_selectedBarIdx === barIdx) ? null : barIdx;
+          renderRhythms();
+        }
+      });
       const copyBtn = document.createElement('span');
       copyBtn.className = 'hat-bar-copy-btn';
       copyBtn.textContent = '⧉';
@@ -5666,7 +5713,7 @@ function selectHat(idx) {
   _reflatten(_editModel);
   editMsg = '';
   _editHistory = [];
-  _copiedBar = null;
+  _copiedBar = null; _selectedBarIdx = null;
   clearTimeout(_hatTextTimer);
   // Sync tempo
   document.getElementById('rhy-play-btn').disabled = false;
@@ -5691,7 +5738,7 @@ function revertEdit() {
   _reflatten(_editModel);
   editMsg = 'Reverted to saved state';
   _editHistory = [];
-  _copiedBar = null;
+  _copiedBar = null; _selectedBarIdx = null;
   clearTimeout(_hatTextTimer);
   renderRhythms();
 }
@@ -6045,10 +6092,24 @@ function showNewPatternModal() {
 
 function _editAddSection() {
   if (!_editModel || !_editModel.bars.length) return;
-  const bi = _editModel.bars.length - 1;
   _editPushUndo();
-  _editModel.bars[bi].sectionHeader = { name: 'section', repeat: 1 };
-  editMsg = 'Section added — click ✎ to rename';
+  const targetCell = _hoveredCell || _lastClickedCell;
+  if (targetCell) {
+    // Attach section label to the bar the user is hovering/last clicked
+    const bi = +targetCell.dataset.barIndex;
+    _editModel.bars[bi].sectionHeader = { name: 'section', repeat: 1 };
+    editMsg = `Section added to bar ${bi + 1} — click ✎ to rename`;
+  } else {
+    // No context: append a fresh bar carrying the new section header
+    const last = _editModel.bars[_editModel.bars.length - 1];
+    const newBar = {
+      cols: last.cols.map((c, i) => ({ ...(_restCol(c.sub)), sub: i > 0 && c.sub })),
+      sectionHeader: { name: 'section', repeat: 1 },
+    };
+    _editModel.bars.push(newBar);
+    _reflatten(_editModel);
+    editMsg = 'New section bar added — click ✎ to rename';
+  }
   renderRhythms();
 }
 
@@ -6372,18 +6433,25 @@ function ensureAudioCtx() {
   if (_audioCtx.state === 'suspended') _audioCtx.resume();
 }
 
-// Voice per hit symbol — sound is determined by the symbol, hand by the line.
+// Voice per hit symbol — each symbol has its own freq, volume and decay.
+// dc = envelope decay in seconds (muted hits decay faster).
 function _voice(hit) {
-  switch (hit.toUpperCase()) {
-    case 'D': return hit === 'd' ? { f: 200, v: 0.11 } : { f: 200, v: 0.30 };
-    case 'S': return { f: 920, v: 0.22 };
-    case '•': return { f: 680, v: 0.025 };
+  switch (hit) {
+    case 'D': return { f: 200, v: 0.30, dc: 0.09 };
+    case 'd': return { f: 190, v: 0.12, dc: 0.04 };
+    case 'T': return { f: 580, v: 0.24, dc: 0.08 };
+    case 't': return { f: 580, v: 0.09, dc: 0.04 };
+    case 'K': return { f: 420, v: 0.22, dc: 0.08 };
+    case 'k': return { f: 420, v: 0.08, dc: 0.04 };
+    case 'S': return { f: 920, v: 0.22, dc: 0.05 };
+    case '•': return { f: 440, v: 0.025, dc: 0.08 };
     case '-': return null;
-    default:  return { f: 680, v: 0.24 };          // T / K / t / k
+    default:  return null;
   }
 }
 
-function _playOsc(time, freq, vol, pan) {
+function _playOsc(time, freq, vol, pan, dc) {
+  const decay = dc || 0.07;
   const osc  = _audioCtx.createOscillator();
   const gain = _audioCtx.createGain();
   const node = _audioCtx.createStereoPanner
@@ -6391,21 +6459,42 @@ function _playOsc(time, freq, vol, pan) {
   osc.type = 'sine';
   osc.frequency.value = freq;
   gain.gain.setValueAtTime(vol, time);
-  gain.gain.exponentialRampToValueAtTime(0.001, time + 0.07);
+  gain.gain.exponentialRampToValueAtTime(0.001, time + decay);
   osc.connect(gain);
   if (node) { node.pan.value = pan; gain.connect(node); node.connect(_audioCtx.destination); }
   else gain.connect(_audioCtx.destination);
   osc.start(time);
-  osc.stop(time + 0.08);
+  osc.stop(time + decay + 0.01);
+}
+
+// Schedule a pitched note (field note) at a precise audio time.
+// Uses a short fixed duration so notes don't bleed into each other.
+function _scheduleNote(time, label) {
+  const dur  = Math.min(audioPreviewSustain, 0.5);
+  const freq = midiToFreq(midiNote(label));
+  const master = _audioCtx.createGain();
+  master.gain.setValueAtTime(0.28 * audioPreviewVol, time);
+  master.gain.exponentialRampToValueAtTime(0.001, time + dur);
+  master.connect(_audioCtx.destination);
+  for (const [mult, vol] of [[1, 1], [2, 0.3], [3, 0.1]]) {
+    const osc = _audioCtx.createOscillator();
+    const g   = _audioCtx.createGain();
+    osc.type  = 'sine';
+    osc.frequency.value = freq * mult;
+    g.gain.value = vol;
+    osc.connect(g); g.connect(master);
+    osc.start(time); osc.stop(time + dur + 0.05);
+  }
 }
 
 function scheduleHit(time, ev, pan) {
   if (!ev || ev.hit === '-') return;
   if (ev.hit === '•' && ghostVol === 0) return;
+  if (ev.hit.length > 1) { _scheduleNote(time, ev.hit); return; } // field note
   const v = _voice(ev.hit);
   if (!v) return;
   const vol = ev.hit === '•' ? ghostVol : v.v;
-  _playOsc(time, v.f, vol, pan);
+  _playOsc(time, v.f, vol, pan, v.dc);
 }
 
 // Step index k always sounds at exactly  _playStartTime + k*dt  (no float
@@ -6415,7 +6504,7 @@ function _stepTime(step, dt) { return _playStartTime + step * dt; }
 
 function scheduleRhythm() {
   if (activeHatIdx == null) return;
-  const parsed = getParsed(activeHatIdx);
+  const parsed = _editModel || getParsed(activeHatIdx);
   if (!parsed.ok || !parsed.cols.length) return;
   const cols = parsed.cols;
   const dt   = secPerCell(parsed.meta);
@@ -6439,7 +6528,7 @@ function scheduleRhythm() {
 
 function animatePlayhead() {
   if (!rhythmPlaying || !_audioCtx || activeHatIdx == null) return;
-  const parsed = getParsed(activeHatIdx);
+  const parsed = _editModel || getParsed(activeHatIdx);
   if (!parsed.ok || !parsed.cols.length) return;
   const n  = parsed.cols.length;
   const dt = secPerCell(parsed.meta);
