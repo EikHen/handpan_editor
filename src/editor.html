@@ -1198,8 +1198,8 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
           <input type="range" id="audio-vol" min="0" max="100" step="5" value="50"/>
         </div>
         <div class="row">
-          <label>Sustain: <b id="audio-sustain-val">0.8</b>s</label>
-          <input type="range" id="audio-sustain" min="0.2" max="4" step="0.1" value="0.8"/>
+          <label>Sustain: <b id="audio-sustain-val">2.5</b>s</label>
+          <input type="range" id="audio-sustain" min="0.2" max="4" step="0.1" value="2.5"/>
         </div>
       </div>
     </div>
@@ -2199,7 +2199,7 @@ const DEFAULT_STATE = {
     {"id":"n7", "x":309,"y":421,"r":50,"label":"F4"},
     {"id":"n8", "x":635,"y":339,"r":50,"label":"G4"},
     {"id":"n9", "x":388,"y":327,"r":50,"label":"A4"},
-    {"id":"n10","x":506,"y":295,"r":50,"label":"C4"},
+    {"id":"n10","x":506,"y":295,"r":50,"label":"C5"},
     {"id":"n15","x":647,"y":134,"r":43,"label":"F5"},
     {"id":"n17","x":180,"y":774,"r":71,"label":"E3"},
     {"id":"n18","x":842,"y":753,"r":77,"label":"Bb2"},
@@ -6314,7 +6314,7 @@ function setCell(barIdx, colIdx, hand, sym) {
 // ─── Note / chord audio preview ──────────────────────────────────────────────
 
 let audioPreviewVol     = 0.5;
-let audioPreviewSustain = 0.8;
+let audioPreviewSustain = 2.5;
 
 function midiToFreq(midi) { return 440 * Math.pow(2, (midi - 69) / 12); }
 
