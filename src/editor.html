@@ -637,7 +637,17 @@ body {
 .hat-cell.edit-cell:hover {
   outline: 1px solid var(--accent-warm); outline-offset: -1px; filter: brightness(1.35);
 }
+/* Rest and ghost cells are already near-white — darken instead of brightening */
+.hat-cell.edit-cell.k-rest:hover,
+.hat-cell.edit-cell.k-ghost:hover { filter: brightness(0.88); }
 .hat-cell.edit-cell[title] { cursor: pointer; }
+/* Column selection */
+.hat-cell.col-selected { box-shadow: inset 0 0 0 2px var(--accent-warm) !important; }
+.hat-col-sel-cell {
+  height: 14px; cursor: pointer; background: transparent; border-radius: 1px;
+}
+.hat-col-sel-cell:hover { background: var(--accent-fill); }
+.hat-col-sel-cell.col-selected { background: var(--accent-warm); }
 
 /* HAT source disclosure */
 .hat-src { margin-top: 9px; }
@@ -1093,32 +1103,6 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
           <button class="btn" onclick="redo()" title="Ctrl+Y"><svg class="icon" aria-hidden="true"><use href="#i-redo"/></svg> Redo</button>
         </div>
 
-        <!-- Advanced section -->
-        <div class="panel-sub-label advanced-toggle" onclick="toggleAdvanced(this)" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
-          Advanced <span class="adv-chevron">▸</span>
-        </div>
-        <div class="advanced-body" style="display:none;">
-          <div class="panel-sub-label">Enharmonics</div>
-          <div class="row" style="margin-bottom:8px;">
-            <select id="enharmonic-mode" title="Note name spelling">
-              <option value="-">— default</option>
-              <option value="proper">proper (auto key)</option>
-              <option value="#"># sharps</option>
-              <option value="b">♭ flats</option>
-            </select>
-          </div>
-
-          <div class="panel-sub-label">Pan body</div>
-          <div class="row" style="margin-bottom:8px;">
-            <label>Radius: <b id="pan-r-val">320</b> px</label>
-            <input type="range" id="pan-r" min="80" max="480" step="1" value="320"/>
-          </div>
-
-          <div class="btn-row" style="margin-bottom:2px;">
-            <button class="btn" onclick="exportCurrentSVG()" title="Export current view as SVG"><svg class="icon" aria-hidden="true"><use href="#i-arrow-down"/></svg> SVG</button>
-            <button class="btn" onclick="exportCurrentPNG()" title="Export current view as PNG"><svg class="icon" aria-hidden="true"><use href="#i-arrow-down"/></svg> PNG</button>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -1226,6 +1210,35 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
           <code>Ctrl+Z/Y</code> — undo/redo<br>
           <code>Esc</code> — deselect<br>
           <b>Alt+Click</b> — play note/chord
+        </div>
+      </div>
+    </div>
+
+    <!-- Advanced -->
+    <div class="panel collapsed">
+      <div class="panel-title" onclick="togglePanel(this)">Advanced <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section"></button></div>
+      <div class="panel-body">
+        <div class="panel-sub-label">Enharmonics</div>
+        <div class="row" style="margin-bottom:8px;">
+          <select id="enharmonic-mode" title="Note name spelling">
+            <option value="-">— default</option>
+            <option value="proper">proper (auto key)</option>
+            <option value="#"># sharps</option>
+            <option value="b">♭ flats</option>
+          </select>
+        </div>
+        <div class="panel-sub-label">Pan body</div>
+        <div class="row" style="margin-bottom:8px;">
+          <label>Radius: <b id="pan-r-val">320</b> px</label>
+          <input type="range" id="pan-r" min="80" max="480" step="1" value="320"/>
+        </div>
+        <div class="btn-row" style="margin-bottom:8px;">
+          <button class="btn" onclick="exportCurrentSVG()" title="Export current view as SVG"><svg class="icon" aria-hidden="true"><use href="#i-arrow-down"/></svg> SVG</button>
+          <button class="btn" onclick="exportCurrentPNG()" title="Export current view as PNG"><svg class="icon" aria-hidden="true"><use href="#i-arrow-down"/></svg> PNG</button>
+        </div>
+        <div class="panel-sub-label" style="margin-top:4px;">Data</div>
+        <div class="btn-row">
+          <button class="btn danger" onclick="clearSavedData()" title="Remove all saved layout, settings and rhythm edits from local storage">Clear Cache</button>
         </div>
       </div>
     </div>
@@ -2519,6 +2532,48 @@ let progExportRootPcs = new Set([-1]); // -1 = auto; multi-select
 // Enharmonics state
 let enharmonicMode = '-'; // '-' | 'proper' | '#' | 'b'
 
+// ─── localStorage persistence ─────────────────────────────────────────────────
+const LS_LAYOUT   = 'handpan-layout-v1';
+const LS_SETTINGS = 'handpan-settings-v1';
+const LS_RHYTHMS  = 'handpan-rhythms-v1';
+
+let _saveTimer = null;
+function scheduleSave() {
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(() => {
+    try {
+      localStorage.setItem(LS_LAYOUT, snapshot());
+    } catch(e) {}
+  }, 800);
+}
+
+function saveSettings() {
+  try {
+    localStorage.setItem(LS_SETTINGS, JSON.stringify({
+      enharmonicMode,
+      vol: Math.round(audioPreviewVol * 100),
+      sustain: audioPreviewSustain,
+    }));
+  } catch(e) {}
+}
+
+function saveRhythms() {
+  try {
+    const edited = HAT_PATTERNS
+      .filter(p => p.edited)
+      .map(p => ({ id: p.id, hat: p.hat }));
+    localStorage.setItem(LS_RHYTHMS, JSON.stringify(edited));
+  } catch(e) {}
+}
+
+function clearSavedData() {
+  if (!confirm('Clear all saved data (layout, settings, rhythm edits)?')) return;
+  localStorage.removeItem(LS_LAYOUT);
+  localStorage.removeItem(LS_SETTINGS);
+  localStorage.removeItem(LS_RHYTHMS);
+  location.reload();
+}
+
 // Rhythm panel state
 let activeHatIdx   = null;   // index into HAT_PATTERNS — the active/editing pattern
 let ghostVol       = 0.025;  // ghost note volume (• notes); 0 = silent
@@ -2533,8 +2588,12 @@ let _hatTextTimer  = null;   // debounce timer for live HAT text editing
 let editMsg        = '';     // transient toolbar status/error message
 let _editMsgTimer  = null;  // auto-clear timer for editMsg
 let _editHistory   = [];     // undo stack of JSON snapshots
-let _copiedBar     = null;   // deep-cloned bar cols for copy/paste
-let _selectedBarIdx = null;  // index of currently selected bar
+let _copiedBars    = null;   // array of bar-cols arrays for copy/paste
+let _selectedBarIdxs = new Set(); // indices of currently selected bars
+let _copiedCols    = null;   // array of { R, L } for column copy/paste
+let _selectedColFlats = new Set(); // flat column indices of selected columns
+let _colSelAnchor  = null;   // last clicked column flat-index for range-select
+let _barSelAnchor  = null;   // last clicked bar index for range-select
 let _paintKey      = null;   // symbol held for drag-paint
 let _paintDown     = false;  // mouse button held
 let _rhyBrowserOpen = true;  // browser sidebar visibility
@@ -2559,6 +2618,7 @@ function pushHistory() {
   histIdx = history.length - 1;
   if (history.length > 120) { history.shift(); histIdx--; }
   if (appMode === 'explore') { _initExplorePanel(); }
+  scheduleSave();
 }
 
 function undo() { if (histIdx > 0)                    { histIdx--; restore(history[histIdx]); } }
@@ -2751,6 +2811,18 @@ function pt(e) {
 let iact = null, nudgeTimer = null;
 
 function onNoteDown(e) {
+  // In explore mode + By Selection highlight: allow click-to-select notes without mutation
+  if (appMode === 'explore' && hlMode === 'selection') {
+    e.stopPropagation();
+    const id = e.currentTarget.getAttribute('data-id');
+    if (e.shiftKey) {
+      selectedIds.has(id) ? selectedIds.delete(id) : selectedIds.add(id);
+    } else {
+      selectedIds = new Set([id]);
+    }
+    render(); updateSelectionInfo();
+    return;
+  }
   if (appMode !== 'edit') return;
   const p0 = pt(e);   // capture before any DOM mutation
 
@@ -3252,16 +3324,19 @@ document.getElementById('enharmonic-mode').addEventListener('change', function()
   refreshChordRootDropdown();
   if (appMode === 'explore') { _initExplorePanel(); }
   updateChordInfo(); buildNoteLegend();
+  saveSettings();
 });
 
 // Audio controls
 document.getElementById('audio-vol').addEventListener('input', function() {
   audioPreviewVol = this.value / 100;
   document.getElementById('audio-vol-val').textContent = this.value;
+  saveSettings();
 });
 document.getElementById('audio-sustain').addEventListener('input', function() {
   audioPreviewSustain = parseFloat(this.value);
   document.getElementById('audio-sustain-val').textContent = this.value;
+  saveSettings();
 });
 
 // Templates dropdown
@@ -3375,39 +3450,100 @@ document.addEventListener('keydown', e => {
       (e.key==='z' && (e.ctrlKey||e.metaKey) && e.shiftKey)) { e.preventDefault(); redo(); }
   if (e.key==='d' && (e.ctrlKey||e.metaKey)) { e.preventDefault(); duplicateSelected(); }
 
-  // ── Rhythm bar copy / paste ──────────────────────────────────────────────
+  // ── Rhythm column / bar copy & paste ─────────────────────────────────────
   if (_editModel && (e.ctrlKey || e.metaKey) && e.key === 'c') {
     const targetCell = _hoveredCell || _lastClickedCell;
-    const bi = _selectedBarIdx !== null ? _selectedBarIdx
-             : (targetCell ? +targetCell.dataset.barIndex : null);
-    if (bi !== null) {
+    if (_selectedColFlats.size > 0) {
+      // Column copy — all selected columns in flat-index order
       e.preventDefault();
-      _copiedBar = JSON.parse(JSON.stringify(_editModel.bars[bi].cols));
-      _selectedBarIdx = bi;
-      editMsg = `Bar ${bi + 1} copied — click bar header or Ctrl+V to paste`;
+      const sorted = [..._selectedColFlats].sort((a, b) => a - b);
+      _copiedCols = sorted.map(fi => {
+        const col = _editModel.cols[fi];
+        return col ? { R: { ...col.R }, L: { ...col.L } } : null;
+      }).filter(Boolean);
+      _copiedBars = null;
+      editMsg = `${_copiedCols.length} column(s) copied — hover target & Ctrl+V to paste`;
       renderRhythms();
+    } else {
+      // Bar copy — selected bars, or bar at hovered cell
+      const selected = [..._selectedBarIdxs].sort((a, b) => a - b);
+      const indices = selected.length > 0 ? selected
+                    : targetCell ? [+targetCell.dataset.barIndex] : [];
+      if (indices.length > 0) {
+        e.preventDefault();
+        _copiedBars = indices.map(bi => JSON.parse(JSON.stringify(_editModel.bars[bi].cols)));
+        _copiedCols = null;
+        _selectedBarIdxs = new Set(indices);
+        editMsg = `${_copiedBars.length} bar(s) copied — Ctrl+V to paste`;
+        renderRhythms();
+      }
     }
   }
-  if (_editModel && (e.ctrlKey || e.metaKey) && e.key === 'v' && _copiedBar) {
-    e.preventDefault();
-    _editPushUndo();
-    const insertAfter = _selectedBarIdx !== null ? _selectedBarIdx : _editModel.bars.length - 1;
-    _editModel.bars.splice(insertAfter + 1, 0, { cols: JSON.parse(JSON.stringify(_copiedBar)) });
-    _selectedBarIdx = insertAfter + 1;
-    _reflatten(_editModel);
-    editMsg = `Bar pasted after bar ${insertAfter + 1}`;
-    renderRhythms();
+  if (_editModel && (e.ctrlKey || e.metaKey) && e.key === 'v') {
+    const targetCell = _hoveredCell || _lastClickedCell;
+    if (_copiedCols && _copiedCols.length > 0 && targetCell) {
+      // Paste column sequence starting at the hovered column
+      e.preventDefault();
+      _editPushUndo();
+      const startFlat = +targetCell.dataset.col;
+      _copiedCols.forEach((cc, i) => {
+        const fi = startFlat + i;
+        if (fi >= _editModel.cols.length) return;
+        const c = _editModel.cols[fi];
+        _editModel.bars[c.barIndex].cols[c.colInBar].R = { ...cc.R };
+        _editModel.bars[c.barIndex].cols[c.colInBar].L = { ...cc.L };
+      });
+      _reflatten(_editModel);
+      editMsg = `${_copiedCols.length} column(s) pasted`;
+      renderRhythms();
+    } else if (_copiedBars && _copiedBars.length > 0) {
+      // Paste bar sequence after highest selected bar (or last bar)
+      e.preventDefault();
+      _editPushUndo();
+      const insertAfter = _selectedBarIdxs.size > 0
+        ? Math.max(..._selectedBarIdxs)
+        : _editModel.bars.length - 1;
+      const newBars = _copiedBars.map(cols => ({ cols: JSON.parse(JSON.stringify(cols)) }));
+      _editModel.bars.splice(insertAfter + 1, 0, ...newBars);
+      _selectedBarIdxs = new Set(newBars.map((_, i) => insertAfter + 1 + i));
+      _reflatten(_editModel);
+      editMsg = `${_copiedBars.length} bar(s) pasted`;
+      renderRhythms();
+    }
   }
 
   // ── Rhythm cell keyboard shortcuts ──────────────────────────────────────
   if (_editModel && !inInput && !e.ctrlKey && !e.metaKey && !e.altKey) {
     const _targetCell = _hoveredCell || _lastClickedCell;
-    // i = insert a rest column before the hovered cell
+    // i = insert a plain rest column before the hovered cell
     if (e.key === 'i' && _targetCell) {
       e.preventDefault();
       _editPushUndo();
       const { barIndex, colInBar } = _targetCell.dataset;
-      _editModel.bars[+barIndex].cols.splice(+colInBar, 0, _restCol(+colInBar > 0));
+      _editModel.bars[+barIndex].cols.splice(+colInBar, 0, _restCol(false));
+      _reflatten(_editModel);
+      editMsg = '';
+      renderRhythms();
+      return;
+    }
+    // I = toggle subdivision divider (|) on the hovered column without inserting
+    if (e.key === 'I' && _targetCell) {
+      e.preventDefault();
+      const { barIndex, colInBar } = _targetCell.dataset;
+      if (+colInBar > 0) { // col 0 is always a bar boundary, can't toggle
+        _editPushUndo();
+        _editModel.bars[+barIndex].cols[+colInBar].sub = !_editModel.bars[+barIndex].cols[+colInBar].sub;
+        _reflatten(_editModel);
+        renderRhythms();
+      }
+      return;
+    }
+    // o = insert a plain rest column AFTER the hovered cell
+    if (e.key === 'o' && _targetCell) {
+      e.preventDefault();
+      _editPushUndo();
+      const { barIndex, colInBar } = _targetCell.dataset;
+      _editModel.bars[+barIndex].cols.splice(+colInBar + 1, 0, _restCol(false));
       _reflatten(_editModel);
       editMsg = '';
       renderRhythms();
@@ -3547,12 +3683,6 @@ function togglePanel(el) {
   (el.classList.contains('panel') ? el : el.closest('.panel')).classList.toggle('collapsed');
 }
 
-function toggleAdvanced(el) {
-  const body = el.nextElementSibling;
-  const hidden = body.style.display === 'none';
-  body.style.display = hidden ? '' : 'none';
-  el.querySelector('.adv-chevron').textContent = hidden ? '▾' : '▸';
-}
 
 // ─── Pan name input ────────────────────────────────────────────────────────────
 
@@ -3813,6 +3943,7 @@ function setMode(mode) {
     buildCatPills(); renderRhythms();
   } else { // 'edit'
     document.querySelector('.panel-audio').classList.add('collapsed');
+    if (prev === 'explore') { selectedIds.clear(); }
     if (prev === 'rhythm') {
       stopPlay();
       const panel = document.getElementById('rhythm-panel');
@@ -4223,6 +4354,7 @@ async function openDetailedProgression(prog, rootPc) {
 }
 
 async function buildDetailedProgressionPng(prog, rootPc) {
+  const SCALE   = 2;            // render at 2× resolution for crisp display
   const W       = 1000;
   const nChords = prog.chords.length;
   const cols    = nChords === 1 ? 1 : 2;
@@ -4258,9 +4390,10 @@ async function buildDetailedProgressionPng(prog, rootPc) {
   const H       = headerH + rows * cellH + footerH;
 
   const canvas = document.createElement('canvas');
-  canvas.width  = W;
-  canvas.height = H;
+  canvas.width  = W * SCALE;
+  canvas.height = H * SCALE;
   const ctx = canvas.getContext('2d');
+  ctx.scale(SCALE, SCALE);
 
   // ── Background & header ──
   ctx.fillStyle = '#fff';
@@ -5150,35 +5283,41 @@ function buildHatGrid(parsed, idx, editable) {
     // Header: bar number + optional copy button
     const hdr = document.createElement('div');
     let hdrCls = 'hat-bar-hdr';
-    if (_copiedBar && editable)           hdrCls += ' pasteable';
-    if (_selectedBarIdx === barIdx && editable) hdrCls += ' bar-selected';
+    if (_selectedBarIdxs.has(barIdx) && editable) hdrCls += ' bar-selected';
     hdr.className = hdrCls;
+    hdr.dataset.barIdx = barIdx;
     hdr.textContent = String(barIdx + 1);
     if (editable) {
-      hdr.title = _copiedBar
-        ? 'Click to paste · Ctrl+C to copy'
-        : `Click to select (bar ${barIdx + 1}) · Ctrl+C to copy`;
+      hdr.title = `Click to select bar ${barIdx + 1} · Shift+click to add · Cmd+click to range-select · Ctrl+C to copy`;
       hdr.addEventListener('click', e => {
         e.stopPropagation();
-        if (_copiedBar) {
-          _editPushUndo();
-          _editModel.bars[barIdx].cols = JSON.parse(JSON.stringify(_copiedBar));
-          _reflatten(_editModel);
-          editMsg = 'Bar pasted';
-          renderRhythms();
+        if ((e.metaKey || e.ctrlKey) && _barSelAnchor !== null) {
+          // Range select: select all bars between anchor and clicked
+          const lo = Math.min(_barSelAnchor, barIdx);
+          const hi = Math.max(_barSelAnchor, barIdx);
+          for (let b = lo; b <= hi; b++) _selectedBarIdxs.add(b);
+          _selectedColFlats = new Set();
+        } else if (e.shiftKey && _selectedBarIdxs.size > 0) {
+          if (_selectedBarIdxs.has(barIdx)) _selectedBarIdxs.delete(barIdx);
+          else _selectedBarIdxs.add(barIdx);
         } else {
-          _selectedBarIdx = (_selectedBarIdx === barIdx) ? null : barIdx;
-          renderRhythms();
+          _selectedBarIdxs = _selectedBarIdxs.has(barIdx) && _selectedBarIdxs.size === 1
+            ? new Set()
+            : new Set([barIdx]);
+          _barSelAnchor = _selectedBarIdxs.size > 0 ? barIdx : null;
+          _selectedColFlats = new Set(); _colSelAnchor = null;
         }
+        _updateSelectionClasses();
       });
       const copyBtn = document.createElement('span');
       copyBtn.className = 'hat-bar-copy-btn';
       copyBtn.textContent = '⧉';
-      copyBtn.title = 'Copy this bar';
+      copyBtn.title = 'Copy this bar (Ctrl+C to copy selection)';
       copyBtn.addEventListener('click', e => {
         e.stopPropagation();
-        _copiedBar = JSON.parse(JSON.stringify(parsed.bars[barIdx].cols));
-        editMsg = 'Bar copied — click another bar number to paste';
+        _copiedBars = [JSON.parse(JSON.stringify(parsed.bars[barIdx].cols))];
+        _copiedCols = null;
+        editMsg = 'Bar copied — Ctrl+V to paste';
         renderRhythms();
       });
       hdr.appendChild(copyBtn);
@@ -5259,6 +5398,7 @@ function buildHatGrid(parsed, idx, editable) {
         if (ci > 0 && col.sub) cls += ' sub-start';
         if (accentSet.has(fi)) cls += ' k-accent';
         if (editable)           cls += ' edit-cell';
+        if (_selectedColFlats.has(fi)) cls += ' col-selected';
         cell.className = cls;
         cell.dataset.col      = fi;          // flat index (used by playback highlight)
         cell.dataset.barIndex = barIdx;
@@ -5288,6 +5428,41 @@ function buildHatGrid(parsed, idx, editable) {
           });
         }
         miniGrid.appendChild(cell);
+      });
+    }
+
+    // Column selector row (editable only) — strip below L row, click to select/deselect
+    if (editable) {
+      miniGrid.appendChild(document.createElement('div')); // corner spacer
+      bar.cols.forEach((col, ci) => {
+        const fi = flatIdx + ci;
+        const sel = _selectedColFlats.has(fi);
+        const selCell = document.createElement('div');
+        selCell.className = 'hat-col-sel-cell' + (sel ? ' col-selected' : '');
+        selCell.dataset.col = fi;
+        selCell.title = sel ? 'Deselect column (click to clear, Shift+click to remove from selection)'
+                            : `Select column ${fi + 1} · Shift+click to add · Cmd+click to range-select · Ctrl+C to copy`;
+        selCell.addEventListener('click', e => {
+          e.stopPropagation();
+          if ((e.metaKey || e.ctrlKey) && _colSelAnchor !== null) {
+            // Range select: select all columns between anchor and clicked
+            const lo = Math.min(_colSelAnchor, fi);
+            const hi = Math.max(_colSelAnchor, fi);
+            for (let f = lo; f <= hi; f++) _selectedColFlats.add(f);
+            _selectedBarIdxs = new Set(); _barSelAnchor = null;
+          } else if (e.shiftKey && _selectedColFlats.size > 0) {
+            if (_selectedColFlats.has(fi)) _selectedColFlats.delete(fi);
+            else _selectedColFlats.add(fi);
+          } else {
+            _selectedColFlats = _selectedColFlats.has(fi) && _selectedColFlats.size === 1
+              ? new Set()
+              : new Set([fi]);
+            _colSelAnchor = _selectedColFlats.size > 0 ? fi : null;
+            _selectedBarIdxs = new Set(); _barSelAnchor = null;
+          }
+          _updateSelectionClasses();
+        });
+        miniGrid.appendChild(selCell);
       });
     }
 
@@ -5428,9 +5603,13 @@ function buildEditorCard(idx) {
         errDiv.style.display = '';
         return;
       }
+      const oldGrid = _editModel ? (_editModel.meta.grid || '8th') : null;
       _editPushUndo();
       _editModel = parsed;
       _refreshEditGrid();
+      if (rhythmPlaying && oldGrid !== null && (parsed.meta.grid || '8th') !== oldGrid) {
+        stopPlay(); startPlay();
+      }
     }, 350);
   });
   src.appendChild(ta);
@@ -5617,6 +5796,7 @@ function _autoSaveEdit() {
     p.hat = newHat;
     p.edited = true;
     delete _parseCache[p.id];
+    saveRhythms();
   }
   clearTimeout(_hatTextTimer);
 }
@@ -5713,7 +5893,7 @@ function selectHat(idx) {
   _reflatten(_editModel);
   editMsg = '';
   _editHistory = [];
-  _copiedBar = null; _selectedBarIdx = null;
+  _copiedBars = null; _selectedBarIdxs = new Set(); _barSelAnchor = null; _copiedCols = null; _selectedColFlats = new Set(); _colSelAnchor = null;
   clearTimeout(_hatTextTimer);
   // Sync tempo
   document.getElementById('rhy-play-btn').disabled = false;
@@ -5738,7 +5918,7 @@ function revertEdit() {
   _reflatten(_editModel);
   editMsg = 'Reverted to saved state';
   _editHistory = [];
-  _copiedBar = null; _selectedBarIdx = null;
+  _copiedBars = null; _selectedBarIdxs = new Set(); _barSelAnchor = null; _copiedCols = null; _selectedColFlats = new Set(); _colSelAnchor = null;
   clearTimeout(_hatTextTimer);
   renderRhythms();
 }
@@ -5757,6 +5937,7 @@ function _editDouble() {
   _editPushUndo();
   const r = doubleSubdivision(_editModel);
   editMsg = r.ok ? `Subdivision doubled → ${_editModel.meta.grid} grid` : `⚠ ${r.error}`;
+  if (r.ok && rhythmPlaying) { stopPlay(); startPlay(); }
   renderRhythms();
 }
 
@@ -5765,6 +5946,7 @@ function _editHalve() {
   _editPushUndo();
   const r = halveSubdivision(_editModel);
   editMsg = r.ok ? `Subdivision halved → ${_editModel.meta.grid} grid` : `⚠ ${r.error}`;
+  if (r.ok && rhythmPlaying) { stopPlay(); startPlay(); }
   renderRhythms();
 }
 
@@ -5798,6 +5980,7 @@ function _editToggleTriplet() {
 
   _reflatten(_editModel);
   editMsg = `Grid → ${_editModel.meta.grid} (${newCount} cells/bar)`;
+  if (rhythmPlaying) { stopPlay(); startPlay(); }
   renderRhythms();
 }
 
@@ -5873,8 +6056,11 @@ function _toggleShortcutPanel() {
         <div class="hat-sc-row"><kbd>Click</kbd> <span>Cycle through symbols (D T K S d \u2022 -)</span></div>
         <div class="hat-sc-row"><kbd>D</kbd> <kbd>T</kbd> <kbd>K</kbd> <kbd>S</kbd> <kbd>d</kbd> <kbd>.</kbd> <kbd>-</kbd> <span>Set cell to symbol (hover or click cell first)</span></div>
         <div class="hat-sc-row"><kbd>1</kbd>-<kbd>9</kbd>, <kbd>0</kbd> <span>Set cell to 1st\u201310th field note</span></div>
-        <div class="hat-sc-row"><kbd>a</kbd>-<kbd>z</kbd> <span>Set cell to 11th+ field notes</span></div>
+        <div class="hat-sc-row"><kbd>q</kbd> <kbd>w</kbd> <kbd>e</kbd> <kbd>r</kbd> <kbd>z</kbd> <kbd>u</kbd> <kbd>p</kbd> <kbd>a</kbd> <kbd>f</kbd> <kbd>g</kbd> <kbd>h</kbd> <kbd>j</kbd> <kbd>l</kbd> <span>Set cell to 11th\u201323rd field note</span></div>
         <div class="hat-sc-row"><kbd>n</kbd> <span>Open note name picker popup</span></div>
+        <div class="hat-sc-row"><kbd>i</kbd> <span>Insert plain rest column before cell</span></div>
+        <div class="hat-sc-row"><kbd>o</kbd> <span>Insert plain rest column after cell</span></div>
+        <div class="hat-sc-row"><kbd>I</kbd> <span>Toggle subdivision divider (|) on hovered column</span></div>
       </div>
       <div class="hat-sc-section">
         <div class="hat-sc-heading">Paint Mode</div>
@@ -5891,6 +6077,11 @@ function _toggleShortcutPanel() {
       </div>
       <div class="hat-sc-section">
         <div class="hat-sc-heading">General</div>
+        <div class="hat-sc-row"><kbd>Click selector strip</kbd> <span>Select column · Shift+click to add · Cmd+click to range-select</span></div>
+        <div class="hat-sc-row"><kbd>Click bar header</kbd> <span>Select bar · Shift+click to add · Cmd+click to range-select</span></div>
+        <div class="hat-sc-row"><kbd>Ctrl+C</kbd> <span>Copy selected columns or bars</span></div>
+        <div class="hat-sc-row"><kbd>Ctrl+V</kbd> <span>Paste columns to hovered position / paste bars after selection</span></div>
+        <div class="hat-sc-row"><kbd>Click elsewhere</kbd> <span>Deselect all</span></div>
         <div class="hat-sc-row"><kbd>Ctrl+Z</kbd> <span>Undo last edit</span></div>
       </div>
     </div>`;
@@ -6088,15 +6279,33 @@ function showNewPatternModal() {
   overlay.querySelector('#np-title').focus();
 }
 
+// ─── Selection helpers ────────────────────────────────────────────────────────
+
+// Lightweight class-only update for selection changes — avoids full DOM rebuild.
+function _updateSelectionClasses() {
+  document.querySelectorAll('.hat-cell[data-col]').forEach(el => {
+    el.classList.toggle('col-selected', _selectedColFlats.has(+el.dataset.col));
+  });
+  document.querySelectorAll('.hat-col-sel-cell[data-col]').forEach(el => {
+    el.classList.toggle('col-selected', _selectedColFlats.has(+el.dataset.col));
+  });
+  document.querySelectorAll('.hat-bar-hdr[data-bar-idx]').forEach(el => {
+    el.classList.toggle('bar-selected', _selectedBarIdxs.has(+el.dataset.barIdx));
+  });
+}
+
 // ─── Section label editing ────────────────────────────────────────────────────
 
 function _editAddSection() {
   if (!_editModel || !_editModel.bars.length) return;
   _editPushUndo();
   const targetCell = _hoveredCell || _lastClickedCell;
-  if (targetCell) {
-    // Attach section label to the bar the user is hovering/last clicked
-    const bi = +targetCell.dataset.barIndex;
+  if (targetCell || _selectedBarIdxs.size > 0) {
+    // If bars are selected, apply to the first (lowest index) selected bar so the
+    // section header always lands at the beginning of the group, not mid-group.
+    const bi = _selectedBarIdxs.size > 0
+      ? Math.min(..._selectedBarIdxs)
+      : +targetCell.dataset.barIndex;
     _editModel.bars[bi].sectionHeader = { name: 'section', repeat: 1 };
     editMsg = `Section added to bar ${bi + 1} — click ✎ to rename`;
   } else {
@@ -6331,9 +6540,9 @@ function _openNoteInput(cellEl) {
   setTimeout(() => document.addEventListener('mousedown', close), 0);
 }
 
-// Letters not used by rhythm symbols (D T K S d t k s • -) or the note-picker (n).
-// These map to field indices 10, 11, 12, … (displayed as a b c e f g h i j l m o p q r u v w x y z)
-const _FIELD_LETTER_KEYS = ['a','b','c','e','f','g','h','i','j','l','m','o','p','q','r','u','v','w','x','y','z'];
+// Letters not used by rhythm symbols (D T K S d t k s • -), note-picker (n), or insert (i/I).
+// These map to field indices 10, 11, … using qwerzuop then afghjl order.
+const _FIELD_LETTER_KEYS = ['q','w','e','r','z','u','p','a','f','g','h','j','l'];
 
 // Key badge for field index i: '1'–'9' for i 0–8, '0' for i=9, letter for i 10+, '' if out of range
 function _fieldKeyBadge(i) {
@@ -6470,7 +6679,7 @@ function _playOsc(time, freq, vol, pan, dc) {
 // Schedule a pitched note (field note) at a precise audio time.
 // Uses a short fixed duration so notes don't bleed into each other.
 function _scheduleNote(time, label) {
-  const dur  = Math.min(audioPreviewSustain, 0.5);
+  const dur  = audioPreviewSustain;
   const freq = midiToFreq(midiNote(label));
   const master = _audioCtx.createGain();
   master.gain.setValueAtTime(0.28 * audioPreviewVol, time);
@@ -6776,13 +6985,77 @@ function syncPanSlider() {
   document.getElementById('pan-r-val').textContent = state.pan.r;
 }
 
+// ─── Rhythm editor: click-outside deselects ───────────────────────────────────
+// Capture phase so it fires even when child handlers call stopPropagation.
+document.addEventListener('click', e => {
+  if (!_selectedColFlats.size && !_selectedBarIdxs.size) return;
+  if (!e.target || !e.target.closest) return;
+  // Keep selection when clicking within the rhythm selector, bar header, or toolbar
+  if (e.target.closest('.hat-col-sel-cell') || e.target.closest('.hat-bar-hdr')
+    || e.target.closest('.hat-edit-toolbar') || e.target.closest('.hat-bar-ctrl')
+    || e.target.closest('.hat-section-lbl')) return;
+  const changed = _selectedColFlats.size > 0 || _selectedBarIdxs.size > 0;
+  _selectedColFlats = new Set(); _colSelAnchor = null;
+  _selectedBarIdxs  = new Set(); _barSelAnchor = null;
+  if (changed) _updateSelectionClasses();
+}, true); // capture phase
+
 // ─── Init: load saved layout ──────────────────────────────────────────────────
 
 (function () {
   document.body.dataset.mode = 'edit';
-  state.pan    = DEFAULT_STATE.pan;
-  state.notes  = JSON.parse(JSON.stringify(DEFAULT_STATE.notes));
-  state.nextId = DEFAULT_STATE.nextId;
+
+  // Restore layout
+  let layoutLoaded = false;
+  try {
+    const raw = localStorage.getItem(LS_LAYOUT);
+    if (raw) {
+      const d = JSON.parse(raw);
+      state.pan    = d.pan;
+      state.notes  = d.notes;
+      state.nextId = d.nextId;
+      layoutLoaded = true;
+    }
+  } catch(e) {}
+  if (!layoutLoaded) {
+    state.pan    = DEFAULT_STATE.pan;
+    state.notes  = JSON.parse(JSON.stringify(DEFAULT_STATE.notes));
+    state.nextId = DEFAULT_STATE.nextId;
+  }
+
+  // Restore settings
+  try {
+    const s = JSON.parse(localStorage.getItem(LS_SETTINGS) || 'null');
+    if (s) {
+      if (s.enharmonicMode) {
+        enharmonicMode = s.enharmonicMode;
+        const el = document.getElementById('enharmonic-mode');
+        if (el) el.value = enharmonicMode;
+      }
+      if (s.vol != null) {
+        audioPreviewVol = s.vol / 100;
+        const volEl = document.getElementById('audio-vol');
+        if (volEl) { volEl.value = s.vol; document.getElementById('audio-vol-val').textContent = s.vol; }
+      }
+      if (s.sustain != null) {
+        audioPreviewSustain = s.sustain;
+        const susEl = document.getElementById('audio-sustain');
+        if (susEl) { susEl.value = s.sustain; document.getElementById('audio-sustain-val').textContent = s.sustain; }
+      }
+    }
+  } catch(e) {}
+
+  // Restore rhythm edits
+  try {
+    const rhythms = JSON.parse(localStorage.getItem(LS_RHYTHMS) || 'null');
+    if (rhythms) {
+      rhythms.forEach(saved => {
+        const p = HAT_PATTERNS.find(p => p.id === saved.id);
+        if (p) { p.hat = saved.hat; p.edited = true; delete _parseCache[p.id]; }
+      });
+    }
+  } catch(e) {}
+
   pushHistory(); resizeCanvas(); render(); syncSidebar(); syncPanSlider();
 })();
 </script>
