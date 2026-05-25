@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Brand — Handpan mark</title>
+<link rel="stylesheet" href="_card.css">
+<style>
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .item {
+    background: var(--surface-card); border: 1px solid var(--border-card); border-radius: 10px;
+    padding: 22px 14px 14px;
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+    box-shadow: var(--shadow-light);
+  }
+  .stage {
+    background: var(--surface-canvas-bg);
+    border-radius: 8px;
+    padding: 18px;
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; min-height: 180px;
+  }
+  .name { font: 600 12px/1 var(--font-sans); color: var(--fg-1); }
+  .meta { font: 10px/1.3 var(--font-mono); color: var(--fg-faint); text-align: center; }
+</style>
+</head>
+<body>
+  <p class="card-intro">A non-wordmark mark — the editor's canvas, distilled. Use for favicons, app icons, or anywhere the wordmark would be too wide.</p>
+  <div class="grid">
+    <div class="item">
+      <div class="stage"><img src="../assets/handpan-mark.svg" width="160" height="160" alt="handpan mark"></div>
+      <div class="name">handpan-mark.svg</div>
+      <div class="meta">256 × 256  ·  full mark</div>
+    </div>
+    <div class="item">
+      <div class="stage"><img src="../assets/handpan-mark.svg" width="96" height="96" alt="handpan mark, small"></div>
+      <div class="name">small</div>
+      <div class="meta">96 × 96  ·  toolbar / tile</div>
+    </div>
+    <div class="item">
+      <div class="stage"><img src="../assets/favicon.svg" width="64" height="64" alt="favicon"></div>
+      <div class="name">favicon.svg</div>
+      <div class="meta">64 × 64  ·  simplified</div>
+    </div>
+  </div>
+</body>
+</html>

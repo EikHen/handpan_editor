@@ -19,16 +19,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<link rel="stylesheet" href="../colors_and_type.css">
 <title>Handpan Layout Editor</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: var(--font-sans);
-  background: var(--surface-app);
-  color: var(--fg-1);
+  font-family: Arial, sans-serif;
+  background: #12121f;
+  color: #dde;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -37,63 +36,31 @@ body {
 
 /* ── Toolbar ─────────────────────────────────────────────────────────── */
 #toolbar {
-  background: var(--surface-panel);
-  border-bottom: 1px solid var(--border-divider);
+  background: #1a1a2e;
+  border-bottom: 1px solid #2a2a4a;
   padding: 0 12px;
-  height: var(--height-toolbar);
+  height: 48px;
   display: flex;
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
   user-select: none;
 }
-#toolbar h1 { font-family: var(--font-alt); font-size: var(--text-15); color: var(--accent-title); margin-right: 4px; white-space: nowrap; }
-.sep { width: 1px; background: var(--border-divider); height: 28px; margin: 0 4px; flex-shrink: 0; }
+#toolbar h1 { font-size: 15px; color: #7ab3d8; margin-right: 4px; white-space: nowrap; }
+.sep { width: 1px; background: #2a2a4a; height: 28px; margin: 0 4px; flex-shrink: 0; }
 .btn {
-  background: var(--surface-card-hover); color: var(--fg-1);
-  border: 1px solid var(--border-input); border-radius: var(--radius-md);
-  padding: var(--pad-button); cursor: pointer; font-size: var(--text-12);
-  white-space: nowrap; transition: background var(--transition-base), border-color var(--transition-base); line-height: 1;
+  background: #1f2547; color: #ccd;
+  border: 1px solid #3a4060; border-radius: 4px;
+  padding: 5px 11px; cursor: pointer; font-size: 12px;
+  white-space: nowrap; transition: background .12s, border-color .12s; line-height: 1;
 }
-.btn:hover { background: var(--accent-fill-hover); border-color: var(--accent); color: var(--fg-1); }
-.btn:active { background: var(--accent-fill); }
-.btn.danger { border-color: var(--danger-border); }
-.btn.danger:hover { background: var(--danger-hover-bg); border-color: var(--danger); color: var(--danger); }
+.btn:hover { background: #2a3060; border-color: #5b8db8; color: #fff; }
+.btn:active { background: #3a4080; }
+.btn.danger { border-color: #803040; }
+.btn.danger:hover { background: #a03050; border-color: #c04060; }
 .btn.icon { padding: 5px 8px; font-size: 14px; }
 .btn.full { width: 100%; text-align: center; margin-top: 5px; }
 .btn-group { display: flex; gap: 3px; }
-.btn.is-active { background: var(--accent-fill); border-color: var(--accent); color: var(--accent-bright); }
-.btn.is-sm { padding: var(--pad-button-small); font-size: var(--text-11); }
-.btn.cta { background: var(--accent-warm-fill); border-color: var(--accent-warm-soft-border); color: var(--accent-warm); }
-.btn.cta:hover { border-color: var(--accent-warm); color: var(--accent-warm-bright); }
-
-/* ── SVG icon helper ─────────────────────────────────────────────────── */
-.icon {
-  width: 14px; height: 14px; display: inline-block;
-  vertical-align: middle; flex-shrink: 0; pointer-events: none;
-}
-.btn .icon { margin-right: 3px; }
-.btn.icon-only { padding: 5px 7px; }
-.btn.icon-only .icon { margin: 0; }
-
-/* ── Mode tabs ───────────────────────────────────────────────────────── */
-.mode-tabs { display: flex; gap: 2px; }
-.mode-tab {
-  background: var(--surface-card-hover); color: var(--fg-2);
-  border: 1px solid var(--border-input); border-radius: var(--radius-md);
-  padding: 5px 14px; cursor: pointer; font: var(--text-12)/1 var(--font-sans);
-  transition: background var(--transition-base), border-color var(--transition-base), color var(--transition-base); white-space: nowrap;
-  display: inline-flex; align-items: center; gap: 5px;
-}
-.mode-tab:hover { background: var(--accent-fill-hover); border-color: var(--accent); color: var(--fg-1); }
-.mode-tab.is-active {
-  background: var(--accent-fill); border-color: var(--accent);
-  color: var(--accent-bright); box-shadow: var(--focus-ring);
-}
-#tab-rhythm.is-active {
-  background: var(--accent-warm-fill); border-color: var(--accent-warm);
-  color: var(--accent-warm-bright); box-shadow: 0 0 0 1px var(--accent-warm);
-}
 
 /* ── Workspace ───────────────────────────────────────────────────────── */
 #workspace { display: flex; flex: 1; overflow: hidden; flex-direction: column; }
@@ -101,49 +68,39 @@ body {
 
 /* ── Sidebar ─────────────────────────────────────────────────────────── */
 #sidebar {
-  width: var(--width-sidebar); min-width: var(--width-sidebar);
-  background: var(--surface-panel);
-  border-right: 1px solid var(--border-divider);
+  width: 252px; min-width: 252px;
+  background: #1a1a2e;
+  border-right: 1px solid #2a2a4a;
   display: flex; flex-direction: column;
   overflow-y: auto; overflow-x: hidden;
   flex-shrink: 0;
 }
-.panel { padding: var(--pad-panel); border-bottom: 1px solid var(--border-divider); }
+.panel { padding: 11px 12px; border-bottom: 1px solid #2a2a4a; }
 .panel-title {
-  font-size: var(--text-10); text-transform: uppercase; letter-spacing: var(--tracking-loose);
-  color: var(--accent); margin-bottom: 9px; font-weight: bold;
-  display: flex; justify-content: space-between; align-items: center;
-  cursor: pointer; user-select: none;
+  font-size: 10px; text-transform: uppercase; letter-spacing: .7px;
+  color: #5b8db8; margin-bottom: 9px; font-weight: bold;
 }
-.panel-collapse-btn {
-  background: none; border: none; padding: 0 2px; cursor: pointer;
-  color: var(--fg-whisper); font-size: 12px; line-height: 1; flex-shrink: 0;
-}
-.panel.collapsed .panel-body { display: none; }
-.panel.collapsed .panel-title { margin-bottom: 0; }
-.panel.collapsed .panel-collapse-btn::before { content: '▸'; }
-.panel:not(.collapsed) .panel-collapse-btn::before { content: '▾'; }
 .row { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; }
 .row:last-child { margin-bottom: 0; }
-.row label { font-size: var(--text-11); color: var(--fg-muted); }
+.row label { font-size: 11px; color: #889; }
 .row input[type=text], .row select {
-  background: var(--surface-input); border: 1px solid var(--border-input); border-radius: var(--radius-sm);
-  color: var(--fg-1); padding: var(--pad-input); font-size: 13px; width: 100%; outline: none;
+  background: #101828; border: 1px solid #3a4060; border-radius: 3px;
+  color: #dde; padding: 4px 7px; font-size: 13px; width: 100%; outline: none;
 }
-.row input[type=text]:focus, .row select:focus { border-color: var(--accent); }
-.row input[type=range] { width: 100%; accent-color: var(--accent); }
+.row input[type=text]:focus, .row select:focus { border-color: #5b8db8; }
+.row input[type=range] { width: 100%; accent-color: #5b8db8; }
 
 /* Pan editing sub-labels and button rows */
 .panel-sub-label {
-  font-size: var(--text-9); text-transform: uppercase; letter-spacing: var(--tracking-medium);
-  color: var(--fg-whisper); margin-bottom: 5px; margin-top: 10px;
+  font-size: 9px; text-transform: uppercase; letter-spacing: .6px;
+  color: #445; margin-bottom: 5px; margin-top: 10px;
 }
 .panel-sub-label:first-child { margin-top: 0; }
 .btn-row { display: flex; gap: 3px; flex-wrap: wrap; margin-bottom: 2px; }
 .btn-row .btn { flex: 1; min-width: 0; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .btn-row .btn.danger { flex: 1; }
 /* Beta superscript on toolbar button */
-.beta-sup { font-size: 7px; color: var(--accent-warm); font-weight: bold; vertical-align: super; margin-left: 1px; letter-spacing: 0; }
+.beta-sup { font-size: 7px; color: #e87a30; font-weight: bold; vertical-align: super; margin-left: 1px; letter-spacing: 0; }
 
 /* Chord checkboxes */
 .chord-grid {
@@ -151,17 +108,17 @@ body {
   gap: 3px 6px; margin: 6px 0;
 }
 .chord-grid label {
-  font-size: 11px; color: var(--fg-2); cursor: pointer;
+  font-size: 11px; color: #aab; cursor: pointer;
   display: flex; align-items: center; gap: 4px;
 }
-.chord-grid input[type=checkbox] { accent-color: var(--accent); cursor: pointer; }
+.chord-grid input[type=checkbox] { accent-color: #5b8db8; cursor: pointer; }
 
 /* Note legend */
 #note-legend {
   display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px;
 }
 .legend-item {
-  display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--fg-2);
+  display: flex; align-items: center; gap: 4px; font-size: 11px; color: #bbc;
 }
 /* Color swatch dot — click opens palette popup */
 .color-swatch {
@@ -169,218 +126,211 @@ body {
   border: 1px solid rgba(255,255,255,0.3);
   cursor: pointer; flex-shrink: 0;
 }
-.color-swatch:hover { outline: 2px solid var(--accent); outline-offset: 1px; }
+.color-swatch:hover { outline: 2px solid #5b8db8; outline-offset: 1px; }
 
 /* Chord info */
 #hl-chord-info {
   font-size: 11px; margin-top: 6px; line-height: 1.6;
-  color: var(--fg-3);
+  color: #99b;
 }
-#hl-chord-info .missing { color: var(--danger); }
-#hl-chord-info .present { color: var(--success); }
+#hl-chord-info .missing { color: #e05; }
+#hl-chord-info .present { color: #5d8; }
 
 /* Export status */
-#export-status { font-size: 11px; color: var(--accent); margin-top: 5px; min-height: 16px; }
+#export-status { font-size: 11px; color: #5b8db8; margin-top: 5px; min-height: 16px; }
 
 /* Shortcuts */
-.kbd { font-size: var(--text-10); color: var(--fg-subtle); line-height: var(--leading-kbd); }
-.kbd b { color: var(--fg-muted); }
+.kbd { font-size: 10px; color: #556; line-height: 1.75; }
+.kbd b { color: #778; }
 .kbd code {
-  background: var(--surface-card-hover); border: 1px solid var(--border-input);
+  background: #1f2547; border: 1px solid #3a4060;
   border-radius: 2px; padding: 0 3px; font-size: 10px;
 }
 
 /* ── Canvas ──────────────────────────────────────────────────────────── */
 #canvas-wrap {
   flex: 1; display: flex; align-items: center; justify-content: center;
-  background: var(--surface-canvas-bg); overflow: auto; position: relative;
+  background: #0d0d1a; overflow: auto; position: relative;
 }
-#canvas { background: white; box-shadow: var(--shadow-canvas); display: block; flex-shrink: 0; }
+#canvas { background: white; box-shadow: 0 0 40px rgba(0,0,0,.6); display: block; flex-shrink: 0; }
 
-/* ── Explore panel ───────────────────────────────────────────────────── */
-#explore-panel {
-  width: 380px; min-width: 260px;
-  background: var(--surface-panel);
-  border-left: 1px solid var(--border-divider);
+/* ── Progressions panel ──────────────────────────────────────────────── */
+#prog-panel {
+  width: 340px; min-width: 240px;
+  background: #1a1a2e;
+  border-left: 1px solid #2a2a4a;
   display: none; flex-direction: column;
-  overflow: hidden; flex-shrink: 0; position: relative;
+  overflow: hidden; flex-shrink: 0;
+  position: relative;
 }
-#explore-resize-handle {
+#prog-panel.open { display: flex; }
+#prog-resize-handle {
   position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
-  cursor: col-resize; background: transparent; transition: background var(--transition-medium); z-index: 10;
+  cursor: col-resize; background: transparent; transition: background .15s; z-index: 10;
 }
-#explore-resize-handle:hover,
-#explore-resize-handle.dragging { background: var(--accent); }
+#prog-resize-handle:hover, #prog-resize-handle.dragging { background: #5b8db8; }
 
-.explore-tab-bar {
-  display: flex; align-items: center;
-  border-bottom: 1px solid var(--border-divider);
-  padding: 0 8px; flex-shrink: 0;
+/* ── Chords panel ────────────────────────────────────────────────────── */
+#chords-panel {
+  width: 320px; min-width: 220px;
+  background: #1a1a2e;
+  border-left: 1px solid #2a2a4a;
+  display: none; flex-direction: column;
+  overflow: hidden; flex-shrink: 0;
+  position: relative;
 }
-.explore-tab {
-  padding: 9px 14px; font: bold var(--text-11)/1 var(--font-sans);
-  color: var(--fg-muted); text-transform: uppercase; letter-spacing: var(--tracking-tight);
-  border: none; border-bottom: 2px solid transparent; margin-bottom: -1px;
-  background: none; cursor: pointer;
-  transition: color var(--transition-base), border-color var(--transition-base);
+#chords-panel.open { display: flex; }
+#chords-resize-handle {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  cursor: col-resize; background: transparent; transition: background .15s; z-index: 10;
 }
-.explore-tab:hover { color: var(--fg-2); }
-.explore-tab.is-active { color: var(--accent-bright); border-bottom-color: var(--accent); }
-
-.explore-filters {
-  padding: 8px 12px 6px; border-bottom: 1px solid var(--border-divider);
-  flex-shrink: 0; display: flex; flex-direction: column; gap: 7px;
-}
-.filter-label {
-  font: var(--text-9)/1 var(--font-sans); color: var(--fg-whisper);
-  text-transform: uppercase; letter-spacing: var(--tracking-medium); margin-bottom: 4px;
-}
+#chords-resize-handle:hover, #chords-resize-handle.dragging { background: #5b8db8; }
 /* Chord type pills — scrollable row */
 .chord-type-pills { display: flex; flex-wrap: wrap; gap: 5px; }
 .chord-type-pill {
-  background: var(--surface-card-hover); color: var(--fg-muted);
-  border: 1px solid var(--border-input); border-radius: var(--radius-pill);
-  padding: var(--pad-pill); font-size: var(--text-11); cursor: pointer;
-  transition: background var(--transition-base), border-color var(--transition-base), color var(--transition-base); white-space: nowrap;
+  background: #1f2547; color: #889;
+  border: 1px solid #3a4060; border-radius: 12px;
+  padding: 4px 10px; font-size: 11px; cursor: pointer;
+  transition: background .12s, border-color .12s, color .12s; white-space: nowrap;
 }
-.chord-type-pill:hover { border-color: var(--accent); color: var(--fg-1); }
-.chord-type-pill.active { background: var(--accent-fill); border-color: var(--accent); color: var(--accent-bright); }
+.chord-type-pill:hover { border-color: #5b8db8; color: #ccd; }
+.chord-type-pill.active { background: #253060; border-color: #5b8db8; color: #8bc4e8; }
 /* Chords card (groups one chord type) */
 .chords-card {
   margin: 0 10px 10px; padding: 9px 9px 8px;
-  background: var(--surface-card); border: 1px solid var(--border-card); border-radius: var(--radius-xl);
+  background: #12121f; border: 1px solid #252540; border-radius: 6px;
 }
 .chords-card-title {
-  font-size: 10px; color: var(--fg-subtle); letter-spacing: .3px;
+  font-size: 10px; color: #556; letter-spacing: .3px;
   margin-bottom: 7px; display: flex; align-items: center; gap: 5px;
 }
-.chords-card-title .ct-sym { font-size: 13px; color: var(--accent-title); }
+.chords-card-title .ct-sym { font-size: 13px; color: #7ab; }
 /* Chord export section inside chords panel */
 .chord-export-section {
-  padding: 10px 12px 12px; border-top: 1px solid var(--border-divider); flex-shrink: 0;
+  padding: 10px 12px 12px; border-top: 1px solid #2a2a4a; flex-shrink: 0;
 }
 .chord-export-title {
   font-size: 10px; text-transform: uppercase; letter-spacing: .6px;
-  color: var(--fg-subtle); margin-bottom: 8px;
+  color: #556; margin-bottom: 8px;
 }
 .chord-export-type-grid {
   display: grid; grid-template-columns: 1fr 1fr 1fr;
   gap: 3px 5px; margin-bottom: 7px;
 }
 .chord-export-type-grid label {
-  font-size: 11px; color: var(--fg-2); cursor: pointer;
+  font-size: 11px; color: #aab; cursor: pointer;
   display: flex; align-items: center; gap: 4px; white-space: nowrap;
 }
-.chord-export-type-grid input[type=checkbox] { accent-color: var(--accent); cursor: pointer; }
+.chord-export-type-grid input[type=checkbox] { accent-color: #5b8db8; cursor: pointer; }
 .chord-export-row { display: flex; gap: 4px; margin-bottom: 7px; }
 .chord-export-row .btn { flex: 1; font-size: 11px; padding: 4px 6px; }
 .chord-export-subtitle {
   font-size: 9px; text-transform: uppercase; letter-spacing: .5px;
-  color: var(--fg-whisper); margin: 8px 0 5px;
+  color: #445; margin: 8px 0 5px;
 }
 .chord-export-play-grid {
   display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px; margin-bottom: 9px;
 }
 .chord-export-play-label {
   display: flex; align-items: center; gap: 5px;
-  font-size: 11px; color: var(--fg-2); cursor: pointer;
+  font-size: 11px; color: #aab; cursor: pointer;
 }
-.chord-export-play-label input { accent-color: var(--accent); cursor: pointer; }
+.chord-export-play-label input { accent-color: #5b8db8; cursor: pointer; }
 #export-status {
-  font-size: 11px; color: var(--accent); min-height: 15px; margin-top: 5px;
+  font-size: 11px; color: #5b8db8; min-height: 15px; margin-top: 5px;
 }
 .prog-header {
   padding: 10px 14px 9px;
-  border-bottom: 1px solid var(--border-divider);
+  border-bottom: 1px solid #2a2a4a;
   display: flex; align-items: center; justify-content: space-between;
   flex-shrink: 0;
 }
-.prog-header-title { font-size: 12px; text-transform: uppercase; letter-spacing: .7px; color: var(--accent); font-weight: bold; }
-.prog-section { padding: 9px 12px 8px; border-bottom: 1px solid var(--border-divider); flex-shrink: 0; }
-.prog-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: .6px; color: var(--fg-subtle); margin-bottom: 7px; }
+.prog-header-title { font-size: 12px; text-transform: uppercase; letter-spacing: .7px; color: #5b8db8; font-weight: bold; }
+.prog-section { padding: 9px 12px 8px; border-bottom: 1px solid #2a2a4a; flex-shrink: 0; }
+.prog-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: .6px; color: #556; margin-bottom: 7px; }
 /* Mood pills */
 .mood-pills { display: flex; flex-wrap: wrap; gap: 5px; }
 .mood-pill {
-  background: var(--surface-card-hover); color: var(--fg-muted);
-  border: 1px solid var(--border-input); border-radius: var(--radius-pill);
-  padding: var(--pad-pill); font-size: var(--text-11); cursor: pointer;
-  transition: background var(--transition-base), border-color var(--transition-base), color var(--transition-base); white-space: nowrap;
+  background: #1f2547; color: #889;
+  border: 1px solid #3a4060; border-radius: 12px;
+  padding: 4px 12px; font-size: 11px; cursor: pointer;
+  transition: background .12s, border-color .12s, color .12s; white-space: nowrap;
 }
-.mood-pill:hover { border-color: var(--accent); color: var(--fg-1); }
-.mood-pill.active { background: var(--accent-fill); border-color: var(--accent); color: var(--accent-bright); }
+.mood-pill:hover { border-color: #5b8db8; color: #ccd; }
+.mood-pill.active { background: #253060; border-color: #5b8db8; color: #8bc4e8; }
 /* Root bar */
 .root-bar { display: flex; flex-wrap: wrap; gap: 3px; }
 .root-btn {
-  background: var(--surface-card-hover); color: var(--fg-faint);
-  border: 1px solid var(--border-card); border-radius: 3px;
+  background: #1f2547; color: #667;
+  border: 1px solid #2e3a55; border-radius: 3px;
   padding: 4px 5px; font-size: 11px; cursor: pointer;
   min-width: 34px; text-align: center;
   transition: background .1s, border-color .1s, color .1s;
 }
-.root-btn:hover { border-color: var(--accent); color: var(--fg-2); }
-.root-btn.on-pan { color: var(--fg-2); border-color: var(--border-input); }
-.root-btn.active { background: var(--accent-fill); border-color: var(--accent); color: var(--accent); font-weight: bold; }
+.root-btn:hover { border-color: #5b8db8; color: #aac; }
+.root-btn.on-pan { color: #9ab; border-color: #3a4a60; }
+.root-btn.active { background: #253060; border-color: #5b8db8; color: #8bc4e8; font-weight: bold; }
 /* Progression list */
 .prog-list { flex: 1; overflow-y: auto; padding: 8px 0 12px; }
 .prog-card {
   margin: 0 10px 10px; padding: 9px 9px 8px;
-  background: var(--surface-card); border: 1px solid var(--border-card); border-radius: var(--radius-xl);
+  background: #12121f; border: 1px solid #252540; border-radius: 6px;
 }
 .prog-card-header {
   display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 7px;
 }
 .prog-card-title {
-  font-size: 10px; color: var(--fg-subtle);
+  font-size: 10px; color: #556;
   letter-spacing: .3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   flex: 1; margin-top: 1px;
 }
 .prog-expand-btn {
-  background: none; border: 1px solid var(--border-divider); border-radius: 3px;
-  color: var(--fg-whisper); font-size: 11px; cursor: pointer; padding: 0 4px; line-height: 16px;
+  background: none; border: 1px solid #2a2a4a; border-radius: 3px;
+  color: #445; font-size: 11px; cursor: pointer; padding: 0 4px; line-height: 16px;
   flex-shrink: 0; margin-left: 4px; transition: border-color .12s, color .12s;
 }
-.prog-expand-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-fill); }
+.prog-expand-btn:hover { border-color: #5b8db8; color: #8bc4e8; background: #1a2040; }
 .chord-row { display: flex; gap: 4px; flex-wrap: wrap; }
 .chord-row--grid4 {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
 }
 .chord-tile {
-  background: var(--surface-card-hover); border: 1px solid var(--border-input); border-radius: 5px;
+  background: #1c1c35; border: 1px solid #333558; border-radius: 5px;
   padding: 5px 6px 4px; cursor: pointer; flex: 1; min-width: 48px;
   display: flex; flex-direction: column; align-items: center; gap: 1px;
   transition: background .12s, border-color .12s;
   user-select: none; position: relative;
 }
 .chord-row--grid4 .chord-tile { flex: unset; min-width: 0; }
-.chord-tile:hover { background: var(--accent-fill); border-color: var(--accent); }
-.chord-tile.active-tile { background: var(--accent-fill); border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-.chord-tile .roman  { font-size: 9px; color: var(--fg-whisper); letter-spacing: .3px; line-height: 1.3; }
-.chord-tile .t-root { font-size: 13px; color: var(--fg-1); font-weight: bold; line-height: 1.1; }
-.chord-tile .t-sym  { font-size: 9px; color: var(--accent-title); line-height: 1.2; }
+.chord-tile:hover { background: #253060; border-color: #5b8db8; }
+.chord-tile.active-tile { background: #253060; border-color: #5b8db8; box-shadow: 0 0 0 1px #5b8db8; }
+.chord-tile .roman  { font-size: 9px; color: #445; letter-spacing: .3px; line-height: 1.3; }
+.chord-tile .t-root { font-size: 13px; color: #ccd; font-weight: bold; line-height: 1.1; }
+.chord-tile .t-sym  { font-size: 9px; color: #7ab; line-height: 1.2; }
 .chord-tile .play-dot { font-size: 9px; margin-top: 1px; }
-.chord-tile.fn-T { border-top: 2px solid var(--fn-tonic); }
-.chord-tile.fn-S { border-top: 2px solid var(--fn-subdom); }
-.chord-tile.fn-D { border-top: 2px solid var(--fn-dominant); }
+.chord-tile.fn-T { border-top: 2px solid #3a6080; }
+.chord-tile.fn-S { border-top: 2px solid #2a6040; }
+.chord-tile.fn-D { border-top: 2px solid #804020; }
 .prog-roman-strip {
   font-family: 'Courier New', Courier, monospace;
-  font-size: 11px; color: var(--fg-whisper); padding: 4px 2px 2px;
+  font-size: 11px; color: #445; padding: 4px 2px 2px;
   letter-spacing: 0.3px; user-select: all;
 }
 .prog-func-legend {
   display: flex; align-items: center; gap: 8px;
   padding: 2px 12px 6px; font-size: 9px;
 }
-.fn-T-lbl { color: var(--fn-tonic-label); }
-.fn-S-lbl { color: var(--fn-subdom-label); }
-.fn-D-lbl { color: var(--fn-dominant-label); }
-.play-full       { color: var(--play-full); }
-.play-partial    { color: var(--play-partial); }
-.play-incomplete { color: var(--play-incomplete); }
-.play-none       { color: var(--fg-whisper); }
+.fn-T-lbl { color: #3a7090; }
+.fn-S-lbl { color: #2a7050; }
+.fn-D-lbl { color: #905030; }
+.play-full       { color: #4c9; }
+.play-partial    { color: #ca0; }
+.play-incomplete { color: #d44; }
+.play-none       { color: #445; }
 /* Playability legend */
 .play-legend {
   display: flex; gap: 10px; padding: 6px 12px 0;
-  font-size: 10px; color: var(--fg-whisper); flex-shrink: 0;
+  font-size: 10px; color: #445; flex-shrink: 0;
   flex-wrap: wrap;
 }
 .play-legend span { display: flex; align-items: center; gap: 3px; }
@@ -388,8 +338,8 @@ body {
 /* ── Rhythm panel ────────────────────────────────────────────────────── */
 /* ── Rhythm Panel (bottom layout) ──────────────────────────────────────────── */
 #rhythm-panel {
-  background: var(--surface-panel);
-  border-top: 1px solid var(--border-divider);
+  background: #1a1a2e;
+  border-top: 1px solid #2a2a4a;
   display: none; flex-direction: column;
   overflow: hidden; flex-shrink: 0;
   height: 300px; min-height: 180px;
@@ -400,7 +350,7 @@ body {
   position: absolute; left: 0; right: 0; top: 0; height: 4px;
   cursor: row-resize; background: transparent; transition: background .15s; z-index: 10;
 }
-#rhythm-resize-handle:hover, #rhythm-resize-handle.dragging { background: var(--accent); }
+#rhythm-resize-handle:hover, #rhythm-resize-handle.dragging { background: #5b8db8; }
 
 /* Main body: browser sidebar + editor */
 .rhy-body {
@@ -411,7 +361,7 @@ body {
 .rhy-browser {
   width: 220px; min-width: 180px; max-width: 320px;
   display: flex; flex-direction: column;
-  border-right: 1px solid var(--border-divider);
+  border-right: 1px solid #2a2a4a;
   flex-shrink: 0; overflow: hidden;
   transition: width .15s, min-width .15s;
 }
@@ -420,67 +370,67 @@ body {
 .rhy-browser-expand-tab {
   display: none; /* hidden by default, shown via JS when collapsed */
   width: 20px; flex-shrink: 0;
-  background: var(--surface-app); border: none; border-right: 1px solid var(--border-divider);
-  color: var(--accent); font-size: 10px; cursor: pointer;
+  background: #16162a; border: none; border-right: 1px solid #2a2a4a;
+  color: #5b8db8; font-size: 10px; cursor: pointer;
   transition: background .1s, color .1s;
   padding: 0;
 }
-.rhy-browser-expand-tab:hover { background: var(--accent-fill); color: var(--accent); }
+.rhy-browser-expand-tab:hover { background: #1e2040; color: #8bc4e8; }
 .rhy-browser-head {
   padding: 7px 10px 6px;
-  border-bottom: 1px solid var(--border-divider);
+  border-bottom: 1px solid #2a2a4a;
   display: flex; align-items: center; justify-content: space-between;
   flex-shrink: 0;
 }
-.rhy-browser-title { font-size: 10px; text-transform: uppercase; letter-spacing: .7px; color: var(--accent); font-weight: bold; }
+.rhy-browser-title { font-size: 10px; text-transform: uppercase; letter-spacing: .7px; color: #5b8db8; font-weight: bold; }
 .rhy-browser-collapse {
   font-size: 11px; padding: 1px 5px; border-radius: 3px;
-  border: 1px solid var(--border-input); background: transparent; color: var(--fg-faint);
+  border: 1px solid #3a4060; background: transparent; color: #667;
   cursor: pointer; transition: color .1s, border-color .1s;
 }
-.rhy-browser-collapse:hover { border-color: var(--accent); color: var(--accent-bright); }
+.rhy-browser-collapse:hover { border-color: #5b8db8; color: #8bc4e8; }
 /* Category pills */
 .rhy-cat-pills { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 4px; padding: 6px 10px; scrollbar-width: none; flex-shrink: 0; }
 .rhy-cat-pills::-webkit-scrollbar { display: none; }
 .rhy-cat-pill {
-  background: var(--surface-card-hover); color: var(--fg-muted);
-  border: 1px solid var(--border-input); border-radius: 12px;
+  background: #1f2547; color: #889;
+  border: 1px solid #3a4060; border-radius: 12px;
   padding: 3px 9px; font-size: 10px; cursor: pointer;
   transition: background .12s, border-color .12s, color .12s; white-space: nowrap;
 }
-.rhy-cat-pill:hover { border-color: var(--accent); color: var(--fg-1); }
-.rhy-cat-pill.active { background: var(--accent-fill); border-color: var(--accent); color: var(--accent-bright); }
+.rhy-cat-pill:hover { border-color: #5b8db8; color: #ccd; }
+.rhy-cat-pill.active { background: #253060; border-color: #5b8db8; color: #8bc4e8; }
 #rhy-search {
   width: calc(100% - 20px); margin: 0 10px 6px; box-sizing: border-box;
-  background: var(--surface-input); border: 1px solid var(--border-input); border-radius: 4px;
-  color: var(--fg-1); padding: 4px 8px; font-size: 11px; outline: none; flex-shrink: 0;
+  background: #101828; border: 1px solid #3a4060; border-radius: 4px;
+  color: #ccd; padding: 4px 8px; font-size: 11px; outline: none; flex-shrink: 0;
 }
-#rhy-search:focus { border-color: var(--accent); }
-#rhy-search::placeholder { color: var(--fg-whisper); }
+#rhy-search:focus { border-color: #5b8db8; }
+#rhy-search::placeholder { color: #446; }
 /* Browser pattern list */
 .rhy-browser-list { flex: 1; overflow-y: auto; padding: 4px 0; }
 .rhy-bcard {
   margin: 0 6px 3px; padding: 6px 9px;
-  background: var(--surface-card); border: 1px solid var(--border-card); border-radius: 5px;
+  background: #12121f; border: 1px solid #252540; border-radius: 5px;
   cursor: pointer; transition: border-color .12s, background .12s;
   display: flex; align-items: center; gap: 6px;
 }
-.rhy-bcard:hover { border-color: var(--border-input); background: var(--surface-app); }
-.rhy-bcard.active { border-color: var(--accent); background: var(--surface-panel-2); }
+.rhy-bcard:hover { border-color: #3a4a60; background: #16162a; }
+.rhy-bcard.active { border-color: #5b8db8; background: #141c30; }
 .rhy-bcard-title {
-  font-size: 11px; color: var(--fg-2); font-weight: 600; flex: 1; min-width: 0;
+  font-size: 11px; color: #bcc; font-weight: 600; flex: 1; min-width: 0;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.rhy-bcard.active .rhy-bcard-title { color: var(--fg-1); }
+.rhy-bcard.active .rhy-bcard-title { color: #dde; }
 .rhy-bcard-badges { display: flex; gap: 3px; flex-shrink: 0; }
 .rhy-bcard-badge {
-  font-size: 8px; color: var(--accent); background: var(--accent-soft-bg);
-  border: 1px solid var(--accent-soft-border); border-radius: 6px; padding: 1px 5px;
+  font-size: 8px; color: #5b8db8; background: #16203a;
+  border: 1px solid #243a55; border-radius: 6px; padding: 1px 5px;
   letter-spacing: .2px;
 }
-.rhy-bcard-badge.edited { background: var(--state-edited-bg); border-color: var(--state-edited-border); color: var(--accent-warm); }
-.rhy-bcard-badge.imported { background: var(--state-imported-bg); border-color: var(--state-imported-border); color: var(--state-imported-fg); }
-.rhy-no-results { font-size: 11px; color: var(--fg-whisper); padding: 18px 10px; text-align: center; }
+.rhy-bcard-badge.edited { background: #2e2410; border-color: #6a5020; color: #c8a050; }
+.rhy-bcard-badge.imported { background: #1e3020; border-color: #3a6040; color: #7ab878; }
+.rhy-no-results { font-size: 11px; color: #446; padding: 18px 10px; text-align: center; }
 
 /* ── Editor area ──────────────────────────────────────────────────────────── */
 .rhy-editor {
@@ -491,9 +441,9 @@ body {
   flex: 1; display: flex; align-items: center; justify-content: center;
 }
 .rhy-welcome { text-align: center; }
-.rhy-welcome-icon { font-size: 32px; color: var(--border-divider); margin-bottom: 8px; }
-.rhy-welcome-title { font-size: 14px; color: var(--fg-subtle); font-weight: bold; margin-bottom: 6px; }
-.rhy-welcome-hint { font-size: 11px; color: var(--fg-whisper); margin-bottom: 14px; line-height: 1.5; }
+.rhy-welcome-icon { font-size: 32px; color: #2a3050; margin-bottom: 8px; }
+.rhy-welcome-title { font-size: 14px; color: #556; font-weight: bold; margin-bottom: 6px; }
+.rhy-welcome-hint { font-size: 11px; color: #445; margin-bottom: 14px; line-height: 1.5; }
 .rhy-welcome-actions { display: flex; gap: 8px; justify-content: center; }
 .rhy-editor-content { flex: 1; overflow-y: auto; padding: 10px 14px; }
 /* Editor card — the single active pattern */
@@ -504,39 +454,39 @@ body {
   display: flex; align-items: baseline; gap: 7px;
   margin-bottom: 8px; flex-wrap: wrap;
 }
-.hat-card-title { font-size: 14px; color: var(--fg-2); font-weight: bold; flex: 1; min-width: 0; }
+.hat-card-title { font-size: 14px; color: #cdd; font-weight: bold; flex: 1; min-width: 0; }
 .hat-badge {
-  font-size: 9px; color: var(--accent); background: var(--accent-soft-bg);
-  border: 1px solid var(--accent-soft-border); border-radius: 8px; padding: 1px 7px;
+  font-size: 9px; color: #5b8db8; background: #16203a;
+  border: 1px solid #243a55; border-radius: 8px; padding: 1px 7px;
   flex-shrink: 0; letter-spacing: .3px;
 }
-.hat-err { font-size: 11px; color: var(--danger); padding: 4px 0; }
-.hat-card-desc { font-size: 10px; color: var(--fg-subtle); margin-bottom: 7px; line-height: 1.4; }
-.hat-badge.imported { background: var(--state-imported-bg); border-color: var(--state-imported-border); color: var(--state-imported-fg); }
-.hat-badge.edited { background: var(--state-edited-bg); border-color: var(--state-edited-border); color: var(--accent-warm); }
+.hat-err { font-size: 11px; color: #d87a5a; padding: 4px 0; }
+.hat-card-desc { font-size: 10px; color: #556; margin-bottom: 7px; line-height: 1.4; }
+.hat-badge.imported { background: #1e3020; border-color: #3a6040; color: #7ab878; }
+.hat-badge.edited { background: #2e2410; border-color: #6a5020; color: #c8a050; }
 
 /* ── Transport bar (footer) ──────────────────────────────────────────────── */
 .rhy-transport {
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-  padding: 5px 12px; border-top: 1px solid var(--border-divider);
-  flex-shrink: 0; background: var(--surface-panel-2);
+  padding: 5px 12px; border-top: 1px solid #2a2a4a;
+  flex-shrink: 0; background: #141428;
 }
-.rhy-tempo-label { font-size: 13px; color: var(--accent-title); flex-shrink: 0; }
+.rhy-tempo-label { font-size: 13px; color: #7ab; flex-shrink: 0; }
 #bpm-input {
-  width: 48px; background: var(--surface-input); border: 1px solid var(--border-input); border-radius: 3px;
-  color: var(--fg-1); padding: 3px 6px; font-size: 12px; text-align: center; outline: none;
+  width: 48px; background: #101828; border: 1px solid #3a4060; border-radius: 3px;
+  color: #dde; padding: 3px 6px; font-size: 12px; text-align: center; outline: none;
 }
-#bpm-input:focus { border-color: var(--accent); }
+#bpm-input:focus { border-color: #5b8db8; }
 .rhy-tap-btn { padding: 3px 9px; font-size: 11px; }
 .rhy-play-btn { padding: 3px 10px; font-size: 11px; }
-.rhy-play-btn.playing { background: var(--danger-hover-bg); border-color: var(--danger); color: var(--danger); }
-.rhy-play-btn.playing:hover { background: var(--danger-hover-bg); }
+.rhy-play-btn.playing { background: #3a2020; border-color: #c05050; color: #e08080; }
+.rhy-play-btn.playing:hover { background: #4a2828; }
 .rhy-ghost-toggle {
   display: flex; align-items: center; gap: 4px;
-  font-size: 10px; color: var(--fg-muted); white-space: nowrap;
+  font-size: 10px; color: #889; white-space: nowrap;
 }
 .rhy-ghost-toggle input[type=range] {
-  width: 44px; accent-color: var(--accent); margin: 0; cursor: pointer;
+  width: 44px; accent-color: #5b8db8; margin: 0; cursor: pointer;
   height: 3px; padding: 0;
 }
 .rhy-transport-spacer { flex: 1; }
@@ -548,58 +498,58 @@ body {
 }
 .rhy-legend-btn {
   font-size: 11px; padding: 2px 6px; border-radius: 3px;
-  border: 1px solid var(--border-input); background: transparent; color: var(--fg-faint);
+  border: 1px solid #3a4060; background: transparent; color: #667;
   cursor: pointer; transition: color .1s, border-color .1s;
 }
-.rhy-legend-btn:hover { border-color: var(--accent); color: var(--accent-bright); }
+.rhy-legend-btn:hover { border-color: #5b8db8; color: #8bc4e8; }
 .rhy-legend-popup {
   display: none; position: absolute; bottom: 100%; right: 0; margin-bottom: 6px;
-  background: var(--surface-panel); border: 1px solid var(--border-input); border-radius: 6px;
+  background: #0d1222; border: 1px solid #3a4060; border-radius: 6px;
   padding: 8px 12px; white-space: nowrap; z-index: 100;
-  box-shadow: var(--shadow-popup);
+  box-shadow: 0 4px 16px #0008;
 }
 .rhy-legend-tip:hover .rhy-legend-popup { display: flex; flex-direction: column; gap: 4px; }
 .rhy-legend-row { display: flex; gap: 6px; align-items: center; }
 .rhy-lbadge {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 18px; height: 18px; border-radius: 3px; border: 1px solid var(--border-card);
+  width: 18px; height: 18px; border-radius: 3px; border: 1px solid #252545;
   font-family: 'Courier New', Courier, monospace; font-size: 11px; font-weight: bold;
 }
-.rhy-lbadge.hand-R { background: var(--hand-r-fill); color: var(--hand-r); border-color: var(--hand-r-border); }
-.rhy-lbadge.hand-L { background: var(--hand-l-fill); color: var(--hand-l); border-color: var(--hand-l-border); }
-.rhy-ltext { font-size: 9px; color: var(--fg-muted); }
+.rhy-lbadge.hand-R { background: #163150; color: #7ab8e8; border-color: #244a6a; }
+.rhy-lbadge.hand-L { background: #3a1808; color: #e89058; border-color: #5a2810; }
+.rhy-ltext { font-size: 9px; color: #778; }
 
 /* ── HAT two-row grid ──────────────────────────────────────────────────────── */
 .hat-grid-wrap { overflow-x: auto; padding-bottom: 2px; }
 .hat-grid-rows { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: flex-start; }
 .hat-bar-unit {
   display: flex; flex-direction: column;
-  border: 1px solid var(--border-card); border-radius: 4px; overflow: hidden;
+  border: 1px solid #1a1a30; border-radius: 4px; overflow: hidden;
 }
 .hat-bar-hdr {
-  font-size: 8px; color: var(--fg-whisper); text-align: left;
+  font-size: 8px; color: #445; text-align: left;
   padding: 2px 4px 3px; position: relative; line-height: 1;
-  background: var(--surface-panel-2); border-bottom: 1px solid var(--border-card);
+  background: #0e0e1e; border-bottom: 1px solid #1a1a30;
   border-radius: 3px 3px 0 0;
 }
-.hat-bar-hdr.pasteable { color: var(--accent); cursor: pointer; }
-.hat-bar-hdr.pasteable:hover { color: var(--hand-r); }
+.hat-bar-hdr.pasteable { color: #5b8db8; cursor: pointer; }
+.hat-bar-hdr.pasteable:hover { color: #7ab8e8; }
 .hat-grid { display: grid; gap: 3px 0; width: max-content; }
 .hat-rowlbl {
   display: flex; align-items: center; justify-content: center;
   width: 22px; font-size: 11px; font-weight: bold;
   font-family: 'Courier New', Courier, monospace;
 }
-.hat-rowlbl.hand-R { color: var(--hand-r); }
-.hat-rowlbl.hand-L { color: var(--hand-l); }
+.hat-rowlbl.hand-R { color: #6fb0e2; }
+.hat-rowlbl.hand-L { color: #e0905a; }
 .hat-marker {
-  font-size: 8px; color: var(--fg-whisper); text-align: center;
+  font-size: 8px; color: #44557a; text-align: center;
   min-width: 26px; line-height: 1; padding-bottom: 1px;
   position: relative;
 }
 .hat-cell {
   min-width: 30px; height: 34px; margin-right: 2px;
-  border-radius: 3px; border: 1px solid var(--border-card);
+  border-radius: 3px; border: 1px solid #1e1e3a;
   display: flex; align-items: center; justify-content: center;
   font-family: 'Courier New', Courier, monospace;
   font-size: 15px; font-weight: bold;
@@ -607,70 +557,70 @@ body {
   position: relative; cursor: pointer;
 }
 /* Right hand = blue family */
-.hat-cell.hand-R.k-hit   { background: var(--hand-r-fill); color: var(--hand-r); border-color: var(--hand-r-border); }
-.hat-cell.hand-R.k-mute  { background: var(--hand-r-fill); color: var(--hand-r-muted); border-color: var(--hand-r-border);
+.hat-cell.hand-R.k-hit   { background: #163150; color: #7ab8e8; border-color: #244a6a; }
+.hat-cell.hand-R.k-mute  { background: #0f1f30; color: #4a82aa; border-color: #18293c;
                            font-size: 12px; font-style: italic; }
-.hat-cell.hand-R.k-ghost { background: var(--hand-r-fill); color: var(--hand-r-ghost); border-color: var(--hand-r-border);
+.hat-cell.hand-R.k-ghost { background: #0d1826; color: #355a78; border-color: #15243a;
                            font-size: 12px; }
 /* Left hand = amber family */
-.hat-cell.hand-L.k-hit   { background: var(--hand-l-fill); color: var(--hand-l); border-color: var(--hand-l-border); }
-.hat-cell.hand-L.k-mute  { background: var(--hand-l-fill); color: var(--hand-l-muted); border-color: var(--hand-l-border);
+.hat-cell.hand-L.k-hit   { background: #3a1808; color: #e89058; border-color: #5a2810; }
+.hat-cell.hand-L.k-mute  { background: #261206; color: #a06038; border-color: #36190a;
                            font-size: 12px; font-style: italic; }
-.hat-cell.hand-L.k-ghost { background: var(--hand-l-fill); color: var(--hand-l-ghost); border-color: var(--hand-l-border);
+.hat-cell.hand-L.k-ghost { background: #1e0e06; color: #7a4a30; border-color: #2c1408;
                            font-size: 12px; }
 /* Rest (either hand) */
-.hat-cell.k-rest { background: var(--surface-input); color: var(--fg-whisper); border-color: var(--border-card); }
+.hat-cell.k-rest { background: #0c0c18; color: #2a2a48; border-color: #161630; }
 /* Structure: bar + subdivision separators */
 .hat-cell.bar-start, .hat-marker.bar-start { margin-left: 10px; }
-.hat-cell.bar-start { border-left: 3px solid var(--accent); }
-.hat-cell.sub-start { border-left: 1px dashed var(--border-divider); }
+.hat-cell.bar-start { border-left: 3px solid #4a6a92; }
+.hat-cell.sub-start { border-left: 1px dashed #34406a; }
 /* Playhead */
 .hat-cell.col-current {
   filter: brightness(1.7);
-  box-shadow: 0 0 0 1px var(--accent);
+  box-shadow: 0 0 0 1px #5b8db8;
 }
 /* Edit hover */
 .hat-cell.edit-cell { cursor: pointer; }
 .hat-cell.edit-cell:hover {
-  outline: 1px solid var(--accent-warm); outline-offset: -1px; filter: brightness(1.35);
+  outline: 1px solid #c8a050; outline-offset: -1px; filter: brightness(1.35);
 }
 .hat-cell.edit-cell[title] { cursor: pointer; }
 
 /* HAT source disclosure */
 .hat-src { margin-top: 9px; }
 .hat-src summary {
-  font-size: 10px; color: var(--fg-subtle); cursor: pointer;
+  font-size: 10px; color: #556; cursor: pointer;
   list-style: none; user-select: none;
   display: flex; align-items: center; gap: 6px;
 }
-.hat-src summary:hover { color: var(--accent-title); }
+.hat-src summary:hover { color: #7ab; }
 .hat-src summary::before { content: '▸ '; flex-shrink: 0; }
 .hat-src[open] summary::before { content: '▾ '; }
 .hat-src-copy-btn {
   font-size: 9px; padding: 1px 6px; margin-left: auto;
-  background: var(--surface-input); border: 1px solid var(--border-input); border-radius: 3px;
-  color: var(--accent); cursor: pointer;
+  background: #111826; border: 1px solid #2a3a50; border-radius: 3px;
+  color: #5a7a9a; cursor: pointer;
   transition: color .1s, border-color .1s, background .1s;
 }
-.hat-src-copy-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--surface-input); }
+.hat-src-copy-btn:hover { color: #8ab8d8; border-color: #4a6a88; background: #182434; }
 .hat-src pre {
   margin: 6px 0 0; padding: 8px 10px;
-  background: var(--surface-input); border: 1px solid var(--border-card); border-radius: 4px;
+  background: #0b0b16; border: 1px solid #1e1e38; border-radius: 4px;
   font-family: 'Courier New', Courier, monospace; font-size: 10px;
-  color: var(--fg-3); overflow-x: auto; white-space: pre; line-height: 1.45;
+  color: #8898b8; overflow-x: auto; white-space: pre; line-height: 1.45;
 }
 .hat-src-ta {
   display: block; width: 100%; margin: 6px 0 0;
   padding: 8px 10px; min-height: 100px; resize: vertical;
-  background: var(--surface-input); border: 1px solid var(--border-divider); border-radius: 4px;
+  background: #0b0b16; border: 1px solid #2a3050; border-radius: 4px;
   font-family: 'Courier New', Courier, monospace; font-size: 10px;
-  color: var(--fg-2); line-height: 1.45; outline: none;
+  color: #aab8d0; line-height: 1.45; outline: none;
   transition: border-color .15s;
 }
-.hat-src-ta:focus { border-color: var(--accent); color: var(--fg-1); }
-.hat-src-ta.hat-src-ta-err { border-color: var(--danger-border) !important; color: var(--danger); }
+.hat-src-ta:focus { border-color: #4a6090; color: #ccd8ee; }
+.hat-src-ta.hat-src-ta-err { border-color: #803030 !important; color: #cc8080; }
 .hat-src-err {
-  font-size: 10px; color: var(--danger); padding: 4px 4px 0;
+  font-size: 10px; color: #d87a5a; padding: 4px 4px 0;
   font-family: 'Courier New', Courier, monospace; line-height: 1.4;
 }
 
@@ -696,68 +646,68 @@ body {
 .hat-edit-toolbar {
   display: flex; align-items: center; flex-wrap: wrap; gap: 5px;
   margin-bottom: 10px; padding: 6px 8px;
-  background: var(--surface-card); border: 1px solid var(--border-card); border-radius: 5px;
+  background: #12121f; border: 1px solid #252540; border-radius: 5px;
   flex-shrink: 0;
 }
 .hat-edit-btn {
   font-size: 10px; padding: 3px 8px; border-radius: 4px;
-  border: 1px solid var(--border-input); background: var(--surface-panel); color: var(--fg-2);
+  border: 1px solid #3a4060; background: #1a1a2e; color: #aab;
   cursor: pointer; transition: border-color .1s, background .1s, color .1s;
 }
-.hat-edit-btn:hover { border-color: var(--accent); color: var(--accent-bright); }
-.hat-edit-btn.revert { border-color: var(--state-edited-border); color: var(--accent-warm); }
-.hat-edit-btn.revert:hover { background: var(--accent-warm-fill); border-color: var(--accent-warm); }
-.hat-edit-btn.active { border-color: var(--accent); color: var(--hand-r); background: var(--accent-fill); }
+.hat-edit-btn:hover { border-color: #5b8db8; color: #8bc4e8; }
+.hat-edit-btn.revert { border-color: #6a5020; color: #c8a050; }
+.hat-edit-btn.revert:hover { background: #2a2010; border-color: #8a6830; }
+.hat-edit-btn.active { border-color: #5b8db8; color: #7ab8e8; background: #0d1e30; }
 .hat-edit-sep {
-  width: 1px; height: 18px; background: var(--border-divider); margin: 0 2px; flex-shrink: 0;
+  width: 1px; height: 18px; background: #2a2a4a; margin: 0 2px; flex-shrink: 0;
 }
 .hat-scale-sel {
   font-size: 10px; padding: 2px 4px;
-  background: var(--surface-input); border: 1px solid var(--border-input); border-radius: 3px;
-  color: var(--fg-2); cursor: pointer; outline: none; max-width: 130px;
+  background: #101828; border: 1px solid #3a4060; border-radius: 3px;
+  color: #8ab; cursor: pointer; outline: none; max-width: 130px;
 }
-.hat-scale-sel:hover { border-color: var(--accent); color: var(--fg-1); }
-.hat-scale-sel:focus { border-color: var(--accent); }
+.hat-scale-sel:hover { border-color: #5b8db8; color: #ccd; }
+.hat-scale-sel:focus { border-color: #5b8db8; }
 .hat-edit-spacer { flex: 1; min-width: 8px; }
 .hat-edit-msg {
-  flex-basis: 100%; font-size: 10px; color: var(--fg-2); padding-top: 2px;
+  flex-basis: 100%; font-size: 10px; color: #8a9; padding-top: 2px;
 }
-.hat-edit-msg.err { color: var(--danger); }
+.hat-edit-msg.err { color: #d88a5a; }
 /* Shortcut reference panel */
 .hat-shortcut-panel {
   position: absolute; top: 8px; right: 8px; bottom: 8px;
   width: 300px; max-width: calc(100% - 16px);
-  background: var(--surface-panel); border: 1px solid var(--border-input); border-radius: 8px;
-  box-shadow: var(--shadow-modal); z-index: 50;
+  background: #0d1222; border: 1px solid #3a4060; border-radius: 8px;
+  box-shadow: 0 8px 30px #000b; z-index: 50;
   display: flex; flex-direction: column; overflow: hidden;
 }
 .hat-sc-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 14px 8px; border-bottom: 1px solid var(--border-divider);
+  padding: 10px 14px 8px; border-bottom: 1px solid #2a2a4a;
 }
-.hat-sc-title { font-size: 12px; font-weight: bold; color: var(--accent); letter-spacing: .5px; }
+.hat-sc-title { font-size: 12px; font-weight: bold; color: #8bc4e8; letter-spacing: .5px; }
 .hat-sc-close {
   font-size: 11px; padding: 2px 6px; border-radius: 3px;
-  border: 1px solid var(--border-input); background: transparent; color: var(--fg-faint);
+  border: 1px solid #3a4060; background: transparent; color: #667;
   cursor: pointer;
 }
-.hat-sc-close:hover { border-color: var(--accent); color: var(--accent-bright); }
+.hat-sc-close:hover { border-color: #5b8db8; color: #8bc4e8; }
 .hat-sc-body { flex: 1; overflow-y: auto; padding: 10px 14px 14px; }
 .hat-sc-section { margin-bottom: 12px; }
 .hat-sc-section:last-child { margin-bottom: 0; }
 .hat-sc-heading {
   font-size: 9px; text-transform: uppercase; letter-spacing: .8px;
-  color: var(--accent); margin-bottom: 6px; font-weight: bold;
+  color: #5b8db8; margin-bottom: 6px; font-weight: bold;
 }
 .hat-sc-row {
-  font-size: 11px; color: var(--fg-3); line-height: 1.7;
+  font-size: 11px; color: #99a; line-height: 1.7;
   display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap;
 }
 .hat-sc-row kbd {
   font-family: 'Courier New', Courier, monospace;
   font-size: 10px; padding: 1px 5px;
-  background: var(--surface-panel); border: 1px solid var(--border-input); border-radius: 3px;
-  color: var(--fg-1); white-space: nowrap;
+  background: #1a1a2e; border: 1px solid #3a4060; border-radius: 3px;
+  color: #ccd; white-space: nowrap;
 }
 .hat-sc-row span { flex: 1; min-width: 0; }
 
@@ -766,22 +716,22 @@ body {
 .hat-bar-ctrl { display: flex; align-items: center; justify-content: center; gap: 3px; padding: 2px 0; }
 .hat-bar-ctrl-btn {
   font-size: 13px; line-height: 1; padding: 0 5px; height: 18px;
-  border-radius: 3px; border: 1px solid var(--border-input); background: var(--surface-card-hover); color: var(--fg-muted);
+  border-radius: 3px; border: 1px solid #3a3060; background: #1a182a; color: #8890c0;
   cursor: pointer; transition: border-color .1s, color .1s;
 }
-.hat-bar-ctrl-btn:hover { border-color: var(--accent-warm); color: var(--accent-warm); }
+.hat-bar-ctrl-btn:hover { border-color: #c8a050; color: #e8c878; }
 /* Copied bar marker */
 .hat-marker.pasteable { cursor: pointer; }
-.hat-marker.pasteable:hover { color: var(--accent); }
+.hat-marker.pasteable:hover { color: #5b8db8; }
 .hat-bar-copy-btn {
   display: none; position: absolute; top: -1px; right: -1px;
   font-size: 7px; line-height: 1; padding: 1px 2px;
-  background: var(--accent-soft-bg); border: 1px solid var(--accent-soft-border); border-radius: 2px;
-  color: var(--hand-r); cursor: pointer; z-index: 2;
+  background: #1a2a40; border: 1px solid #3a5070; border-radius: 2px;
+  color: #7ab8e8; cursor: pointer; z-index: 2;
 }
 .hat-marker:hover .hat-bar-copy-btn,
 .hat-bar-hdr:hover .hat-bar-copy-btn { display: block; }
-.hat-marker.copied { outline: 2px solid var(--accent); outline-offset: -1px; border-radius: 2px; }
+.hat-marker.copied { outline: 2px solid #5b8db8; outline-offset: -1px; border-radius: 2px; }
 /* Paint mode */
 .hat-cell.edit-cell.paint-active { outline: 2px solid #f1c40f !important; outline-offset: -1px; }
 /* Accent indicators */
@@ -789,7 +739,7 @@ body {
 .hat-accent-row { display: contents; }
 .hat-accent-btn {
   font-size: 9px; text-align: center; line-height: 18px; height: 18px;
-  cursor: pointer; user-select: none; color: var(--fg-whisper);
+  cursor: pointer; user-select: none; color: #444466;
   background: transparent; border: none; padding: 0;
   transition: color .1s;
 }
@@ -798,138 +748,138 @@ body {
 /* Note cells */
 .hat-cell.k-note { font-size: 9px; font-weight: bold; letter-spacing: -.3px;
                    min-width: 32px; }
-.hat-cell.k-note.hand-R { background: var(--hand-r-fill); color: var(--success); border-color: var(--hand-r-border); }
-.hat-cell.k-note.hand-L { background: var(--hand-l-fill); color: var(--accent-warm); border-color: var(--hand-l-border); }
+.hat-cell.k-note.hand-R { background: #0f2a1a; color: #6ae88a; border-color: #1e4a2a; }
+.hat-cell.k-note.hand-L { background: #2a1a08; color: #e8c068; border-color: #4a3010; }
 
 /* Section labels */
 .hat-section-lbl {
   flex-basis: 100%;
   display: flex; align-items: center; gap: 6px;
   padding: 6px 2px 3px; margin-top: 4px;
-  border-top: 1px solid var(--border-divider);
+  border-top: 1px solid #2a3050;
 }
 .hat-section-name {
   font-size: 10px; font-weight: bold; letter-spacing: .8px;
-  text-transform: lowercase; color: var(--accent);
+  text-transform: lowercase; color: #7a9ab8;
 }
 .hat-section-repeat {
-  font-size: 9px; color: var(--accent); background: var(--accent-fill);
-  border: 1px solid var(--accent-soft-border); border-radius: 8px;
+  font-size: 9px; color: #5b7a98; background: #162030;
+  border: 1px solid #253a50; border-radius: 8px;
   padding: 1px 6px;
 }
 .hat-section-edit-btn {
   font-size: 9px; padding: 1px 4px;
-  background: transparent; border: 1px solid var(--border-input);
-  border-radius: 3px; color: var(--fg-subtle); cursor: pointer;
+  background: transparent; border: 1px solid #2a3a50;
+  border-radius: 3px; color: #556; cursor: pointer;
 }
-.hat-section-edit-btn:hover { border-color: var(--accent); color: var(--hand-r); }
+.hat-section-edit-btn:hover { border-color: #5b8db8; color: #7ab8e8; }
 
 /* Bar group pattern tag */
 .hat-bar-pattern {
-  font-size: 9px; color: var(--fg-muted); margin-left: 6px; letter-spacing: .5px;
+  font-size: 9px; color: #4a6888; margin-left: 6px; letter-spacing: .5px;
   cursor: pointer; border-radius: 3px; padding: 1px 4px;
   border: 1px solid transparent;
   transition: color .1s, background .1s, border-color .1s;
 }
-.hat-bar-pattern:hover { color: var(--accent); background: var(--accent-soft-bg); border-color: var(--accent-soft-border); }
+.hat-bar-pattern:hover { color: #7abedc; background: #0c1a28; border-color: #2a4a68; }
 
 /* Beat-grouping editor popup */
 .hat-group-popup {
   position: fixed; z-index: 3000;
-  background: var(--surface-panel); border: 1px solid var(--border-input); border-radius: 8px;
+  background: #0d1222; border: 1px solid #3a4060; border-radius: 8px;
   padding: 12px 14px 10px; min-width: 280px; max-width: 360px;
-  box-shadow: var(--shadow-modal);
+  box-shadow: 0 8px 30px #000b;
   display: flex; flex-direction: column; gap: 9px;
 }
-.hat-group-lbl { font-size: 11px; color: var(--fg-subtle); line-height: 1.5; }
+.hat-group-lbl { font-size: 11px; color: #556; line-height: 1.5; }
 .hat-group-presets { display: flex; flex-wrap: wrap; gap: 5px; }
 .hat-group-chip {
   font-size: 12px; padding: 4px 10px;
-  background: var(--surface-card-hover); border: 1px solid var(--border-input);
-  border-radius: 12px; color: var(--accent); cursor: pointer;
+  background: #121a30; border: 1px solid #2a3a58;
+  border-radius: 12px; color: #7a9ab8; cursor: pointer;
   font-family: 'Courier New', monospace; letter-spacing: .5px;
   transition: background .1s, border-color .1s, color .1s;
 }
-.hat-group-chip:hover { background: var(--accent-fill); border-color: var(--accent); color: var(--accent-bright); }
-.hat-group-chip.active { border-color: var(--accent); color: var(--accent); background: var(--accent-fill); }
+.hat-group-chip:hover { background: #1a2a48; border-color: #4a6a98; color: #aac8e8; }
+.hat-group-chip.active { border-color: #4a7ab0; color: #7abbe8; background: #0e1e38; }
 .hat-group-inp {
   width: 100%; padding: 7px 10px; font-size: 15px;
-  background: var(--surface-input); border: 1px solid var(--border-input); border-radius: 5px;
-  color: var(--fg-1); outline: none; font-family: 'Courier New', monospace;
+  background: #101828; border: 1px solid #3a4060; border-radius: 5px;
+  color: #dde; outline: none; font-family: 'Courier New', monospace;
   letter-spacing: 1.2px; transition: border-color .15s;
 }
-.hat-group-inp:focus { border-color: var(--accent); }
-.hat-group-err { font-size: 11px; color: var(--fg-3); min-height: 14px; }
+.hat-group-inp:focus { border-color: #5b8db8; }
+.hat-group-err { font-size: 11px; color: #887040; min-height: 14px; }
 
 /* Sub-beat divider toggle row */
 .hat-subdiv-btn {
   height: 8px; display: flex; align-items: center; justify-content: center;
-  font-size: 8px; line-height: 1; color: var(--fg-whisper); cursor: pointer;
+  font-size: 8px; line-height: 1; color: #22223a; cursor: pointer;
   user-select: none; transition: color .1s, background .1s;
   border-radius: 1px;
 }
 .hat-subdiv-btn::after { content: '·'; }
-.hat-subdiv-btn.on { color: var(--accent); }
+.hat-subdiv-btn.on { color: #5a7ab0; }
 .hat-subdiv-btn.on::after { content: '|'; }
-.hat-subdiv-btn.bar-start { color: var(--accent); cursor: default; }
+.hat-subdiv-btn.bar-start { color: #3a5a8a; cursor: default; }
 .hat-subdiv-btn.bar-start::after { content: '|'; }
-.hat-subdiv-btn:not(.bar-start):hover { color: var(--hand-r); background: var(--accent-fill); }
+.hat-subdiv-btn:not(.bar-start):hover { color: #7ab8e8; background: #0e1a30; }
 
 /* Note picker popup */
 .hat-note-popup {
   position: fixed; z-index: 3000;
-  background: var(--surface-panel); border: 1px solid var(--border-input); border-radius: 7px;
+  background: #0d1222; border: 1px solid #3a4060; border-radius: 7px;
   padding: 8px; max-width: 260px;
-  box-shadow: var(--shadow-popup);
+  box-shadow: 0 6px 24px #0009;
   display: flex; flex-direction: column; gap: 6px;
 }
-.hat-note-popup-lbl { font-size: 9px; color: var(--fg-whisper); letter-spacing: .3px; }
+.hat-note-popup-lbl { font-size: 9px; color: #445; letter-spacing: .3px; }
 .hat-note-popup-grid { display: flex; flex-wrap: wrap; gap: 4px; }
 .hat-note-popup-btn {
   font-size: 10px; padding: 3px 7px;
-  background: var(--hand-r-fill); border: 1px solid var(--state-imported-border);
-  border-radius: 4px; color: var(--success); cursor: pointer;
+  background: #0f2a1a; border: 1px solid #2a5a3a;
+  border-radius: 4px; color: #6ae88a; cursor: pointer;
   font-family: 'Courier New', monospace;
   display: flex; align-items: center; gap: 3px;
   transition: background .1s, border-color .1s;
 }
-.hat-note-popup-btn:hover { background: var(--accent-fill); border-color: var(--success); color: var(--success); }
+.hat-note-popup-btn:hover { background: #1a5a2a; border-color: #5aaa6a; color: #8affa0; }
 .hat-npop-num {
-  font-size: 8px; color: var(--success); background: var(--surface-input);
+  font-size: 8px; color: #3a7a4a; background: #071510;
   border-radius: 2px; padding: 0 3px; min-width: 13px;
   text-align: center; font-family: Arial, sans-serif;
 }
 .hat-note-popup-inp {
   width: 100%; padding: 4px 6px; font-size: 10px;
-  background: var(--surface-input); border: 1px solid var(--border-input); border-radius: 4px;
-  color: var(--fg-1); outline: none; font-family: 'Courier New', monospace;
+  background: #101828; border: 1px solid #3a4060; border-radius: 4px;
+  color: #ccd; outline: none; font-family: 'Courier New', monospace;
 }
-.hat-note-popup-inp:focus { border-color: var(--accent); }
+.hat-note-popup-inp:focus { border-color: #5b8db8; }
 
 /* Fields palette */
 .hat-fields-palette {
   display: flex; align-items: center; gap: 4px;
   flex-wrap: wrap; padding: 4px 0 0;
-  border-top: 1px solid var(--border-divider); margin-top: 3px;
+  border-top: 1px solid #2a2a4a; margin-top: 3px;
   flex-basis: 100%;
 }
-.hat-fields-lbl { font-size: 9px; color: var(--fg-subtle); }
+.hat-fields-lbl { font-size: 9px; color: #556; }
 .hat-field-btn {
   font-size: 9px; padding: 2px 5px;
-  background: var(--hand-r-fill); border: 1px solid var(--state-imported-border);
-  border-radius: 3px; color: var(--success); cursor: pointer;
+  background: #0f2a1a; border: 1px solid #2a5a3a;
+  border-radius: 3px; color: #6ae88a; cursor: pointer;
   font-family: 'Courier New', Courier, monospace;
   display: inline-flex; align-items: center; gap: 2px;
 }
-.hat-field-btn:hover { background: var(--accent-fill); border-color: var(--success); }
+.hat-field-btn:hover { background: #1a4a2a; border-color: #4a8a5a; }
 .hat-field-num {
-  font-size: 7px; color: var(--success); background: var(--surface-input);
+  font-size: 7px; color: #3a7a4a; background: #071510;
   border-radius: 2px; padding: 0 2px; min-width: 10px;
   text-align: center; font-family: Arial, sans-serif;
 }
 
 /* Fields badge */
-.hat-badge.hat-fields-badge { background: var(--state-imported-bg); border-color: var(--state-imported-border); color: var(--success); }
+.hat-badge.hat-fields-badge { background: #0f2218; border-color: #2a5a3a; color: #6ae88a; }
 
 /* Flam indicator */
 .hat-cell[data-mod="*"]::before {
@@ -941,100 +891,32 @@ body {
 #new-pat-modal {
   position: fixed; inset: 0; z-index: 9000;
   display: flex; align-items: center; justify-content: center;
-  background: rgba(60,40,20,.5);
+  background: rgba(0,0,0,.65);
 }
 #new-pat-modal .modal-box {
-  background: var(--surface-panel); border: 1px solid var(--border-input); border-radius: 8px;
+  background: #15131f; border: 1px solid #3a3060; border-radius: 8px;
   padding: 20px 24px; min-width: 280px; display: flex; flex-direction: column; gap: 12px;
 }
-#new-pat-modal h3 { margin: 0; font-size: 14px; color: var(--fg-1); }
-#new-pat-modal label { font-size: 11px; color: var(--fg-muted); display: flex; flex-direction: column; gap: 4px; }
+#new-pat-modal h3 { margin: 0; font-size: 14px; color: #ccd; }
+#new-pat-modal label { font-size: 11px; color: #889; display: flex; flex-direction: column; gap: 4px; }
 #new-pat-modal input, #new-pat-modal select {
-  background: var(--surface-input); border: 1px solid var(--border-input); border-radius: 4px;
-  color: var(--fg-1); font-size: 12px; padding: 4px 7px; outline: none;
+  background: #1e1c2e; border: 1px solid #3a3060; border-radius: 4px;
+  color: #ccd; font-size: 12px; padding: 4px 7px; outline: none;
 }
 #new-pat-modal .modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
-
-/* ── Toast notification ──────────────────────────────────────────────── */
-.toast {
-  position: fixed; bottom: 28px; left: 50%;
-  transform: translateX(-50%) translateY(10px);
-  background: var(--accent-soft-bg); border: 1px solid var(--accent-soft-border);
-  color: var(--accent-bright); padding: 8px 18px;
-  border-radius: var(--radius-pill); font: var(--text-11)/1 var(--font-sans);
-  box-shadow: var(--shadow-popup);
-  opacity: 0; transition: opacity var(--transition-medium), transform var(--transition-medium);
-  pointer-events: none; white-space: nowrap; z-index: 9999;
-}
-.toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-/* ── Mode-based layout ───────────────────────────────────────────────── */
-.edit-only   { display: block; }
-.explore-only { display: none; }
-
-body[data-mode="explore"] #sidebar { width: 210px; min-width: 210px; }
-body[data-mode="explore"] .edit-only   { display: none !important; }
-body[data-mode="explore"] .explore-only { display: block !important; }
-body[data-mode="explore"] #explore-panel { display: flex; }
-
-body[data-mode="rhythm"] #workspace-row { display: none; }
-body[data-mode="rhythm"] #rhythm-panel { display: flex; flex: 1; height: auto !important; min-height: 0 !important; flex-shrink: 1; }
-
-/* Immutability cursor guard */
-body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
-
-/* Inline note label editor */
-.note-label-inp {
-  position: fixed; z-index: 9000; border-radius: 50%;
-  border: 2px solid var(--accent); background: rgba(255,255,255,0.96);
-  text-align: center; font-family: Arial, sans-serif; color: #222;
-  outline: none; padding: 0; box-sizing: border-box;
-}
 </style>
 </head>
 <body>
-
-<!-- ══ Icon sprite ══════════════════════════════════════════════════════ -->
-<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
-  <symbol id="i-arrow-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="4" x2="12" y2="20"></line><polyline points="6 14 12 20 18 14"></polyline></symbol>
-  <symbol id="i-arrow-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="4" x2="12" y2="20"></line><polyline points="6 10 12 4 18 10"></polyline></symbol>
-  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></symbol>
-  <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15V6a2 2 0 0 1 2-2h9"></path></symbol>
-  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="6" x2="18" y2="18"></line><line x1="18" y1="6" x2="6" y2="18"></line></symbol>
-  <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path></symbol>
-  <symbol id="i-undo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"></polyline><path d="M4 9h11a5 5 0 0 1 5 5v0a5 5 0 0 1-5 5h-6"></path></symbol>
-  <symbol id="i-redo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 14 20 9 15 4"></polyline><path d="M20 9H9a5 5 0 0 0-5 5v0a5 5 0 0 0 5 5h6"></path></symbol>
-  <symbol id="i-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 4 20 12 6 20 6 4"></polygon></symbol>
-  <symbol id="i-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="5" width="4" height="14" rx="0.5"></rect><rect x="14" y="5" width="4" height="14" rx="0.5"></rect></symbol>
-  <symbol id="i-square" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="14" rx="0.5"></rect></symbol>
-  <symbol id="i-skip-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="19 5 8 12 19 19 19 5"></polygon><line x1="5" y1="5" x2="5" y2="19"></line></symbol>
-  <symbol id="i-skip-forward" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 5 16 12 5 19 5 5"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></symbol>
-  <symbol id="i-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 6 9 12 15 18"></polyline></symbol>
-  <symbol id="i-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></symbol>
-  <symbol id="i-maximize" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 4 20 4 20 9"></polyline><polyline points="9 20 4 20 4 15"></polyline><line x1="20" y1="4" x2="14" y2="10"></line><line x1="4" y1="20" x2="10" y2="14"></line></symbol>
-  <symbol id="i-minimize" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="10" y1="14" x2="4" y2="20"></line><line x1="14" y1="10" x2="20" y2="4"></line></symbol>
-  <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"></circle><line x1="20" y1="20" x2="16" y2="16"></line></symbol>
-  <symbol id="i-help-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M9.5 9.5a2.5 2.5 0 0 1 5 0c0 1.5-2.5 2-2.5 4"></path><circle cx="12" cy="17" r="0.4" fill="currentColor"></circle></symbol>
-  <symbol id="i-music" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></symbol>
-  <symbol id="i-pan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="13.5" r="2.5"></circle><circle cx="7" cy="15" r="1.2"></circle><circle cx="17" cy="15" r="1.2"></circle><circle cx="9" cy="9.5" r="1.1"></circle><circle cx="15" cy="9.5" r="1.1"></circle></symbol>
-  <symbol id="i-rhythm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="3" height="12" rx="0.5"></rect><rect x="8.5" y="9" width="3" height="9" rx="0.5"></rect><rect x="14" y="4" width="3" height="14" rx="0.5"></rect><rect x="19.5" y="11" width="3" height="7" rx="0.5"></rect></symbol>
-  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"></polyline></symbol>
-  <symbol id="i-volume" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M16 8a5 5 0 0 1 0 8"></path><path d="M19.5 5.5a9 9 0 0 1 0 13"></path></symbol>
-  <symbol id="i-pen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l4-1 13-13a2.5 2.5 0 0 0-3.5-3.5L3.5 16.5 3 21z"></path></symbol>
-  <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></symbol>
-</svg>
 
 <!-- ══ Toolbar ══════════════════════════════════════════════════════════ -->
 <div id="toolbar">
   <h1>Handpan Editor</h1>
   <div class="sep"></div>
-  <div class="mode-tabs" role="tablist" aria-label="Editor mode">
-    <button class="mode-tab is-active" id="tab-edit"    data-mode="edit"    onclick="setMode('edit')"    role="tab"><svg class="icon" aria-hidden="true"><use href="#i-pan"/></svg> Pan</button>
-    <button class="mode-tab"           id="tab-explore" data-mode="explore" onclick="setMode('explore')" role="tab"><svg class="icon" aria-hidden="true"><use href="#i-music"/></svg> Explore</button>
-    <button class="mode-tab"           id="tab-rhythm"  data-mode="rhythm"  onclick="setMode('rhythm')"  role="tab"><svg class="icon" aria-hidden="true"><use href="#i-rhythm"/></svg> Rhythm<sup class="beta-sup">β</sup></button>
-  </div>
+  <button class="btn" id="rhy-toggle-btn" onclick="toggleRhythm()" title="Rhythm Mode">♩ Rhythm<sup class="beta-sup">β</sup></button>
+  <button class="btn" id="prog-toggle-btn" onclick="toggleProgressions()" title="Chord Progressions">♬ Progressions</button>
+  <button class="btn" id="chords-toggle-btn" onclick="toggleChords()" title="Chords">♩ Chords</button>
   <div class="sep"></div>
-  <span id="status" style="font-size:11px;color:var(--fg-subtle);"></span>
+  <span id="status" style="font-size:11px;color:#556;"></span>
 </div>
 
 <!-- ══ Workspace ════════════════════════════════════════════════════════ -->
@@ -1043,187 +925,157 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
 
   <div id="sidebar">
 
-    <!-- Pan name / note count -->
-    <div class="panel">
-      <div class="panel-title" onclick="togglePanel(this)">Pan <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section"></button></div>
-      <div class="panel-body">
-        <div class="row">
-          <label>Name</label>
-          <input type="text" id="pan-name" placeholder="My Pan…" maxlength="40"/>
-        </div>
-        <div class="t-hint" id="pan-note-count" style="margin-top:4px;"></div>
-      </div>
-    </div>
-
     <!-- Templates -->
-    <div class="panel edit-only">
-      <div class="panel-title" onclick="togglePanel(this)">Template <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section"></button></div>
-      <div class="panel-body">
-        <div class="row">
-          <select id="template-select">
-            <option value="">— choose a template —</option>
-          </select>
-        </div>
+    <div class="panel">
+      <div class="panel-title">Template</div>
+      <div class="row">
+        <select id="template-select">
+          <option value="">— choose a template —</option>
+        </select>
       </div>
     </div>
 
     <!-- Pan Editing -->
-    <div class="panel edit-only">
-      <div class="panel-title" onclick="togglePanel(this)">Pan Editing <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section"></button></div>
-      <div class="panel-body">
-        <div class="panel-sub-label">Layout file</div>
-        <div class="btn-row" style="margin-bottom:8px;">
-          <button class="btn" onclick="exportJSON()" title="Export layout as JSON"><svg class="icon" aria-hidden="true"><use href="#i-arrow-down"/></svg> Export</button>
-          <button class="btn" onclick="triggerImport()" title="Import layout from JSON"><svg class="icon" aria-hidden="true"><use href="#i-arrow-up"/></svg> Import</button>
-        </div>
+    <div class="panel">
+      <div class="panel-title">Pan Editing</div>
 
-        <div class="panel-sub-label">Notes</div>
-        <div class="btn-row" style="margin-bottom:8px;">
-          <button class="btn" onclick="addNote()"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg> Add</button>
-          <button class="btn" onclick="duplicateSelected()"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg> Dup</button>
-          <button class="btn danger" onclick="deleteSelected()"><svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg> Delete</button>
-        </div>
+      <div class="panel-sub-label">Layout file</div>
+      <div class="btn-row" style="margin-bottom:5px;">
+        <button class="btn" onclick="exportJSON()" title="Export layout as JSON">⬇ Export</button>
+        <button class="btn" onclick="triggerImport()" title="Import layout from JSON">⬆ Import</button>
+      </div>
+      <div class="btn-row" style="margin-bottom:8px;">
+        <button class="btn" onclick="exportCurrentSVG()" title="Export current view as SVG">⬇ SVG</button>
+        <button class="btn" onclick="exportCurrentPNG()" title="Export current view as PNG">⬇ PNG</button>
+      </div>
 
-        <div class="panel-sub-label">History</div>
-        <div class="btn-row" style="margin-bottom:8px;">
-          <button class="btn" onclick="undo()" title="Ctrl+Z"><svg class="icon" aria-hidden="true"><use href="#i-undo"/></svg> Undo</button>
-          <button class="btn" onclick="redo()" title="Ctrl+Y"><svg class="icon" aria-hidden="true"><use href="#i-redo"/></svg> Redo</button>
-        </div>
+      <div class="panel-sub-label">Notes</div>
+      <div class="btn-row" style="margin-bottom:8px;">
+        <button class="btn" onclick="addNote()">+ Add</button>
+        <button class="btn" onclick="duplicateSelected()">⧉ Dup</button>
+        <button class="btn danger" onclick="deleteSelected()">✕ Delete</button>
+      </div>
 
-        <!-- Advanced section -->
-        <div class="panel-sub-label advanced-toggle" onclick="toggleAdvanced(this)" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
-          Advanced <span class="adv-chevron">▸</span>
-        </div>
-        <div class="advanced-body" style="display:none;">
-          <div class="panel-sub-label">Enharmonics</div>
-          <div class="row" style="margin-bottom:8px;">
-            <select id="enharmonic-mode" title="Note name spelling">
-              <option value="-">— default</option>
-              <option value="proper">proper (auto key)</option>
-              <option value="#"># sharps</option>
-              <option value="b">♭ flats</option>
-            </select>
-          </div>
+      <div class="panel-sub-label">History</div>
+      <div class="btn-row" style="margin-bottom:8px;">
+        <button class="btn icon" onclick="undo()" title="Ctrl+Z">↩ Undo</button>
+        <button class="btn icon" onclick="redo()" title="Ctrl+Y">↪ Redo</button>
+      </div>
 
-          <div class="panel-sub-label">Pan body</div>
-          <div class="row" style="margin-bottom:8px;">
-            <label>Radius: <b id="pan-r-val">320</b> px</label>
-            <input type="range" id="pan-r" min="80" max="480" step="1" value="320"/>
-          </div>
+      <div class="panel-sub-label">Enharmonics</div>
+      <div class="row" style="margin-bottom:8px;">
+        <select id="enharmonic-mode" title="Note name spelling">
+          <option value="-">— default</option>
+          <option value="proper">proper (auto key)</option>
+          <option value="#"># sharps</option>
+          <option value="b">♭ flats</option>
+        </select>
+      </div>
 
-          <div class="btn-row" style="margin-bottom:2px;">
-            <button class="btn" onclick="exportCurrentSVG()" title="Export current view as SVG"><svg class="icon" aria-hidden="true"><use href="#i-arrow-down"/></svg> SVG</button>
-            <button class="btn" onclick="exportCurrentPNG()" title="Export current view as PNG"><svg class="icon" aria-hidden="true"><use href="#i-arrow-down"/></svg> PNG</button>
-          </div>
-        </div>
+      <div class="panel-sub-label">Pan body</div>
+      <div class="row" style="margin-bottom:0;">
+        <label>Radius: <b id="pan-r-val">320</b> px</label>
+        <input type="range" id="pan-r" min="80" max="480" step="1" value="320"/>
       </div>
     </div>
 
     <!-- Note properties -->
-    <div class="panel edit-only">
-      <div class="panel-title" onclick="togglePanel(this)">Note <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section"></button></div>
-      <div class="panel-body">
-        <div id="props-empty" style="font-size:12px;color:var(--fg-whisper);">Select a note to edit.</div>
-        <div id="props-single" style="display:none;">
-          <div class="row">
-            <label>Label</label>
-            <input type="text" id="prop-label" placeholder="D3, Bb4, F#5 …" maxlength="8"/>
-          </div>
-          <div class="row">
-            <label>Radius: <b id="prop-r-val">50</b> px</label>
-            <input type="range" id="prop-r" min="14" max="130" step="1"/>
-          </div>
+    <div class="panel">
+      <div class="panel-title">Note</div>
+      <div id="props-empty" style="font-size:12px;color:#445;">Select a note to edit.</div>
+      <div id="props-single" style="display:none;">
+        <div class="row">
+          <label>Label</label>
+          <input type="text" id="prop-label" placeholder="D3, Bb4, F#5 …" maxlength="8"/>
         </div>
-        <div id="props-multi" style="display:none;">
-          <div id="hint-multi" class="t-hint" style="margin-bottom:6px;"></div>
-          <div class="row">
-            <label>Radius all: <b id="prop-r-multi-val">—</b> px</label>
-            <input type="range" id="prop-r-multi" min="14" max="130" step="1" value="50"/>
-          </div>
+        <div class="row">
+          <label>Radius: <b id="prop-r-val">50</b> px</label>
+          <input type="range" id="prop-r" min="14" max="130" step="1"/>
+        </div>
+      </div>
+      <div id="props-multi" style="display:none;">
+        <div id="hint-multi" style="font-size:11px;color:#667;margin-bottom:6px;"></div>
+        <div class="row">
+          <label>Radius all: <b id="prop-r-multi-val">—</b> px</label>
+          <input type="range" id="prop-r-multi" min="14" max="130" step="1" value="50"/>
         </div>
       </div>
     </div>
 
-    <!-- Highlight (explore only) -->
-    <div class="panel explore-only">
-      <div class="panel-title" onclick="togglePanel(this)">Highlight <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section"></button></div>
-      <div class="panel-body">
+    <!-- Highlight -->
+    <div class="panel">
+      <div class="panel-title">Highlight</div>
+      <div class="row">
+        <label>Mode</label>
+        <select id="hl-mode">
+          <option value="none">None</option>
+          <option value="note">By Note (pitch class)</option>
+          <option value="chord">By Chord</option>
+          <option value="selection">By Selection</option>
+        </select>
+      </div>
+
+      <!-- Note color legend (shown for both note and chord modes) -->
+      <div id="note-legend-wrap" style="display:none;">
+        <div id="note-legend"></div>
+      </div>
+
+      <!-- By-note only: scale-native table -->
+      <div id="hl-note-opts" style="display:none;">
+        <div id="note-scale-table"></div>
+      </div>
+
+      <!-- By-chord options -->
+      <div id="hl-chord-opts" style="display:none;">
         <div class="row">
-          <label>Mode</label>
-          <select id="hl-mode">
-            <option value="none">None</option>
-            <option value="note">By Note (pitch class)</option>
-            <option value="chord">By Chord</option>
-            <option value="selection">By Selection</option>
-          </select>
+          <label>Chord type</label>
+          <select id="hl-chord-type"></select>
         </div>
+        <div class="row">
+          <label>Root</label>
+          <select id="hl-chord-root"></select>
+        </div>
+        <div id="hl-chord-info"></div>
+      </div>
 
-        <!-- Note color legend (shown for both note and chord modes) -->
-        <div id="note-legend-wrap" style="display:none;">
-          <div id="note-legend"></div>
-        </div>
-
-        <!-- By-note only: scale-native table -->
-        <div id="hl-note-opts" style="display:none;">
-          <div id="note-scale-table"></div>
-        </div>
-
-        <!-- By-chord options -->
-        <div id="hl-chord-opts" style="display:none;">
-          <div class="row">
-            <label>Chord type</label>
-            <select id="hl-chord-type"></select>
-          </div>
-          <div class="row">
-            <label>Root</label>
-            <select id="hl-chord-root"></select>
-          </div>
-          <div id="hl-chord-info"></div>
-        </div>
-
-        <!-- By-selection options -->
-        <div id="hl-selection-opts" style="display:none;">
-          <div id="hl-selection-info"></div>
-        </div>
+      <!-- By-selection options -->
+      <div id="hl-selection-opts" style="display:none;">
+        <div id="hl-selection-info"></div>
       </div>
     </div>
 
     <!-- Audio -->
-    <div class="panel panel-audio collapsed">
-      <div class="panel-title" onclick="togglePanel(this)">Audio <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section"></button></div>
-      <div class="panel-body">
-        <div class="t-hint" style="margin-bottom:6px;">Alt+Click notes, chords or tiles to hear them</div>
-        <div class="row">
-          <label>Volume: <b id="audio-vol-val">50</b>%</label>
-          <input type="range" id="audio-vol" min="0" max="100" step="5" value="50"/>
-        </div>
-        <div class="row">
-          <label>Sustain: <b id="audio-sustain-val">0.8</b>s</label>
-          <input type="range" id="audio-sustain" min="0.2" max="4" step="0.1" value="0.8"/>
-        </div>
+    <div class="panel">
+      <div class="panel-title">Audio</div>
+      <div style="font-size:11px;color:#667;margin-bottom:6px;">Alt+Click notes, chords or tiles to hear them</div>
+      <div class="row">
+        <label>Volume: <b id="audio-vol-val">50</b>%</label>
+        <input type="range" id="audio-vol" min="0" max="100" step="5" value="50"/>
+      </div>
+      <div class="row">
+        <label>Sustain: <b id="audio-sustain-val">0.8</b>s</label>
+        <input type="range" id="audio-sustain" min="0.2" max="4" step="0.1" value="0.8"/>
       </div>
     </div>
 
     <!-- Shortcuts -->
-    <div class="panel edit-only collapsed" style="flex:1;">
-      <div class="panel-title" onclick="togglePanel(this)">Shortcuts <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section"></button></div>
-      <div class="panel-body">
-        <div class="kbd">
-          <b>Click</b> — select<br>
-          <b>Shift+click</b> — multi-select<br>
-          <b>Drag note</b> — move<br>
-          <b>Drag canvas</b> — box select<br>
-          <b>⊙ handle</b> — resize<br>
-          <b>Dbl-click</b> — edit label<br>
-          <code>↑↓←→</code> — nudge 1 px<br>
-          <code>Shift+↑↓←→</code> — nudge 10 px<br>
-          <code>Del</code> — delete<br>
-          <code>Ctrl+A</code> — select all<br>
-          <code>Ctrl+D</code> — duplicate<br>
-          <code>Ctrl+Z/Y</code> — undo/redo<br>
-          <code>Esc</code> — deselect<br>
-          <b>Alt+Click</b> — play note/chord
-        </div>
+    <div class="panel" style="flex:1;">
+      <div class="panel-title">Shortcuts</div>
+      <div class="kbd">
+        <b>Click</b> — select<br>
+        <b>Shift+click</b> — multi-select<br>
+        <b>Drag note</b> — move<br>
+        <b>Drag canvas</b> — box select<br>
+        <b>⊙ handle</b> — resize<br>
+        <b>Dbl-click</b> — edit label<br>
+        <code>↑↓←→</code> — nudge 1 px<br>
+        <code>Shift+↑↓←→</code> — nudge 10 px<br>
+        <code>Del</code> — delete<br>
+        <code>Ctrl+A</code> — select all<br>
+        <code>Ctrl+D</code> — duplicate<br>
+        <code>Ctrl+Z/Y</code> — undo/redo<br>
+        <code>Esc</code> — deselect<br>
+        <b>Alt+Click</b> — play note/chord
       </div>
     </div>
 
@@ -1240,106 +1092,104 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
     </svg>
   </div>
 
-  <!-- ══ Explore Panel ════════════════════════════════════════════════════ -->
-  <div id="explore-panel">
-    <div id="explore-resize-handle"></div>
-
-    <!-- Tab bar -->
-    <div class="explore-tab-bar">
-      <button class="explore-tab is-active" id="etab-chords" onclick="setExploreTab('chords')">Chords</button>
-      <button class="explore-tab"           id="etab-progs"  onclick="setExploreTab('progs')">Progressions</button>
-      <div style="flex:1"></div>
+  <!-- ══ Progressions Panel ═══════════════════════════════════════════════ -->
+  <div id="prog-panel">
+    <div id="prog-resize-handle"></div>
+    <div class="prog-header">
+      <span class="prog-header-title">♬ Chord Progressions</span>
+      <button class="btn" style="padding:2px 7px;font-size:11px;" onclick="toggleProgressions()">✕</button>
     </div>
-
-    <!-- Filters -->
-    <div class="explore-filters">
-      <div id="mood-filter-section" style="display:none">
-        <div class="filter-label">Mood</div>
-        <div id="mood-pills" class="mood-pills"></div>
-      </div>
-      <div>
-        <div class="filter-label">Root / Key</div>
-        <div id="root-bar" class="root-bar"></div>
-      </div>
-      <div id="chord-type-filter-section">
-        <div class="filter-label">Chord type</div>
-        <div id="chord-type-pills" class="chord-type-pills"></div>
-      </div>
-      <div class="play-legend">
-        <span><span class="play-full">●</span> Complete</span>
-        <span><span class="play-partial">◕</span> −1</span>
-        <span><span class="play-incomplete">◔</span> −2+</span>
-        <span><span class="play-none">○</span> None</span>
-      </div>
-      <div id="func-legend-section" class="prog-func-legend" style="display:none">
-        <span class="fn-T-lbl">■ Tonic</span>
-        <span class="fn-S-lbl">■ Subdominant</span>
-        <span class="fn-D-lbl">■ Dominant</span>
-      </div>
+    <div class="prog-section">
+      <div class="prog-section-title">Mood</div>
+      <div class="mood-pills" id="mood-pills"></div>
     </div>
+    <div class="prog-section">
+      <div class="prog-section-title">Root note</div>
+      <div class="root-bar" id="root-bar"></div>
+    </div>
+    <div class="play-legend">
+      <span><span class="play-full">●</span> Complete</span>
+      <span><span class="play-partial">◕</span> −1 note</span>
+      <span><span class="play-incomplete">◔</span> −2+</span>
+      <span><span class="play-none">○</span> None</span>
+    </div>
+    <div class="prog-func-legend">
+      <span class="fn-T-lbl">■ Tonic</span>
+      <span class="fn-S-lbl">■ Subdominant</span>
+      <span class="fn-D-lbl">■ Dominant</span>
+    </div>
+    <div class="prog-list" id="prog-list"></div>
 
-    <!-- Scrollable card list — both Chords and Progs render here -->
-    <div id="explore-list" style="flex:1;overflow-y:auto;padding:8px 0 12px;"></div>
+    <div class="chord-export-section">
+      <div class="chord-export-title">Export progressions → ZIP</div>
 
-    <!-- Export section (tab-dependent, collapsible) -->
-    <div class="panel collapsed" style="border-top:1px solid var(--border-divider);flex-shrink:0;border-bottom:none;">
-      <div class="panel-title" onclick="togglePanel(this)">Export <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section"></button></div>
-      <div class="panel-body" id="explore-export-section">
-      <div id="chords-export-inner">
-        <div class="chord-export-section">
-          <div class="chord-export-title">Export chords → ZIP</div>
-
-          <div class="chord-export-subtitle">Chord types</div>
-          <div class="chord-export-type-grid" id="chord-checks"></div>
-          <div class="chord-export-row">
-            <button class="btn" onclick="checkAllChordTypes(true)">All</button>
-            <button class="btn" onclick="checkAllChordTypes(false)">None</button>
-          </div>
-
-          <div class="chord-export-subtitle">Include completeness</div>
-          <div class="chord-export-play-grid">
-            <label class="chord-export-play-label">
-              <input type="checkbox" id="export-play-complete" checked>
-              <span class="play-full">●</span> Complete
-            </label>
-            <label class="chord-export-play-label">
-              <input type="checkbox" id="export-play-partial" checked>
-              <span class="play-partial">◕</span> −1 note
-            </label>
-            <label class="chord-export-play-label">
-              <input type="checkbox" id="export-play-incomplete">
-              <span class="play-incomplete">◔</span> −2+
-            </label>
-            <label class="chord-export-play-label">
-              <input type="checkbox" id="export-play-none">
-              <span class="play-none">○</span> None
-            </label>
-          </div>
-
-          <button class="btn full cta" onclick="exportAllChordsZip()"><svg class="icon" aria-hidden="true"><use href="#i-arrow-down"/></svg> Export ZIP</button>
-          <div id="export-status"></div>
-        </div>
+      <div class="chord-export-subtitle">Moods</div>
+      <div class="chord-export-type-grid" id="prog-export-mood-checks"></div>
+      <div class="chord-export-row">
+        <button class="btn" onclick="checkAllProgExportMoods(true)">All</button>
+        <button class="btn" onclick="checkAllProgExportMoods(false)">None</button>
       </div>
-      <div id="progs-export-inner" style="display:none">
-        <div class="chord-export-section">
-          <div class="chord-export-title">Export progressions → ZIP</div>
 
-          <div class="chord-export-subtitle">Moods</div>
-          <div class="chord-export-type-grid" id="prog-export-mood-checks"></div>
-          <div class="chord-export-row">
-            <button class="btn" onclick="checkAllProgExportMoods(true)">All</button>
-            <button class="btn" onclick="checkAllProgExportMoods(false)">None</button>
-          </div>
+      <div class="chord-export-subtitle">Root note</div>
+      <div class="root-bar" id="prog-export-root-bar"></div>
 
-          <div class="chord-export-subtitle">Root note</div>
-          <div class="root-bar" id="prog-export-root-bar"></div>
+      <button class="btn full" style="margin-top:9px;" onclick="exportProgressionsZip()">⬇ Export ZIP</button>
+      <div id="prog-export-status" style="font-size:11px;color:#5b8db8;min-height:15px;margin-top:4px;"></div>
+    </div>
+  </div>
 
-          <button class="btn full cta" style="margin-top:9px;" onclick="exportProgressionsZip()"><svg class="icon" aria-hidden="true"><use href="#i-arrow-down"/></svg> Export ZIP</button>
-          <div id="prog-export-status" style="min-height:15px;margin-top:4px;color:var(--accent);font-size:var(--text-11);"></div>
-        </div>
+  <!-- ══ Chords Panel ══════════════════════════════════════════════════════ -->
+  <div id="chords-panel">
+    <div id="chords-resize-handle"></div>
+    <div class="prog-header">
+      <span class="prog-header-title">♩ Chords</span>
+      <button class="btn" style="padding:2px 7px;font-size:11px;" onclick="toggleChords()">✕</button>
+    </div>
+    <div class="prog-section">
+      <div class="prog-section-title">Type</div>
+      <div class="chord-type-pills" id="chord-type-pills"></div>
+    </div>
+    <div class="play-legend">
+      <span><span class="play-full">●</span> Complete</span>
+      <span><span class="play-partial">◕</span> −1 note</span>
+      <span><span class="play-incomplete">◔</span> −2+</span>
+      <span><span class="play-none">○</span> None</span>
+    </div>
+    <div class="prog-list" id="chords-list"></div>
+
+    <div class="chord-export-section">
+      <div class="chord-export-title">Export chords → ZIP</div>
+
+      <div class="chord-export-subtitle">Chord types</div>
+      <div class="chord-export-type-grid" id="chord-checks"></div>
+      <div class="chord-export-row">
+        <button class="btn" onclick="checkAllChordTypes(true)">All</button>
+        <button class="btn" onclick="checkAllChordTypes(false)">None</button>
       </div>
-      </div><!-- /panel-body -->
-    </div><!-- /panel.collapsed explore-export -->
+
+      <div class="chord-export-subtitle">Include completeness</div>
+      <div class="chord-export-play-grid">
+        <label class="chord-export-play-label">
+          <input type="checkbox" id="export-play-complete" checked>
+          <span class="play-full">●</span> Complete
+        </label>
+        <label class="chord-export-play-label">
+          <input type="checkbox" id="export-play-partial" checked>
+          <span class="play-partial">◕</span> −1 note
+        </label>
+        <label class="chord-export-play-label">
+          <input type="checkbox" id="export-play-incomplete">
+          <span class="play-incomplete">◔</span> −2+
+        </label>
+        <label class="chord-export-play-label">
+          <input type="checkbox" id="export-play-none">
+          <span class="play-none">○</span> None
+        </label>
+      </div>
+
+      <button class="btn full" onclick="exportAllChordsZip()">⬇ Export ZIP</button>
+      <div id="export-status"></div>
+    </div>
   </div>
 
   </div><!-- /workspace-row -->
@@ -1368,8 +1218,8 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
             <div class="rhy-welcome-title">Rhythm Editor</div>
             <div class="rhy-welcome-hint">Pick a pattern from the sidebar to start editing, or create a new one.</div>
             <div class="rhy-welcome-actions">
-              <button class="btn is-sm" onclick="showNewPatternModal()"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg> New Pattern</button>
-              <button class="btn is-sm" onclick="importHatFile()"><svg class="icon" aria-hidden="true"><use href="#i-arrow-up"/></svg> Import</button>
+              <button class="btn" onclick="showNewPatternModal()" style="font-size:11px;padding:4px 12px;">+ New Pattern</button>
+              <button class="btn" onclick="importHatFile()" style="font-size:11px;padding:4px 12px;">Import</button>
             </div>
           </div>
         </div>
@@ -1381,9 +1231,9 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
       <span class="rhy-tempo-label">♩ =</span>
       <input type="number" id="bpm-input" value="90" min="30" max="300">
       <button class="btn rhy-tap-btn" onclick="tapTempo()">Tap</button>
-      <button class="btn rhy-play-btn" id="rhy-play-btn" onclick="togglePlay()" disabled><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg> Play</button>
+      <button class="btn rhy-play-btn" id="rhy-play-btn" onclick="togglePlay()" disabled>▶ Play</button>
       <label class="rhy-ghost-toggle" title="Ghost note volume">
-        <span style="color:var(--fg-subtle);">ghost</span> <input type="range" id="ghost-vol-slider" min="0" max="100" value="50"><span id="ghost-vol-val">50</span>%
+        <span style="color:#556;">ghost</span> <input type="range" id="ghost-vol-slider" min="0" max="100" value="50"><span id="ghost-vol-val">50</span>%
       </label>
       <span class="rhy-transport-spacer"></span>
       <div class="rhy-legend-tip">
@@ -1394,8 +1244,8 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
           <div class="rhy-legend-row"><span class="rhy-ltext">D Doum · T Tak (R) · K Tak (L) · S Slap · d muted · • ghost · - rest</span></div>
         </div>
       </div>
-      <button class="btn icon-only" id="rhy-expand-btn" onclick="toggleRhythmExpand()" title="Expand to full window"><svg class="icon" aria-hidden="true"><use href="#i-maximize"/></svg></button>
-      <button class="btn icon-only" onclick="setMode('edit')" title="Close rhythm panel"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>
+      <button class="btn" id="rhy-expand-btn" onclick="toggleRhythmExpand()" title="Expand to full window">⤢</button>
+      <button class="btn" onclick="toggleRhythm()" title="Close rhythm panel">✕</button>
       <input type="file" id="hat-import-input" accept=".md,.hat,.txt" style="display:none">
     </div>
   </div>
@@ -2188,7 +2038,7 @@ const PALETTE = [
 
 // ─── Default startup layout (D3 Kurd 18, hand-tuned positions) ───────────────
 const DEFAULT_STATE = {
-  pan: {"cx":500,"cy":500,"r":324,"name":""},
+  pan: {"cx":500,"cy":500,"r":324},
   notes: [
     {"id":"n1", "x":502,"y":510,"r":80,"label":"D3"},
     {"id":"n2", "x":585,"y":652,"r":62,"label":"A3"},
@@ -2500,14 +2350,14 @@ let hlMode       = 'none';   // 'none' | 'note' | 'chord'
 let hlChordType  = 'Major';
 let hlChordRoot  = 0;
 
-// App mode state
-let appMode    = 'edit';    // 'edit' | 'explore' | 'rhythm'
-let exploreTab = 'chords';  // 'chords' | 'progs'
-
-// Progressions / Chords explore state
+// Progressions panel state
+let progOpen     = false;
 let activeMood   = 'happy';
 let activeRootPc = -1;       // -1 = auto (best root per progression)
 let _activeTile  = null;     // { progName, chordIdx } — currently highlighted tile
+
+// Chords panel state
+let chordsOpen          = false;
 let activeChordTypeFilter = 'all'; // 'all' | any key of CHORD_TYPES
 
 // Progressions export state
@@ -2517,6 +2367,7 @@ let progExportRootPcs = new Set([-1]); // -1 = auto; multi-select
 let enharmonicMode = '-'; // '-' | 'proper' | '#' | 'b'
 
 // Rhythm panel state
+let rhythmOpen     = false;
 let activeHatIdx   = null;   // index into HAT_PATTERNS — the active/editing pattern
 let ghostVol       = 0.025;  // ghost note volume (• notes); 0 = silent
 let activeHatCat   = 'all';  // currently selected category pill
@@ -2554,7 +2405,8 @@ function pushHistory() {
   history.push(snapshot());
   histIdx = history.length - 1;
   if (history.length > 120) { history.shift(); histIdx--; }
-  if (appMode === 'explore') { _initExplorePanel(); }
+  if (progOpen)   { buildRootBar(); renderProgressions(); buildProgExportRootBar(); }
+  if (chordsOpen) { buildChordTypePills(); renderChords(); }
 }
 
 function undo() { if (histIdx > 0)                    { histIdx--; restore(history[histIdx]); } }
@@ -2571,23 +2423,20 @@ function restore(snap) {
 function newId() { return `n${state.nextId++}`; }
 
 function addNote(x = 500, y = 320) {
-  if (appMode !== 'edit') return;
   const note = { id: newId(), x, y, r: 50, label: rewriteLabel('A3') };
   state.notes.push(note);
   selectedIds = new Set([note.id]);
   pushHistory(); render(); syncSidebar();
-  setTimeout(() => startInlineLabelEdit(note), 40);
+  setTimeout(() => { const el = document.getElementById('prop-label'); el.focus(); el.select(); }, 50);
 }
 
 function deleteSelected() {
-  if (appMode !== 'edit') return;
   if (!selectedIds.size) return;
   state.notes = state.notes.filter(n => !selectedIds.has(n.id));
   selectedIds.clear(); pushHistory(); render(); syncSidebar();
 }
 
 function duplicateSelected() {
-  if (appMode !== 'edit') return;
   if (!selectedIds.size) return;
   const newIds = new Set(), toAdd = [];
   for (const n of state.notes) {
@@ -2747,7 +2596,6 @@ function pt(e) {
 let iact = null, nudgeTimer = null;
 
 function onNoteDown(e) {
-  if (appMode !== 'edit') return;
   const p0 = pt(e);   // capture before any DOM mutation
 
   if (e.target.classList.contains('resize-handle')) {
@@ -2778,7 +2626,6 @@ function onNoteDown(e) {
 }
 
 function onPanDown(e) {
-  if (appMode !== 'edit') return;
   e.stopPropagation();
   const p0 = pt(e);
   iact = { type: 'pan-move', x0: p0.x, y0: p0.y, origCx: state.pan.cx, origCy: state.pan.cy, moved: false };
@@ -2849,12 +2696,9 @@ document.addEventListener('mouseup', () => {
 });
 
 function onNoteDblClick(e) {
-  if (appMode !== 'edit') return;
   const id = e.currentTarget.getAttribute('data-id');
-  const note = state.notes.find(n => n.id === id);
-  if (!note) return;
   selectedIds = new Set([id]); render(); syncSidebar();
-  startInlineLabelEdit(note);
+  setTimeout(() => { const el = document.getElementById('prop-label'); el.focus(); el.select(); }, 30);
 }
 
 // ─── Sidebar sync ─────────────────────────────────────────────────────────────
@@ -2877,12 +2721,6 @@ function syncSidebar() {
 
   document.getElementById('status').textContent =
     n === 0 ? `${state.notes.length} notes` : n === 1 ? '1 selected' : `${n} selected`;
-
-  // Pan name + note count panel
-  const panNameEl = document.getElementById('pan-name');
-  if (panNameEl) panNameEl.value = state.pan.name || '';
-  const panCountEl = document.getElementById('pan-note-count');
-  if (panCountEl) panCountEl.textContent = `${state.notes.length} notes`;
 
   updateHighlightPanel();
 }
@@ -3076,7 +2914,7 @@ function updateChordInfo() {
     ? `<span style="color:#5d8;font-size:10px;letter-spacing:.3px;">● Scale native</span>`
     : panPcs.has(hlChordRoot)
       ? `<span style="color:#a80;font-size:10px;letter-spacing:.3px;">◐ Root on pan, incomplete</span>`
-      : `<span style="color:var(--fg-faint);font-size:10px;letter-spacing:.3px;">○ Root not on pan</span>`;
+      : `<span style="color:#667;font-size:10px;letter-spacing:.3px;">○ Root not on pan</span>`;
 
   const playHtml = `<button onclick="playChordAudio(_chordLabels(${hlChordRoot},'${hlChordType}'))" style="background:none;border:1px solid #445;color:#5b8db8;cursor:pointer;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px;">♪ Play</button>`;
 
@@ -3136,7 +2974,7 @@ function updateSelectionInfo() {
   const el = document.getElementById('hl-selection-info');
   if (!el) return;
   if (selectedIds.size === 0) {
-    el.innerHTML = '<div class="t-hint" style="text-align:center;padding:8px 0;">Select notes on the pan to identify chords.<br>Shift+Click to multi-select.</div>';
+    el.innerHTML = '<div style="color:#667;font-size:11px;text-align:center;padding:8px 0;">Select notes on the pan to identify chords.<br>Shift+Click to multi-select.</div>';
     return;
   }
   const pcs = new Set();
@@ -3156,7 +2994,7 @@ function updateSelectionInfo() {
   let html = `<div style="margin-bottom:6px;">${noteNames}</div>`;
 
   if (pcs.size < 2) {
-    html += '<div class="t-hint">Select more notes to identify a chord</div>';
+    html += '<div style="color:#667;font-size:11px;">Select more notes to identify a chord</div>';
   } else if (chords.length === 0) {
     html += '<div style="color:#e05;font-size:12px;">No matching chord</div>';
   } else {
@@ -3178,7 +3016,7 @@ function updateSelectionInfo() {
 
       html += `<div style="background:#1c1c35;border:1px solid #3a4060;border-radius:6px;padding:8px 12px;cursor:pointer;flex:1;min-width:100px;text-align:center;" onclick="playChordAudio(_chordLabels(${c.root},'${c.type}'))">` +
         `<div style="font-size:18px;font-weight:bold;color:#ccd;line-height:1.2;">${c.rootName}<span style="font-size:12px;color:#7ab;margin-left:2px;">${c.sym}</span></div>` +
-        `<div style="font-size:10px;color:var(--fg-faint);margin-top:2px;">${c.type}</div>` +
+        `<div style="font-size:10px;color:#667;margin-top:2px;">${c.type}</div>` +
         `<div style="font-size:10px;margin-top:4px;">${chordNoteStr}</div>` +
         `<div style="font-size:9px;color:${dotColor};margin-top:2px;">${dotChar} ${all ? 'All on pan' : 'Partial'}</div>` +
         `<div style="font-size:9px;color:#5b8db8;margin-top:3px;">click to play</div>` +
@@ -3195,12 +3033,10 @@ function updateSelectionInfo() {
 // Note props
 const propLabel = document.getElementById('prop-label');
 propLabel.addEventListener('input', () => {
-  if (appMode !== 'edit') return;
   const n = state.notes.find(nd => selectedIds.has(nd.id));
   if (n) { n.label = propLabel.value; render(); updateHighlightPanel(); }
 });
 propLabel.addEventListener('change', () => {
-  if (appMode !== 'edit') return;
   const n = state.notes.find(nd => selectedIds.has(nd.id));
   if (n && enharmonicMode !== '-') {
     n.label = rewriteLabel(n.label);
@@ -3213,7 +3049,6 @@ propLabel.addEventListener('keydown', e => { if (e.key === 'Enter') propLabel.bl
 
 const propR = document.getElementById('prop-r');
 propR.addEventListener('input', () => {
-  if (appMode !== 'edit') return;
   const r = +propR.value;
   document.getElementById('prop-r-val').textContent = r;
   for (const n of state.notes) if (selectedIds.has(n.id)) n.r = r;
@@ -3223,7 +3058,6 @@ propR.addEventListener('change', pushHistory);
 
 const propRMulti = document.getElementById('prop-r-multi');
 propRMulti.addEventListener('input', () => {
-  if (appMode !== 'edit') return;
   const r = +propRMulti.value;
   document.getElementById('prop-r-multi-val').textContent = r;
   for (const n of state.notes) if (selectedIds.has(n.id)) n.r = r;
@@ -3246,7 +3080,8 @@ document.getElementById('enharmonic-mode').addEventListener('change', function()
   applyEnharmonics();
   pushHistory(); render(); syncSidebar();
   refreshChordRootDropdown();
-  if (appMode === 'explore') { _initExplorePanel(); }
+  if (progOpen)   { buildRootBar(); buildMoodPills(); renderProgressions(); buildProgExportRootBar(); }
+  if (chordsOpen) { buildChordTypePills(); renderChords(); }
   updateChordInfo(); buildNoteLegend();
 });
 
@@ -3277,9 +3112,6 @@ templateSelect.addEventListener('change', e => {
   state.pan    = layout.pan;
   state.notes  = layout.notes;
   state.nextId = layout.nextId;
-  state.pan.name = tpl.name;
-  const panNameEl = document.getElementById('pan-name');
-  if (panNameEl) panNameEl.value = tpl.name;
   selectedIds.clear();
   if (enharmonicMode !== '-') applyEnharmonics();
   pushHistory(); render(); syncSidebar(); syncPanSlider();
@@ -3289,7 +3121,7 @@ templateSelect.addEventListener('change', e => {
 // Highlight mode
 document.getElementById('hl-mode').addEventListener('change', e => {
   hlMode = e.target.value; render(); updateHighlightPanel();
-  if (appMode === 'explore' && exploreTab === 'chords') renderChords();
+  if (chordsOpen) renderChords();
 });
 
 // Populate chord type dropdown
@@ -3301,7 +3133,7 @@ Object.keys(CHORD_TYPES).forEach(name => {
 });
 chordTypeEl.addEventListener('change', e => {
   hlChordType = e.target.value; render(); updateChordInfo();
-  if (appMode === 'explore' && exploreTab === 'chords') renderChords();
+  if (chordsOpen) renderChords();
 });
 
 // Populate root dropdown
@@ -3319,7 +3151,7 @@ function refreshChordRootDropdown() {
 }
 chordRootEl.addEventListener('change', e => {
   hlChordRoot = +e.target.value; render(); updateChordInfo();
-  if (appMode === 'explore' && exploreTab === 'chords') renderChords();
+  if (chordsOpen) renderChords();
 });
 
 // Populate chord type checkboxes for ZIP export
@@ -3343,7 +3175,7 @@ function getSelectedChordTypes() {
 
 document.addEventListener('keydown', e => {
   const inInput = ['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName);
-  if (!inInput && appMode === 'edit') {
+  if (!inInput) {
     if (e.key === 'Delete' || e.key === 'Backspace') { deleteSelected(); return; }
     if (e.key === 'Escape') { selectedIds.clear(); render(); syncSidebar(); return; }
     if (e.key === 'a' && (e.ctrlKey||e.metaKey)) { e.preventDefault(); selectAll(); return; }
@@ -3502,70 +3334,6 @@ function dlBlob(blob, name) {
   a.click(); URL.revokeObjectURL(a.href);
 }
 
-// ─── Panel collapse helpers ────────────────────────────────────────────────────
-
-function togglePanel(el) {
-  (el.classList.contains('panel') ? el : el.closest('.panel')).classList.toggle('collapsed');
-}
-
-function toggleAdvanced(el) {
-  const body = el.nextElementSibling;
-  const hidden = body.style.display === 'none';
-  body.style.display = hidden ? '' : 'none';
-  el.querySelector('.adv-chevron').textContent = hidden ? '▾' : '▸';
-}
-
-// ─── Pan name input ────────────────────────────────────────────────────────────
-
-(function () {
-  const panNameEl = document.getElementById('pan-name');
-  if (!panNameEl) return;
-  panNameEl.addEventListener('input', e => { state.pan.name = e.target.value; });
-  panNameEl.addEventListener('change', () => pushHistory());
-})();
-
-// ─── Inline label editor ──────────────────────────────────────────────────────
-
-function startInlineLabelEdit(note) {
-  document.getElementById('note-label-inp')?.remove();
-  const svgRect = document.getElementById('canvas').getBoundingClientRect();
-  const sx = svgRect.width / 1000, sy = svgRect.height / 1400;
-  const sc = Math.min(sx, sy);
-  const cx = svgRect.left + note.x * sx;
-  const cy = svgRect.top  + note.y * sy;
-  const diam = Math.round(note.r * 2 * sc);
-  const fs   = Math.max(9, Math.min(Math.round(note.r * 0.46 * sc), 22));
-
-  const inp = document.createElement('input');
-  inp.id = 'note-label-inp'; inp.className = 'note-label-inp';
-  inp.type = 'text'; inp.value = note.label; inp.maxLength = 8;
-  Object.assign(inp.style, {
-    left: (cx - note.r * sc) + 'px', top: (cy - note.r * sc) + 'px',
-    width: diam + 'px', height: diam + 'px',
-    fontSize: fs + 'px', lineHeight: diam + 'px',
-  });
-  document.body.appendChild(inp);
-  inp.focus(); inp.select();
-
-  const origLabel = note.label;
-  const finish = () => {
-    if (!document.body.contains(inp)) return;
-    const val = inp.value.trim() || origLabel;
-    note.label = (enharmonicMode !== '-') ? rewriteLabel(val) : val;
-    document.body.removeChild(inp);
-    const pl = document.getElementById('prop-label');
-    if (pl) pl.value = note.label;
-    render(); updateHighlightPanel(); pushHistory();
-  };
-  inp.addEventListener('blur', finish);
-  inp.addEventListener('keydown', e => {
-    if (e.key === 'Enter')  { inp.blur(); e.preventDefault(); }
-    if (e.key === 'Escape') { inp.value = origLabel; inp.blur(); }
-    e.stopPropagation();
-  });
-  inp.addEventListener('input', () => { note.label = inp.value; renderNotes(); });
-}
-
 // ─── Export functions ─────────────────────────────────────────────────────────
 
 function exportJSON() {
@@ -3591,8 +3359,6 @@ document.getElementById('file-input').addEventListener('change', e => {
         }
       }
       if (enharmonicMode !== '-') applyEnharmonics();
-      const panNameEl = document.getElementById('pan-name');
-      if (panNameEl) panNameEl.value = state.pan.name || '';
       selectedIds.clear(); pushHistory(); render(); syncSidebar(); syncPanSlider();
     } catch (err) { alert('Invalid JSON: ' + err.message); }
   };
@@ -3642,18 +3408,8 @@ function getPlayableChords(types) {
   return getAllChords(types).filter(c => c.native);
 }
 
-function showToast(msg, ms = 3500) {
-  const el = document.getElementById('toast');
-  if (!el) return;
-  el.textContent = msg;
-  el.classList.add('visible');
-  clearTimeout(el._timer);
-  el._timer = setTimeout(() => el.classList.remove('visible'), ms);
-}
-
 function setExportStatus(msg) {
   document.getElementById('export-status').textContent = msg;
-  if (msg.startsWith('Done')) showToast(msg);
 }
 
 async function exportAllChordsZip() {
@@ -3754,70 +3510,19 @@ function playDot(play) {
   return '<span class="play-dot play-none">○</span>';
 }
 
-
-// ─── Mode switching ───────────────────────────────────────────────────────────
-
-function setMode(mode) {
-  const prev = appMode;
-  if (mode === prev) return;
-  appMode = mode;
-  document.body.dataset.mode = mode;
-
-  document.querySelectorAll('.mode-tab').forEach(btn =>
-    btn.classList.toggle('is-active', btn.dataset.mode === mode)
-  );
-
-  if (mode === 'explore') {
-    _initExplorePanel();
-    document.querySelector('.panel-audio').classList.remove('collapsed');
-  } else if (mode === 'rhythm') {
-    buildCatPills(); renderRhythms();
-  } else { // 'edit'
-    document.querySelector('.panel-audio').classList.add('collapsed');
-    if (prev === 'rhythm') {
-      stopPlay();
-      const panel = document.getElementById('rhythm-panel');
-      panel.classList.remove('expanded');
-      _autoSaveEdit();
-      activeHatIdx = null; _editModel = null; editMsg = '';
-      const eb = document.getElementById('rhy-expand-btn');
-      if (eb) eb.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#i-maximize"/></svg>';
-    }
+function toggleProgressions() {
+  progOpen = !progOpen;
+  const panel = document.getElementById('prog-panel');
+  const btn   = document.getElementById('prog-toggle-btn');
+  panel.classList.toggle('open', progOpen);
+  btn.style.background  = progOpen ? '#253060' : '';
+  btn.style.borderColor = progOpen ? '#5b8db8' : '';
+  btn.style.color       = progOpen ? '#8bc4e8' : '';
+  if (progOpen) {
+    buildMoodPills(); buildRootBar(); renderProgressions();
+    buildProgExportMoodChecks(); buildProgExportRootBar();
   }
   resizeCanvas();
-}
-
-function _initExplorePanel() {
-  const isChords = exploreTab === 'chords';
-  document.getElementById('mood-filter-section').style.display       = isChords ? 'none' : '';
-  document.getElementById('func-legend-section').style.display       = isChords ? 'none' : '';
-  document.getElementById('chord-type-filter-section').style.display = isChords ? '' : 'none';
-  document.getElementById('chords-export-inner').style.display       = isChords ? '' : 'none';
-  document.getElementById('progs-export-inner').style.display        = isChords ? 'none' : '';
-
-  buildRootBar();
-  if (isChords) {
-    buildChordTypePills();
-    renderChords();
-  } else {
-    buildMoodPills();
-    renderProgressions();
-    buildProgExportMoodChecks();
-    buildProgExportRootBar();
-  }
-}
-
-function setExploreTab(tab) {
-  exploreTab = tab;
-  document.querySelectorAll('.explore-tab').forEach(btn =>
-    btn.classList.toggle('is-active', btn.id === `etab-${tab}`)
-  );
-  _initExplorePanel();
-}
-
-function triggerExploreExport() {
-  if (exploreTab === 'chords') exportAllChordsZip();
-  else exportProgressionsZip();
 }
 
 function moodAvailability(moodId) {
@@ -3864,11 +3569,7 @@ function buildRootBar() {
   auto.className = 'root-btn' + (activeRootPc === -1 ? ' active' : '');
   auto.textContent = 'Auto';
   auto.title = 'Best root per progression';
-  auto.addEventListener('click', () => {
-    activeRootPc = -1; buildRootBar();
-    if (exploreTab === 'progs') { buildMoodPills(); renderProgressions(); }
-    else { renderChords(); }
-  });
+  auto.addEventListener('click', () => { activeRootPc = -1; buildRootBar(); buildMoodPills(); renderProgressions(); });
   el.appendChild(auto);
 
   for (let i = 0; i < 12; i++) {
@@ -3878,22 +3579,18 @@ function buildRootBar() {
       (activeRootPc === i ? ' active' : '');
     btn.textContent = getDisplayNames()[i];
     btn.title = panPcs.has(i) ? `${getDisplayNames()[i]} — on pan` : getDisplayNames()[i];
-    btn.addEventListener('click', () => {
-      activeRootPc = i; buildRootBar();
-      if (exploreTab === 'progs') { buildMoodPills(); renderProgressions(); }
-      else { renderChords(); }
-    });
+    btn.addEventListener('click', () => { activeRootPc = i; buildRootBar(); buildMoodPills(); renderProgressions(); });
     el.appendChild(btn);
   }
 }
 
 function renderProgressions() {
-  const el = document.getElementById('explore-list');
+  const el = document.getElementById('prog-list');
   el.innerHTML = '';
   const filtered = PROGRESSIONS.filter(p => p.moods.includes(activeMood));
 
   if (!filtered.length) {
-    el.innerHTML = '<div style="padding:20px;font-size:12px;color:var(--fg-whisper);text-align:center;">No progressions for this mood.</div>';
+    el.innerHTML = '<div style="padding:20px;font-size:12px;color:#445;text-align:center;">No progressions for this mood.</div>';
     return;
   }
 
@@ -3994,6 +3691,18 @@ const CHORD_TYPE_GROUPS = [
   { id: 'Min6',   label: 'Min6' },
 ];
 
+function toggleChords() {
+  chordsOpen = !chordsOpen;
+  const panel = document.getElementById('chords-panel');
+  const btn   = document.getElementById('chords-toggle-btn');
+  panel.classList.toggle('open', chordsOpen);
+  btn.style.background  = chordsOpen ? '#253060' : '';
+  btn.style.borderColor = chordsOpen ? '#5b8db8' : '';
+  btn.style.color       = chordsOpen ? '#8bc4e8' : '';
+  if (chordsOpen) { buildChordTypePills(); renderChords(); }
+  resizeCanvas();
+}
+
 function chordTypeAvailability(typeName) {
   // Returns 0..1: fraction of 12 roots that are at least 'complete' for this type.
   if (!CHORD_TYPES[typeName]) return 0;
@@ -4038,7 +3747,7 @@ function buildChordTypePills() {
 }
 
 function renderChords() {
-  const el = document.getElementById('explore-list');
+  const el = document.getElementById('chords-list');
   el.innerHTML = '';
 
   const types = activeChordTypeFilter === 'all'
@@ -4059,8 +3768,7 @@ function renderChords() {
     const row = document.createElement('div');
     row.className = 'chord-row chord-row--grid4';
 
-    const rootsToShow = activeRootPc >= 0 ? [activeRootPc] : [...Array(12).keys()];
-    for (const rootPc of rootsToShow) {
+    for (let rootPc = 0; rootPc < 12; rootPc++) {
       const play = chordPlayability(rootPc, typeName);
       const isActive = hlMode === 'chord' && hlChordRoot === rootPc && hlChordType === typeName;
 
@@ -4082,7 +3790,7 @@ function renderChords() {
         document.getElementById('hl-chord-root').value = rootPc;
         document.getElementById('hl-chord-type').value = typeName;
         render(); updateHighlightPanel(); renderChords();
-        if (appMode === 'explore' && exploreTab === 'progs') renderProgressions();
+        if (progOpen) renderProgressions();
       });
 
       row.appendChild(tile);
@@ -4367,7 +4075,6 @@ function buildProgExportRootBar() {
 function setProgExportStatus(msg) {
   const el = document.getElementById('prog-export-status');
   if (el) el.textContent = msg;
-  if (msg.startsWith('Done')) showToast(msg);
 }
 
 async function exportProgressionsZip() {
@@ -4473,6 +4180,23 @@ async function exportMoodsZip() {
 
 // ─── Rhythm panel — HAT (Handpan ASCII Tab) v1.2 ─────────────────────────────
 
+function toggleRhythm() {
+  rhythmOpen = !rhythmOpen;
+  if (!rhythmOpen) stopPlay();
+  const panel = document.getElementById('rhythm-panel');
+  const btn   = document.getElementById('rhy-toggle-btn');
+  panel.classList.toggle('open', rhythmOpen);
+  btn.style.background  = rhythmOpen ? '#253060' : '';
+  btn.style.borderColor = rhythmOpen ? '#5b8db8' : '';
+  btn.style.color       = rhythmOpen ? '#8bc4e8' : '';
+  if (rhythmOpen) { buildCatPills(); renderRhythms(); }
+  else { panel.classList.remove('expanded');
+         _autoSaveEdit();
+         activeHatIdx = null; _editModel = null; editMsg = '';
+         const eb = document.getElementById('rhy-expand-btn');
+         if (eb) eb.textContent = '⤢'; }
+  resizeCanvas();
+}
 
 function toggleRhyBrowser() {
   _rhyBrowserOpen = !_rhyBrowserOpen;
@@ -4487,7 +4211,7 @@ function toggleRhythmExpand() {
   const on    = !panel.classList.contains('expanded');
   panel.classList.toggle('expanded', on);
   const btn = document.getElementById('rhy-expand-btn');
-  if (btn) btn.innerHTML = on ? '<svg class="icon" aria-hidden="true"><use href="#i-minimize"/></svg>' : '<svg class="icon" aria-hidden="true"><use href="#i-maximize"/></svg>';
+  if (btn) btn.textContent = on ? '⤡' : '⤢';
   resizeCanvas();
 }
 
@@ -6002,8 +5726,8 @@ function showNewPatternModal() {
       <label>Tuning<input id="np-tuning" type="text" placeholder="D Kurd" style="width:100%"></label>
       <label>Fields<input id="np-fields" type="text" placeholder="D4 E4 F#4 A4 B4 …" style="width:100%"></label>
       <div class="modal-btns">
-        <button class="btn is-sm" id="np-cancel">Cancel</button>
-        <button class="btn is-sm" id="np-ok" style="border-color:#3a6040;color:#7ab878;">Create</button>
+        <button class="btn" id="np-cancel" style="font-size:11px;padding:3px 10px;">Cancel</button>
+        <button class="btn" id="np-ok" style="font-size:11px;padding:3px 10px;border-color:#3a6040;color:#7ab878;">Create</button>
       </div>
     </div>`;
   document.body.appendChild(overlay);
@@ -6463,7 +6187,7 @@ function startPlay() {
   ensureAudioCtx();
   rhythmPlaying = true;
   const btn = document.getElementById('rhy-play-btn');
-  btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#i-square"/></svg> Stop';
+  btn.textContent = '■ Stop';
   btn.classList.add('playing');
 
   const begin = () => {
@@ -6486,7 +6210,7 @@ function stopPlay() {
   document.querySelectorAll('.hat-cell.col-current')
     .forEach(c => c.classList.remove('col-current'));
   const btn = document.getElementById('rhy-play-btn');
-  if (btn) { btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#i-play"/></svg> Play'; btn.classList.remove('playing'); }
+  if (btn) { btn.textContent = '▶ Play'; btn.classList.remove('playing'); }
 }
 
 function togglePlay() {
@@ -6640,11 +6364,11 @@ async function exportRhythmsZip() {
   });
 })();
 
-// ─── Explore panel resize ─────────────────────────────────────────────────────
+// ─── Progressions panel resize ────────────────────────────────────────────────
 
 (function () {
-  const handle = document.getElementById('explore-resize-handle');
-  const panel  = document.getElementById('explore-panel');
+  const handle = document.getElementById('prog-resize-handle');
+  const panel  = document.getElementById('prog-panel');
   let active = false, startX = 0, startW = 0;
 
   handle.addEventListener('mousedown', e => {
@@ -6653,7 +6377,29 @@ async function exportRhythmsZip() {
   });
   document.addEventListener('mousemove', e => {
     if (!active) return;
-    const w = Math.max(260, Math.min(640, startW - (e.clientX - startX)));
+    const w = Math.max(240, Math.min(640, startW - (e.clientX - startX)));
+    panel.style.width = w + 'px'; panel.style.minWidth = w + 'px';
+    resizeCanvas();
+  });
+  document.addEventListener('mouseup', () => {
+    if (active) { active = false; handle.classList.remove('dragging'); }
+  });
+})();
+
+// ─── Chords panel resize ──────────────────────────────────────────────────────
+
+(function () {
+  const handle = document.getElementById('chords-resize-handle');
+  const panel  = document.getElementById('chords-panel');
+  let active = false, startX = 0, startW = 0;
+
+  handle.addEventListener('mousedown', e => {
+    active = true; startX = e.clientX; startW = panel.offsetWidth;
+    handle.classList.add('dragging'); e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!active) return;
+    const w = Math.max(220, Math.min(600, startW - (e.clientX - startX)));
     panel.style.width = w + 'px'; panel.style.minWidth = w + 'px';
     resizeCanvas();
   });
@@ -6665,9 +6411,7 @@ async function exportRhythmsZip() {
 // ─── Canvas sizing ────────────────────────────────────────────────────────────
 
 function resizeCanvas() {
-  if (appMode === 'rhythm') return; // canvas not visible
   const wrap = document.getElementById('canvas-wrap');
-  if (!wrap || !wrap.clientWidth) return;
   const maxW = wrap.clientWidth - 24;
   const maxH = wrap.clientHeight - 24;
   const aspect = 1000 / 1400; // card aspect ratio (5:7)
@@ -6690,7 +6434,6 @@ function syncPanSlider() {
 // ─── Init: load saved layout ──────────────────────────────────────────────────
 
 (function () {
-  document.body.dataset.mode = 'edit';
   state.pan    = DEFAULT_STATE.pan;
   state.notes  = JSON.parse(JSON.stringify(DEFAULT_STATE.notes));
   state.nextId = DEFAULT_STATE.nextId;
@@ -6698,6 +6441,5 @@ function syncPanSlider() {
 })();
 </script>
 
-<div id="toast" role="status" aria-live="polite"></div>
 </body>
 </html>

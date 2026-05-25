@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Type — Scale</title>
+<link rel="stylesheet" href="_card.css">
+<style>
+  .scale-table {
+    background: var(--surface-card);
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 0 rgba(20, 20, 30, 0.04);
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 64px 1fr 220px;
+    align-items: baseline;
+    gap: 20px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border-card);
+  }
+  .row:last-child { border-bottom: 0; }
+  .size {
+    font: 600 11px/1 var(--font-mono);
+    color: var(--fg-faint);
+    letter-spacing: .2px;
+  }
+  .specimen { color: var(--fg-1); font-family: var(--font-sans); }
+  .use {
+    font: 11px/1.4 var(--font-sans);
+    color: var(--fg-2);
+  }
+</style>
+</head>
+<body>
+  <p class="card-intro">A <b>tight 9–15 px scale</b> — everything in the editor chrome lives in this range. Bigger sizes are reserved for SVG labels drawn on the white canvas.</p>
+
+  <div class="scale-table">
+    <div class="row"><span class="size">9 px</span><span class="specimen" style="font-size:9px;">Sub-label · BADGE · kbd</span><span class="use">sub-labels, badges, keyboard hints</span></div>
+    <div class="row"><span class="size">10 px</span><span class="specimen" style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#3d7395;font-weight:bold;">Panel title · section title</span><span class="use">panel headings, section titles</span></div>
+    <div class="row"><span class="size">11 px</span><span class="specimen" style="font-size:11px;">Default body — row label, pill, item</span><span class="use">most body text; row labels &amp; pills</span></div>
+    <div class="row"><span class="size">12 px</span><span class="specimen" style="font-size:12px;">Button label · input value</span><span class="use">buttons, input values</span></div>
+    <div class="row"><span class="size">13 px</span><span class="specimen" style="font-size:13px;">D3 · note label · primary input</span><span class="use">note labels on canvas, primary inputs</span></div>
+    <div class="row"><span class="size">14 px</span><span class="specimen" style="font-size:14px;font-weight:bold;">Rhythm welcome card title</span><span class="use">rhythm-card title</span></div>
+    <div class="row"><span class="size">15 px</span><span class="specimen" style="font-size:15px;font-weight:bold;color:#2c5e7a;">♩ Handpan Editor</span><span class="use">toolbar wordmark — H1</span></div>
+  </div>
+</body>
+</html>

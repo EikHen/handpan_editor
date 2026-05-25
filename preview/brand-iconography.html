@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Iconography — SVG set</title>
+<link rel="stylesheet" href="_card.css">
+<style>
+  body { padding: 22px 26px; }
+
+  .group { background: white; border: 1px solid #ecebe4; border-radius: 10px;
+           padding: 14px 16px 12px; box-shadow: 0 1px 0 rgba(20, 20, 30, 0.04); }
+  .group + .group { margin-top: 14px; }
+
+  .icons { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+  .icon {
+    background: var(--surface-card);
+    border: 1px solid var(--border-card);
+    border-radius: 6px;
+    padding: 14px 6px 8px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+  }
+  .icon svg {
+    width: 22px; height: 22px;
+    color: var(--accent);
+  }
+  .icon .name {
+    font: 10px/1.2 var(--font-sans);
+    color: var(--fg-2);
+    text-align: center;
+  }
+  .icon.warm svg { color: var(--accent-warm); }
+  .icon.r svg { color: var(--hand-r); }
+  .icon.l svg { color: var(--hand-l); }
+</style>
+</head>
+<body>
+  <p class="card-intro">A <b>tasteful, geometric icon set</b> — 24×24 viewBox, 1.75 px stroke, round caps. Stroke uses <code style="font-family:var(--font-mono);background:var(--surface-panel);padding:1px 4px;border-radius:3px;font-size:11px;">currentColor</code>, so the icon picks up whatever colour its container uses (steel-blue by default; warm copper on welcoming surfaces; R/L hand colours in rhythm contexts).</p>
+
+  <!-- Sprite loaded once; <use> references each symbol -->
+  <svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+    <defs>
+      <symbol id="i-arrow-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="4" x2="12" y2="20"/><polyline points="6 14 12 20 18 14"/></symbol>
+      <symbol id="i-arrow-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="4" x2="12" y2="20"/><polyline points="6 10 12 4 18 10"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></symbol>
+      <symbol id="i-undo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M4 9h11a5 5 0 0 1 5 5v0a5 5 0 0 1-5 5h-6"/></symbol>
+      <symbol id="i-redo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 14 20 9 15 4"/><path d="M20 9H9a5 5 0 0 0-5 5v0a5 5 0 0 0 5 5h6"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 4 20 12 6 20 6 4"/></symbol>
+      <symbol id="i-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="5" width="4" height="14" rx="0.5"/><rect x="14" y="5" width="4" height="14" rx="0.5"/></symbol>
+      <symbol id="i-square" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="14" rx="0.5"/></symbol>
+      <symbol id="i-skip-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="19 5 8 12 19 19 19 5"/><line x1="5" y1="5" x2="5" y2="19"/></symbol>
+      <symbol id="i-skip-forward" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 5 16 12 5 19 5 5"/><line x1="19" y1="5" x2="19" y2="19"/></symbol>
+      <symbol id="i-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 6 9 12 15 18"/></symbol>
+      <symbol id="i-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></symbol>
+      <symbol id="i-chevron-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 15 12 9 18 15"/></symbol>
+      <symbol id="i-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></symbol>
+      <symbol id="i-maximize" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 4 20 4 20 9"/><polyline points="9 20 4 20 4 15"/><line x1="20" y1="4" x2="14" y2="10"/><line x1="4" y1="20" x2="10" y2="14"/></symbol>
+      <symbol id="i-minimize" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="4" y2="20"/><line x1="14" y1="10" x2="20" y2="4"/></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><line x1="20" y1="20" x2="16" y2="16"/></symbol>
+      <symbol id="i-help-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 0 1 5 0c0 1.5-2.5 2-2.5 4"/><circle cx="12" cy="17" r="0.4" fill="currentColor"/></symbol>
+      <symbol id="i-music" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
+      <symbol id="i-disc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></symbol>
+      <symbol id="i-pan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="13.5" r="2.5"/><circle cx="7" cy="15" r="1.2"/><circle cx="17" cy="15" r="1.2"/><circle cx="9" cy="9.5" r="1.1"/><circle cx="15" cy="9.5" r="1.1"/></symbol>
+      <symbol id="i-rhythm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="3" height="12" rx="0.5"/><rect x="8.5" y="9" width="3" height="9" rx="0.5"/><rect x="14" y="4" width="3" height="14" rx="0.5"/><rect x="19.5" y="11" width="3" height="7" rx="0.5"/></symbol>
+      <symbol id="i-wave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12 q3 -8 6 0 t6 0 t6 0 t6 0"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="5" y1="5" x2="6.5" y2="6.5"/><line x1="17.5" y1="17.5" x2="19" y2="19"/><line x1="5" y1="19" x2="6.5" y2="17.5"/><line x1="17.5" y1="6.5" x2="19" y2="5"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 13.5A9 9 0 1 1 10.5 3a7 7 0 0 0 10.5 10.5z"/></symbol>
+      <symbol id="i-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 4 14 11 14 10 22 19 10 13 10 13 2"/></symbol>
+      <symbol id="i-diamond" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 12 12 22 2 12 12 2"/></symbol>
+      <symbol id="i-circle-dashed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" stroke-dasharray="4 3"/></symbol>
+      <symbol id="i-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c-4 0-7-3-7-7 0-3 2-5 3.5-7 1.5-2 1.5-4 1.5-5 2 0 3 1 4 3 1 2 2 3.5 3 5 1.5 2.5 2 4 2 6 0 4-3 5-7 5z"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></symbol>
+      <symbol id="i-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></symbol>
+      <symbol id="i-volume" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M16 8a5 5 0 0 1 0 8"/><path d="M19.5 5.5a9 9 0 0 1 0 13"/></symbol>
+      <symbol id="i-mouse-pointer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 3 11 21 14 13 21 11 3 3"/></symbol>
+      <symbol id="i-pen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l4-1 13-13a2.5 2.5 0 0 0-3.5-3.5L3.5 16.5 3 21z"/></symbol>
+      <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+      <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></symbol>
+      <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+    </defs>
+  </svg>
+
+  <div class="group">
+    <div class="group-head">
+      <div class="group-title">Actions &amp; history</div>
+      <div class="group-meta">edit · file · undo</div>
+    </div>
+    <div class="icons">
+      <div class="icon"><svg><use href="#i-arrow-down"/></svg><div class="name">arrow-down</div></div>
+      <div class="icon"><svg><use href="#i-arrow-up"/></svg><div class="name">arrow-up</div></div>
+      <div class="icon"><svg><use href="#i-plus"/></svg><div class="name">plus</div></div>
+      <div class="icon"><svg><use href="#i-copy"/></svg><div class="name">copy</div></div>
+      <div class="icon"><svg><use href="#i-x"/></svg><div class="name">x</div></div>
+      <div class="icon"><svg><use href="#i-trash"/></svg><div class="name">trash</div></div>
+      <div class="icon"><svg><use href="#i-undo"/></svg><div class="name">undo</div></div>
+      <div class="icon"><svg><use href="#i-redo"/></svg><div class="name">redo</div></div>
+      <div class="icon"><svg><use href="#i-check"/></svg><div class="name">check</div></div>
+      <div class="icon"><svg><use href="#i-pen"/></svg><div class="name">pen</div></div>
+      <div class="icon"><svg><use href="#i-eye"/></svg><div class="name">eye</div></div>
+      <div class="icon"><svg><use href="#i-mouse-pointer"/></svg><div class="name">pointer</div></div>
+      <div class="icon"><svg><use href="#i-settings"/></svg><div class="name">settings</div></div>
+      <div class="icon"><svg><use href="#i-help-circle"/></svg><div class="name">help</div></div>
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="group-head">
+      <div class="group-title">Playback &amp; chrome</div>
+      <div class="group-meta">transport · disclosure · search</div>
+    </div>
+    <div class="icons">
+      <div class="icon"><svg><use href="#i-play"/></svg><div class="name">play</div></div>
+      <div class="icon"><svg><use href="#i-pause"/></svg><div class="name">pause</div></div>
+      <div class="icon"><svg><use href="#i-square"/></svg><div class="name">square (stop)</div></div>
+      <div class="icon"><svg><use href="#i-skip-back"/></svg><div class="name">skip-back</div></div>
+      <div class="icon"><svg><use href="#i-skip-forward"/></svg><div class="name">skip-forward</div></div>
+      <div class="icon"><svg><use href="#i-chevron-left"/></svg><div class="name">chevron-left</div></div>
+      <div class="icon"><svg><use href="#i-chevron-right"/></svg><div class="name">chevron-right</div></div>
+      <div class="icon"><svg><use href="#i-chevron-up"/></svg><div class="name">chevron-up</div></div>
+      <div class="icon"><svg><use href="#i-chevron-down"/></svg><div class="name">chevron-down</div></div>
+      <div class="icon"><svg><use href="#i-maximize"/></svg><div class="name">maximize</div></div>
+      <div class="icon"><svg><use href="#i-minimize"/></svg><div class="name">minimize</div></div>
+      <div class="icon"><svg><use href="#i-search"/></svg><div class="name">search</div></div>
+      <div class="icon"><svg><use href="#i-volume"/></svg><div class="name">volume</div></div>
+      <div class="icon"><svg><use href="#i-circle"/></svg><div class="name">circle</div></div>
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="group-head">
+      <div class="group-title">Music &amp; product</div>
+      <div class="group-meta">handpan-specific glyphs</div>
+    </div>
+    <div class="icons">
+      <div class="icon"><svg><use href="#i-pan"/></svg><div class="name">pan</div></div>
+      <div class="icon"><svg><use href="#i-music"/></svg><div class="name">music</div></div>
+      <div class="icon"><svg><use href="#i-disc"/></svg><div class="name">disc</div></div>
+      <div class="icon"><svg><use href="#i-rhythm"/></svg><div class="name">rhythm</div></div>
+      <div class="icon"><svg><use href="#i-wave"/></svg><div class="name">wave</div></div>
+      <div class="icon"><svg><use href="#i-target"/></svg><div class="name">target (root)</div></div>
+      <div class="icon"><svg><use href="#i-sun"/></svg><div class="name">sun (happy)</div></div>
+      <div class="icon"><svg><use href="#i-moon"/></svg><div class="name">moon (sad)</div></div>
+      <div class="icon"><svg><use href="#i-zap"/></svg><div class="name">zap (epic)</div></div>
+      <div class="icon"><svg><use href="#i-diamond"/></svg><div class="name">diamond (dark)</div></div>
+      <div class="icon"><svg><use href="#i-circle-dashed"/></svg><div class="name">circle-dashed (peaceful)</div></div>
+      <div class="icon"><svg><use href="#i-flame"/></svg><div class="name">flame (warm jazz)</div></div>
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="group-head">
+      <div class="group-title">In product context</div>
+      <div class="group-meta">currentColor recolouring</div>
+    </div>
+    <div class="icons">
+      <div class="icon"><svg><use href="#i-plus"/></svg><div class="name">accent (default)</div></div>
+      <div class="icon warm"><svg><use href="#i-sun"/></svg><div class="name">accent-warm</div></div>
+      <div class="icon r"><svg><use href="#i-rhythm"/></svg><div class="name">hand-r</div></div>
+      <div class="icon l"><svg><use href="#i-rhythm"/></svg><div class="name">hand-l</div></div>
+    </div>
+  </div>
+</body>
+</html>

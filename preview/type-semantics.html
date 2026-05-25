@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Type — Semantic styles</title>
+<link rel="stylesheet" href="_card.css">
+<style>
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .item {
+    background: var(--surface-card);
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+    padding: 14px 16px;
+    box-shadow: var(--shadow-light);
+  }
+  .item-key {
+    font: 10px/1 var(--font-mono);
+    color: var(--fg-faint);
+    text-transform: uppercase; letter-spacing: .6px;
+    margin-bottom: 10px;
+  }
+  .item-specimen {
+    background: var(--surface-panel);
+    border: 1px solid var(--border-card);
+    border-radius: 6px;
+    padding: 14px;
+    min-height: 50px;
+    display: flex; align-items: center;
+  }
+  .item-use {
+    font: 11px/1.45 var(--font-sans);
+    color: var(--fg-2);
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+  <div class="grid">
+    <div class="item">
+      <div class="item-key">.t-h1</div>
+      <div class="item-specimen"><span class="t-h1">♩ Handpan Editor</span></div>
+      <div class="item-use">The toolbar wordmark. Bold Arial 15, accent-title.</div>
+    </div>
+
+    <div class="item">
+      <div class="item-key">.t-panel-title</div>
+      <div class="item-specimen"><span class="t-panel-title">Pan Editing</span></div>
+      <div class="item-use">UPPERCASE heading at the top of every sidebar panel.</div>
+    </div>
+
+    <div class="item">
+      <div class="item-key">.t-section-title</div>
+      <div class="item-specimen"><span class="t-section-title">Mood</span></div>
+      <div class="item-use">Section titles inside the side panels.</div>
+    </div>
+
+    <div class="item">
+      <div class="item-key">.t-sub-label</div>
+      <div class="item-specimen"><span class="t-sub-label">Layout file</span></div>
+      <div class="item-use">Tiny dividers between groups of buttons.</div>
+    </div>
+
+    <div class="item">
+      <div class="item-key">.t-body</div>
+      <div class="item-specimen"><span class="t-body">Alt+Click notes, chords or tiles to hear them.</span></div>
+      <div class="item-use">The default body text.</div>
+    </div>
+
+    <div class="item">
+      <div class="item-key">.t-row-label</div>
+      <div class="item-specimen"><span class="t-row-label">Radius: <b style="color:var(--fg-1);">320</b> px</span></div>
+      <div class="item-use">Sits above sliders &amp; inputs.</div>
+    </div>
+
+    <div class="item">
+      <div class="item-key">.t-hint</div>
+      <div class="item-specimen"><span class="t-hint">Pick a pattern to start editing.</span></div>
+      <div class="item-use">Empty-state and onboarding hints.</div>
+    </div>
+
+    <div class="item">
+      <div class="item-key">.t-caption</div>
+      <div class="item-specimen"><span class="t-caption">HAT v1.2.2  ·  R blue · L copper</span></div>
+      <div class="item-use">Quiet meta text under titles.</div>
+    </div>
+  </div>
+</body>
+</html>

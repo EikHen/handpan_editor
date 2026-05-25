@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Spacing scale</title>
+<link rel="stylesheet" href="_card.css">
+<style>
+  .stage {
+    background: var(--surface-card);
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow-light);
+  }
+  .row {
+    display: grid; grid-template-columns: 130px 1fr 60px;
+    align-items: center; gap: 16px;
+    padding: 8px 0;
+  }
+  .row + .row { border-top: 1px solid var(--border-card); }
+  .name { font: 600 12px/1 var(--font-sans); color: var(--fg-1); }
+  .bar { height: 18px; background: var(--accent); border-radius: 2px; }
+  .meta { font: 11px/1 var(--font-mono); color: var(--fg-faint); text-align: right; }
+
+  .section-title {
+    font: 600 10px/1 var(--font-sans);
+    color: var(--fg-faint);
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    margin: 18px 0 10px;
+  }
+  .section-title:first-child { margin-top: 0; }
+</style>
+</head>
+<body>
+  <p class="card-intro">Everything in the editor lives on a <b>3 / 5 / 8 / 12 px</b> grid. Tight, but consistent.</p>
+  <div class="stage">
+    <div class="section-title">Raw stops</div>
+    <div class="row"><div class="name">--space-xs</div><div class="bar" style="width:3px;"></div><div class="meta">3 px</div></div>
+    <div class="row"><div class="name">--space-sm</div><div class="bar" style="width:5px;"></div><div class="meta">5 px</div></div>
+    <div class="row"><div class="name">--space-md</div><div class="bar" style="width:8px;"></div><div class="meta">8 px</div></div>
+    <div class="row"><div class="name">--space-lg</div><div class="bar" style="width:12px;"></div><div class="meta">12 px</div></div>
+    <div class="row"><div class="name">--space-xl</div><div class="bar" style="width:20px;"></div><div class="meta">20 px</div></div>
+
+    <div class="section-title">Component pad presets</div>
+    <div class="row"><div class="name">pad-button</div><div class="bar" style="width:55px;"></div><div class="meta">5 × 11</div></div>
+    <div class="row"><div class="name">pad-pill</div><div class="bar" style="width:50px;"></div><div class="meta">4 × 10</div></div>
+    <div class="row"><div class="name">pad-input</div><div class="bar" style="width:35px;"></div><div class="meta">4 × 7</div></div>
+    <div class="row"><div class="name">pad-panel</div><div class="bar" style="width:60px;"></div><div class="meta">11 × 12</div></div>
+  </div>
+</body>
+</html>

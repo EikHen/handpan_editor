@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HAT rhythm grid</title>
+<link rel="stylesheet" href="_card.css">
+<style>
+  /* Glyph key */
+  .key { background: var(--surface-card); border: 1px solid var(--border-card);
+         border-radius: 10px; padding: 16px 18px; margin-bottom: 16px;
+         box-shadow: var(--shadow-light); }
+  .key-title {
+    font: 600 11px/1 var(--font-sans); color: var(--fg-1);
+    text-transform: uppercase; letter-spacing: .6px; margin-bottom: 12px;
+  }
+  .key-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .key-item { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+  .key-cell-pair { display: flex; gap: 4px; }
+  .key-name { font: 600 11px/1 var(--font-sans); color: var(--fg-1); }
+  .key-desc { font: 10px/1.4 var(--font-sans); color: var(--fg-2); }
+
+  .cell {
+    width: 30px; height: 34px;
+    border-radius: 3px; border: 1px solid;
+    display: flex; align-items: center; justify-content: center;
+    font: bold 15px/1 var(--font-mono); user-select: none;
+  }
+  .cell.r-hit   { background: #e3eaf2; color: #2c5e7a; border-color: #b8c9d6; }
+  .cell.r-mute  { background: #eef2f7; color: #7a98ad; border-color: #cad6df; font-style: italic; font-size: 12px; }
+  .cell.r-ghost { background: #f3f6fa; color: #b3c0cc; border-color: #d8e0e8; font-size: 12px; }
+  .cell.l-hit   { background: #f5e8d5; color: #8e5828; border-color: #d4b896; }
+  .cell.l-mute  { background: #faf0de; color: #b8956b; border-color: #e0c7a3; font-style: italic; font-size: 12px; }
+  .cell.l-ghost { background: #fbf4e4; color: #d4be9c; border-color: #e6d2b3; font-size: 12px; }
+  .cell.rest    { background: var(--surface-panel); color: var(--fg-whisper); border-color: var(--border-card); }
+
+  /* Pattern */
+  .pattern { background: var(--surface-card); border: 1px solid var(--border-card);
+             border-radius: 10px; padding: 16px 18px; box-shadow: var(--shadow-light); }
+  .pattern-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+  .pattern-title { font: 600 13px/1 var(--font-sans); color: var(--fg-1); }
+  .pattern-meta  { font: 11px/1 var(--font-mono); color: var(--fg-faint); }
+  .pattern-stage {
+    background: var(--surface-panel);
+    border: 1px solid var(--border-card);
+    border-radius: 6px; padding: 14px;
+  }
+
+  .hat-grid {
+    display: grid; grid-template-columns: 22px repeat(8, 30px);
+    gap: 3px; align-items: center; width: max-content;
+  }
+  .rowlbl {
+    display: flex; align-items: center; justify-content: center;
+    width: 22px; font: bold 11px/1 var(--font-mono);
+  }
+  .rowlbl.r { color: #2c5e7a; }
+  .rowlbl.l { color: #8e5828; }
+  .bar-start { border-left: 3px solid var(--accent) !important; margin-left: 6px; }
+  .beat-mark { font: 8px/1 Arial, sans-serif; color: var(--fg-faint); text-align: center; padding-bottom: 3px; }
+
+  .pattern-note {
+    margin-top: 12px;
+    font: 11px/1.5 var(--font-sans); color: var(--fg-2);
+  }
+  .pattern-note b { color: var(--fg-1); font-weight: 600; }
+</style>
+</head>
+<body>
+  <p class="card-intro">The handpan rhythm grid has <b>two rows, one per hand</b>. Right hand sits on top in cool steel-blue; left hand below in warm copper.</p>
+
+  <div class="key">
+    <div class="key-title">Stroke alphabet</div>
+    <div class="key-grid">
+      <div class="key-item">
+        <div class="key-cell-pair">
+          <div class="cell r-hit">D</div>
+          <div class="cell l-hit">D</div>
+        </div>
+        <div class="key-name">D · Doum</div>
+        <div class="key-desc">Centre bass stroke</div>
+      </div>
+      <div class="key-item">
+        <div class="key-cell-pair">
+          <div class="cell r-hit">T</div>
+          <div class="cell l-hit">T</div>
+        </div>
+        <div class="key-name">T · Tak</div>
+        <div class="key-desc">Rim / accent stroke</div>
+      </div>
+      <div class="key-item">
+        <div class="key-cell-pair">
+          <div class="cell r-mute">d</div>
+          <div class="cell l-mute">t</div>
+        </div>
+        <div class="key-name">d  t · Muted</div>
+        <div class="key-desc">Same stroke, palm-damped</div>
+      </div>
+      <div class="key-item">
+        <div class="key-cell-pair">
+          <div class="cell r-ghost">•</div>
+          <div class="cell l-ghost">•</div>
+        </div>
+        <div class="key-name">• · Ghost</div>
+        <div class="key-desc">Soft, barely audible</div>
+      </div>
+      <div class="key-item">
+        <div class="key-cell-pair">
+          <div class="cell rest">−</div>
+        </div>
+        <div class="key-name">− · Rest</div>
+        <div class="key-desc">No stroke this slot</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pattern">
+    <div class="pattern-head">
+      <div class="pattern-title">Maqsoum</div>
+      <div class="pattern-meta">4/4  ·  ♩ 90  ·  D Kurd</div>
+    </div>
+    <div class="pattern-stage">
+      <div class="hat-grid">
+        <span></span>
+        <span class="beat-mark">1</span><span></span>
+        <span class="beat-mark">2</span><span></span>
+        <span class="beat-mark">3</span><span></span>
+        <span class="beat-mark">4</span><span></span>
+
+        <span class="rowlbl r">R</span>
+        <div class="cell r-hit bar-start">D</div>
+        <div class="cell rest">−</div>
+        <div class="cell r-hit">T</div>
+        <div class="cell rest">−</div>
+        <div class="cell r-hit">D</div>
+        <div class="cell rest">−</div>
+        <div class="cell r-hit">T</div>
+        <div class="cell rest">−</div>
+
+        <span class="rowlbl l">L</span>
+        <div class="cell l-ghost bar-start">•</div>
+        <div class="cell l-hit">T</div>
+        <div class="cell l-ghost">•</div>
+        <div class="cell l-hit">T</div>
+        <div class="cell l-ghost">•</div>
+        <div class="cell l-hit">T</div>
+        <div class="cell l-ghost">•</div>
+        <div class="cell l-hit">T</div>
+      </div>
+    </div>
+    <div class="pattern-note">
+      Right hand lands on the <b>downbeats</b> (Doum on 1 &amp; 3, Tak on 2 &amp; 4). Left hand fills the <b>off-beats</b> with quiet ghosts and Taks.
+    </div>
+  </div>
+</body>
+</html>

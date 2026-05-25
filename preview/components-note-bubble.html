@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Note bubble</title>
+<link rel="stylesheet" href="_card.css">
+<style>
+  .stage {
+    background: var(--surface-canvas-bg);
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+    padding: 30px 20px;
+    display: flex; justify-content: center; align-items: center;
+  }
+  .pan {
+    background: white;
+    border: 5px solid #c0c0c0;
+    border-radius: 50%;
+    width: 520px; height: 280px;
+    position: relative;
+    box-shadow: var(--shadow-canvas);
+  }
+  .pan::after {
+    content: ''; position: absolute; inset: 32px;
+    border: 1.5px solid #e0e0e0; border-radius: 50%;
+    pointer-events: none;
+  }
+  .bubble {
+    position: absolute; top: 50%; transform: translate(-50%, -50%);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font: bold 16px/1 Arial, sans-serif;
+    color: #222;
+    background: white;
+    border: 2px solid;
+  }
+  .bubble.selected { outline: 2px solid #f90; outline-offset: 2px; }
+  .bubble .handle {
+    position: absolute; right: -8px; top: 50%; transform: translateY(-50%);
+    width: 14px; height: 14px; border-radius: 50%;
+    background: #f90; border: 1.5px solid white;
+  }
+  .legend {
+    margin-top: 14px;
+    font: 11px/1.5 var(--font-sans);
+    color: var(--fg-2);
+    text-align: center;
+  }
+  .legend b { color: var(--fg-1); font-weight: 600; }
+</style>
+</head>
+<body>
+  <p class="card-intro">A <b>note bubble</b> is the editor's atom: a circle, a 2-px border, a centred pitch label. The border colour is the pitch-class hue.</p>
+
+  <div class="stage">
+    <div class="pan">
+      <div class="bubble" style="left:14%;width:60px;height:60px;border-color:#e74c3c;">C3</div>
+      <div class="bubble" style="left:28%;width:64px;height:64px;border-color:#27ae60;">E3</div>
+      <div class="bubble" style="left:46%;width:90px;height:90px;border-color:#3d7395;font-size:20px;">D3</div>
+      <div class="bubble" style="left:64%;width:64px;height:64px;border-color:#16a085;">F3</div>
+      <div class="bubble selected" style="left:80%;width:60px;height:60px;border-color:#e91e8c;">A3<span class="handle"></span></div>
+    </div>
+  </div>
+  <div class="legend">Left to right: C — E — <b>D (centre, the ding)</b> — F — <b>A, selected</b> (with orange resize handle).</div>
+</body>
+</html>

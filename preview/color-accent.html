@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Colors — Accent</title>
+<link rel="stylesheet" href="_card.css">
+<style>
+  .ramp { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .swatch {
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border-card);
+    background: var(--surface-card);
+    box-shadow: var(--shadow-light);
+  }
+  .swatch-fill { height: 56px; }
+  .swatch-meta { padding: 8px 10px; }
+  .swatch-name { font: 600 11px/1 var(--font-sans); color: var(--fg-1); margin-bottom: 3px; }
+  .swatch-hex { font: 10px/1 var(--font-mono); color: var(--fg-faint); }
+
+  .usage-stage {
+    background: var(--surface-panel);
+    border: 1px solid var(--border-card);
+    border-radius: 8px;
+    padding: 18px 20px;
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    margin-top: 16px;
+  }
+  .wordmark { font: bold 18px/1 var(--font-sans); color: var(--accent-title); }
+
+  .warm-row {
+    margin-top: 18px;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+  }
+  .section-label {
+    font: 600 10px/1 var(--font-sans);
+    color: var(--fg-faint);
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    margin: 18px 0 10px;
+  }
+</style>
+</head>
+<body>
+  <p class="card-intro">The brand carries <b>two accents</b>: a deep <b>steel blue</b> for everything generic, and a warm <b>copper amber</b> for friendly, welcoming moments.</p>
+
+  <div class="section-label" style="margin-top:0;">Cool — steel blue</div>
+  <div class="ramp">
+    <div class="swatch"><div class="swatch-fill" style="background:#3d7395;"></div><div class="swatch-meta"><div class="swatch-name">accent</div><div class="swatch-hex">#3d7395</div></div></div>
+    <div class="swatch"><div class="swatch-fill" style="background:#2c5e7a;"></div><div class="swatch-meta"><div class="swatch-name">hover / title</div><div class="swatch-hex">#2c5e7a</div></div></div>
+    <div class="swatch"><div class="swatch-fill" style="background:#1f4a63;"></div><div class="swatch-meta"><div class="swatch-name">bright (active text)</div><div class="swatch-hex">#1f4a63</div></div></div>
+    <div class="swatch"><div class="swatch-fill" style="background:#e3eaf2;"></div><div class="swatch-meta"><div class="swatch-name">fill</div><div class="swatch-hex">#e3eaf2</div></div></div>
+  </div>
+
+  <div class="section-label">Warm — copper amber</div>
+  <div class="warm-row">
+    <div class="swatch"><div class="swatch-fill" style="background:#b8763a;"></div><div class="swatch-meta"><div class="swatch-name">accent-warm</div><div class="swatch-hex">#b8763a</div></div></div>
+    <div class="swatch"><div class="swatch-fill" style="background:#8e5828;"></div><div class="swatch-meta"><div class="swatch-name">warm hover</div><div class="swatch-hex">#8e5828</div></div></div>
+    <div class="swatch"><div class="swatch-fill" style="background:#6f4419;"></div><div class="swatch-meta"><div class="swatch-name">warm bright</div><div class="swatch-hex">#6f4419</div></div></div>
+    <div class="swatch"><div class="swatch-fill" style="background:#f5e8d5;"></div><div class="swatch-meta"><div class="swatch-name">warm fill</div><div class="swatch-hex">#f5e8d5</div></div></div>
+  </div>
+
+  <div class="usage-stage">
+    <span class="wordmark">♩ Handpan Editor</span>
+    <button class="p-pill">Jazz</button>
+    <button class="p-pill is-active">Happy</button>
+    <button class="p-pill">Epic</button>
+    <button class="p-btn">⬇ Export</button>
+    <button class="p-btn is-active">▶ Play</button>
+  </div>
+</body>
+</html>

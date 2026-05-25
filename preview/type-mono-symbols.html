@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Type — Mono &amp; symbols</title>
+<link rel="stylesheet" href="_card.css">
+<style>
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  .pre-stage {
+    background: var(--surface-panel);
+    border: 1px solid var(--border-card);
+    border-radius: 6px;
+    padding: 14px 16px;
+    font: 12px/1.5 var(--font-mono);
+    color: var(--fg-1);
+    white-space: pre;
+  }
+  .roman-stage {
+    background: var(--surface-panel);
+    border: 1px solid var(--border-card);
+    border-radius: 6px;
+    padding: 14px 16px;
+    font: 12px/1.7 var(--font-mono);
+    color: var(--fg-2);
+    letter-spacing: .3px;
+  }
+  .kbd-stage {
+    background: var(--surface-panel);
+    border: 1px solid var(--border-card);
+    border-radius: 6px;
+    padding: 14px 16px;
+    font: 11px/1.7 Arial, sans-serif;
+    color: var(--fg-2);
+  }
+  .kbd-stage b { color: var(--fg-1); }
+  .kbd-stage code {
+    font: 11px var(--font-mono);
+    background: var(--surface-card);
+    border: 1px solid var(--border-input);
+    border-radius: 2px;
+    padding: 1px 5px;
+    color: var(--fg-1);
+  }
+  .syms-stage {
+    background: var(--surface-panel);
+    border: 1px solid var(--border-card);
+    border-radius: 6px;
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px 8px;
+  }
+  .sym {
+    display: flex; align-items: baseline; gap: 8px;
+    font: 11px/1 Arial, sans-serif;
+    color: var(--fg-1);
+  }
+  .sym .glyph {
+    font: bold 18px/1 Arial, sans-serif;
+    color: var(--accent);
+    width: 28px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+  <p class="card-intro">The editor uses <b>Courier New</b> for anything that aligns in a grid — rhythm tabs, roman-numeral strips, kbd hints, code blocks.</p>
+
+  <div class="grid">
+    <div class="group">
+      <div class="group-head"><div class="group-title">Mono — code block</div><div class="group-meta">.t-mono</div></div>
+      <pre class="pre-stage">R: || D | - | T | - ||
+L: || • | T | • | T ||</pre>
+    </div>
+
+    <div class="group">
+      <div class="group-head"><div class="group-title">Roman analysis</div><div class="group-meta">.t-roman</div></div>
+      <div class="roman-stage">
+        I — IV — V — I<br>
+        ii — V — I<br>
+        i — ♭VI — ♭VII — V
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-head"><div class="group-title">Keyboard hints</div><div class="group-meta">.t-kbd</div></div>
+      <div class="kbd-stage">
+        <b>Click</b> — select<br>
+        <code>Ctrl+A</code> — select all<br>
+        <code>Ctrl+Z</code> / <code>Ctrl+Y</code> — undo / redo<br>
+        <code>↑↓←→</code> — nudge 1 px
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-head"><div class="group-title">Chord symbols</div><div class="group-meta">Unicode glyphs</div></div>
+      <div class="syms-stage">
+        <div class="sym"><span class="glyph">△</span>Maj</div>
+        <div class="sym"><span class="glyph">−</span>min</div>
+        <div class="sym"><span class="glyph">°</span>dim</div>
+        <div class="sym"><span class="glyph">+</span>aug</div>
+        <div class="sym"><span class="glyph">△⁷</span>Maj7</div>
+        <div class="sym"><span class="glyph">−⁷</span>min7</div>
+        <div class="sym"><span class="glyph">⁷</span>Dom7</div>
+        <div class="sym"><span class="glyph">ø⁷</span>½-dim</div>
+        <div class="sym"><span class="glyph">−△⁷</span>minMaj7</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

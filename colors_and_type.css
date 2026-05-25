@@ -1,0 +1,291 @@
+/*
+  Handpan Editor — colour & type tokens (warm-light direction)
+  Source: github.com/EikHen/handpan_editor
+
+  The editor has been reimagined as a WARM-LIGHT studio panel — cream and
+  off-white surfaces, deep steel-blue accent, warm-copper for friendly
+  moments. The white "paper" canvas now sits inside a soft sandstone matte,
+  not a dark cave. Calm, inviting, easy on the eyes.
+
+  Dark-on-warm-light reads as well as the old cool-on-cool-dark did, and
+  feels much more welcoming for new users.
+*/
+
+:root {
+
+  /* ── Surfaces (warm light) ───────────────────────────────────────────── */
+  --surface-app:         #f5efe3; /* app body — soft warm cream */
+  --surface-panel:       #fbf7ee; /* toolbar, sidebars, panels */
+  --surface-panel-2:     #f0e8d8; /* transport / footer bars */
+  --surface-card:        #ffffff; /* card inside a panel */
+  --surface-card-hover:  #fdf9f0;
+  --surface-input:       #fbf7ee; /* form fields */
+  --surface-canvas-bg:   #e8ddc6; /* sandstone matte behind the white pan */
+  --surface-paper:       #ffffff; /* the printable canvas itself */
+  --surface-paper-fill:  #f2f2f2; /* pan body shell on paper */
+
+  /* The legacy light-mode aliases used by the design-system preview cards */
+  --surface-light:        #fbfaf6;
+  --surface-light-soft:   #f5f1e8;
+  --surface-light-card:   #ffffff;
+  --border-light:         #ecebe4;
+  --fg-on-light-1:        #2c2c34;
+  --fg-on-light-2:        #4a4a52;
+  --fg-on-light-3:        #6a6a78;
+  --fg-on-light-muted:    #8a8a93;
+  --fg-on-light-faint:    #a4a4ad;
+
+  /* ── Borders & dividers ──────────────────────────────────────────────── */
+  --border-divider:      #ddd2bd; /* warm taupe panel splits */
+  --border-card:         #e6dcc6;
+  --border-input:        #c9bda6;
+  --border-paper:        #c0c0c0;
+  --border-paper-soft:   #e0e0e0;
+
+  /* ── Text — warm dark → warm whisper ramp ────────────────────────────── */
+  --fg-1:                #3a3027; /* primary body — warm espresso */
+  --fg-2:                #5a4d3e; /* secondary body / button label */
+  --fg-3:                #7d7060; /* tertiary, checkbox labels */
+  --fg-muted:            #948774; /* row labels, default pill */
+  --fg-faint:            #a89c89; /* hints */
+  --fg-subtle:           #b8ad9b; /* sub-section titles */
+  --fg-whisper:          #c4b9a6; /* shortcuts, empty-state */
+  --fg-on-paper:         #222222; /* labels drawn on the white canvas */
+  --fg-on-paper-soft:    #333333; /* chord name on canvas */
+
+  /* ── Accent — deep steel blue, tuned for cream ───────────────────────── */
+  --accent:              #3d7395; /* primary — borders, focus, sliders */
+  --accent-hover:        #2c5e7a; /* hover lift, deeper */
+  --accent-bright:       #1f4a63; /* active-state text, darkest */
+  --accent-title:        #2c5e7a; /* "Handpan Editor" wordmark */
+  --accent-fill:         #e3eaf2; /* active-pill plate */
+  --accent-fill-hover:   #d4dfe9;
+  --accent-soft-bg:      #ecf3f8;
+  --accent-soft-border:  #c3d5e3;
+
+  /* ── Warm accent — friendly / onboarding / marketing ─────────────────── */
+  --accent-warm:           #b8763a; /* deep copper-amber */
+  --accent-warm-hover:     #8e5828;
+  --accent-warm-bright:    #6f4419;
+  --accent-warm-fill:      #f5e8d5;
+  --accent-warm-soft-bg:   #faf2e4;
+  --accent-warm-soft-border:#e0c7a3;
+
+  /* ── Hands — light-mode dyad. R steel-blue, L warm copper. ───────────── */
+  --hand-r:              #2c5e7a; /* right hand — cool deep blue */
+  --hand-r-fill:         #e3eaf2;
+  --hand-r-border:       #b8c9d6;
+  --hand-r-muted:        #7a98ad;
+  --hand-r-ghost:        #b3c0cc;
+
+  --hand-l:              #8e5828; /* left hand — warm copper */
+  --hand-l-fill:         #f5e8d5;
+  --hand-l-border:       #d4b896;
+  --hand-l-muted:        #b8956b;
+  --hand-l-ghost:        #d4be9c;
+
+  /* ── Harmonic function (chord-tile top stripes) ──────────────────────── */
+  --fn-tonic:            #3d7395; /* cool */
+  --fn-subdom:           #3a7a4a; /* settled green */
+  --fn-dominant:         #b8763a; /* warm tension */
+  --fn-tonic-label:      #2c5e7a;
+  --fn-subdom-label:     #2a6040;
+  --fn-dominant-label:   #8e5828;
+
+  /* ── Status — chord playability ──────────────────────────────────────── */
+  --play-full:           #1a9966; /* ● Complete */
+  --play-partial:        #c08a00; /* ◕ Missing 1 note */
+  --play-incomplete:     #c63838; /* ◔ Missing 2+ */
+  --play-none:           #b0a89b; /* ○ No coverage */
+
+  /* Patch states (slightly warmer chips on light) */
+  --state-edited-bg:        #faf2e4;
+  --state-edited-border:    #e0c7a3;
+  --state-edited-fg:        #8e5828;
+  --state-imported-bg:      #ebf3e8;
+  --state-imported-border:  #b3d6b8;
+  --state-imported-fg:      #2a6040;
+
+  --danger:              #c63838;
+  --danger-border:       #d8a59c;
+  --danger-hover-bg:     #f7e3df;
+  --success:             #1a9966;
+
+  /* ── Pitch-class palette (unchanged — tuned for the WHITE canvas) ────── */
+  --pc-c:        #e74c3c;
+  --pc-c-sharp:  #e67e22;
+  --pc-d:        #f1c40f;
+  --pc-e-flat:   #a8b820;
+  --pc-e:        #27ae60;
+  --pc-f:        #16a085;
+  --pc-f-sharp:  #2980b9;
+  --pc-g:        #6c5ce7;
+  --pc-a-flat:   #a855f7;
+  --pc-a:        #e91e8c;
+  --pc-b-flat:   #c0392b;
+  --pc-b:        #795548;
+
+  /* Extended palette */
+  --pal-red:        #e74c3c;
+  --pal-red-dk:     #c0392b;
+  --pal-magenta:    #e91e63;
+  --pal-pink:       #f06292;
+  --pal-orange:     #e67e22;
+  --pal-amber:      #f39c12;
+  --pal-yellow:     #f1c40f;
+  --pal-olive:      #a8b820;
+  --pal-green:      #27ae60;
+  --pal-mint:       #2ecc71;
+  --pal-teal:       #16a085;
+  --pal-aqua:       #80cbc4;
+  --pal-blue:       #3498db;
+  --pal-blue-dk:    #2980b9;
+  --pal-indigo:     #6c5ce7;
+  --pal-violet:     #a855f7;
+  --pal-purple:     #9c27b0;
+  --pal-fuchsia:    #e91e8c;
+  --pal-brown:      #795548;
+  --pal-slate:      #607d8b;
+
+
+  /* ── Radii ───────────────────────────────────────────────────────────── */
+  --radius-xs:     2px;
+  --radius-sm:     3px;
+  --radius-md:     4px;
+  --radius-lg:     5px;
+  --radius-xl:     6px;
+  --radius-pill:  12px;
+  --radius-full:  50%;
+
+  /* ── Spacing ─────────────────────────────────────────────────────────── */
+  --space-xs:      3px;
+  --space-sm:      5px;
+  --space-md:      8px;
+  --space-lg:     12px;
+  --space-xl:     20px;
+
+  /* Component metrics */
+  --pad-button:        5px 11px;
+  --pad-button-small:  3px  9px;
+  --pad-input:         4px  7px;
+  --pad-pill:          4px 10px;
+  --pad-panel:        11px 12px;
+
+  --height-toolbar:       48px;
+  --width-sidebar:       252px;
+  --width-side-panel:    320px;
+  --height-rhythm-panel: 300px;
+
+  /* ── Shadows — subtle on light surfaces ──────────────────────────────── */
+  --shadow-canvas: 0 4px 24px rgba(60, 40, 20, 0.12), 0 1px 0 rgba(60, 40, 20, 0.05);
+  --shadow-popup:  0 2px 12px rgba(60, 40, 20, 0.14);
+  --shadow-modal:  0 8px 30px rgba(60, 40, 20, 0.18);
+  --shadow-light:  0 1px 0 rgba(60, 40, 20, 0.04), 0 4px 16px rgba(60, 40, 20, 0.06);
+
+  --focus-ring:    0 0 0 1px var(--accent);
+
+  /* ── Motion ──────────────────────────────────────────────────────────── */
+  --transition-fast:    0.10s ease;
+  --transition-base:    0.12s ease;
+  --transition-medium:  0.15s ease;
+
+
+  /* ── Type ────────────────────────────────────────────────────────────── */
+  --font-sans: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --font-mono: "Courier New", Courier, ui-monospace, monospace;
+  --font-alt:  "DM Sans", "Inter Tight", system-ui, sans-serif;
+
+  --text-9:    9px;
+  --text-10:  10px;
+  --text-11:  11px;
+  --text-12:  12px;
+  --text-13:  13px;
+  --text-14:  14px;
+  --text-15:  15px;
+  --text-20:  20px;
+  --text-30:  30px;
+  --text-32:  32px;
+
+  --leading-tight:    1.10;
+  --leading-snug:     1.30;
+  --leading-base:     1.45;
+  --leading-kbd:      1.75;
+
+  --tracking-tight:   0.3px;
+  --tracking-medium:  0.6px;
+  --tracking-loose:   0.8px;
+}
+
+
+/* Semantic type classes */
+
+.t-h1 {
+  font: bold var(--text-15) / var(--leading-tight) var(--font-sans);
+  color: var(--accent-title);
+}
+
+.t-h2 {
+  font: bold var(--text-14) / var(--leading-tight) var(--font-sans);
+  color: var(--fg-2);
+}
+
+.t-panel-title {
+  font: bold var(--text-10) / var(--leading-tight) var(--font-sans);
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-loose);
+}
+
+.t-section-title {
+  font: var(--text-10) / var(--leading-tight) var(--font-sans);
+  color: var(--fg-subtle);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-medium);
+}
+
+.t-sub-label {
+  font: var(--text-9) / var(--leading-tight) var(--font-sans);
+  color: var(--fg-whisper);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-medium);
+}
+
+.t-row-label  { font: var(--text-11) / var(--leading-snug) var(--font-sans); color: var(--fg-muted); }
+.t-body       { font: var(--text-11) / var(--leading-base) var(--font-sans); color: var(--fg-1); }
+.t-body-sm    { font: var(--text-10) / var(--leading-base) var(--font-sans); color: var(--fg-2); }
+.t-hint       { font: var(--text-11) / var(--leading-snug) var(--font-sans); color: var(--fg-faint); }
+.t-caption    { font: var(--text-10) / var(--leading-snug) var(--font-sans); color: var(--fg-subtle); }
+.t-button     { font: var(--text-12) / 1 var(--font-sans); color: var(--fg-2); }
+.t-button-sm  { font: var(--text-11) / 1 var(--font-sans); color: var(--fg-2); }
+.t-note       { font: bold var(--text-13) / var(--leading-tight) var(--font-sans); color: var(--fg-2); }
+.t-mono       { font-family: var(--font-mono); }
+.t-roman      {
+  font: var(--text-11) / var(--leading-snug) var(--font-mono);
+  color: var(--fg-whisper);
+  letter-spacing: var(--tracking-tight);
+}
+
+.t-kbd        { font: var(--text-10) / var(--leading-kbd) var(--font-sans); color: var(--fg-faint); }
+.t-kbd code {
+  font: var(--text-10) var(--font-mono);
+  background: var(--surface-card-hover);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-xs);
+  padding: 0 3px;
+  color: var(--fg-2);
+}
+
+.t-beta-sup {
+  font: bold var(--text-9) / 1 var(--font-sans);
+  color: var(--accent-warm);
+  vertical-align: super;
+  margin-left: 1px;
+}
+
+
+/* Standalone baseline */
+html, body {
+  background: var(--surface-app);
+  color: var(--fg-1);
+  font-family: var(--font-sans);
+}

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Brand — Pan canvas</title>
+<link rel="stylesheet" href="_card.css">
+<style>
+  .stage {
+    background: var(--surface-canvas-bg);
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+    padding: 36px 20px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  svg { display: block; }
+  .caption {
+    margin-top: 14px; text-align: center;
+    font: 11px/1.5 var(--font-sans); color: var(--fg-2);
+  }
+  .caption b { color: var(--fg-1); font-weight: 600; }
+</style>
+</head>
+<body>
+  <p class="card-intro">The <b>centre of the product</b>: a white sheet of paper, a pan body, concentric rings, and labelled note bubbles arranged low → high.</p>
+  <div class="stage">
+    <svg viewBox="0 0 1000 1000" width="360" height="360" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 6px 24px rgba(60,40,20,.18));">
+      <rect width="1000" height="1000" fill="white"/>
+      <circle cx="500" cy="500" r="380" fill="#f2f2f2" stroke="#c0c0c0" stroke-width="5"/>
+      <circle cx="500" cy="500" r="305" fill="none" stroke="#e0e0e0" stroke-width="1.5"/>
+      <g>
+        <circle cx="500" cy="500" r="86" fill="white" stroke="#222" stroke-width="2.5"/>
+        <text x="500" y="500" text-anchor="middle" dominant-baseline="central"
+              font-family="Arial, sans-serif" font-size="40" fill="#222">D3</text>
+      </g>
+      <g font-family="Arial, sans-serif" fill="#222" font-size="28">
+        <g><circle cx="640" cy="710" r="60" fill="white" stroke="#222" stroke-width="2"/><text x="640" y="710" text-anchor="middle" dominant-baseline="central">A3</text></g>
+        <g><circle cx="360" cy="710" r="60" fill="white" stroke="#222" stroke-width="2"/><text x="360" y="710" text-anchor="middle" dominant-baseline="central">B♭3</text></g>
+        <g><circle cx="740" cy="555" r="50" fill="white" stroke="#222" stroke-width="2"/><text x="740" y="555" text-anchor="middle" dominant-baseline="central">C4</text></g>
+        <g><circle cx="260" cy="555" r="50" fill="white" stroke="#222" stroke-width="2"/><text x="260" y="555" text-anchor="middle" dominant-baseline="central">D4</text></g>
+        <g><circle cx="740" cy="400" r="50" fill="white" stroke="#222" stroke-width="2"/><text x="740" y="400" text-anchor="middle" dominant-baseline="central">E4</text></g>
+        <g><circle cx="260" cy="400" r="50" fill="white" stroke="#222" stroke-width="2"/><text x="260" y="400" text-anchor="middle" dominant-baseline="central">F4</text></g>
+        <g><circle cx="635" cy="280" r="48" fill="white" stroke="#222" stroke-width="2"/><text x="635" y="280" text-anchor="middle" dominant-baseline="central">G4</text></g>
+        <g><circle cx="365" cy="280" r="48" fill="white" stroke="#222" stroke-width="2"/><text x="365" y="280" text-anchor="middle" dominant-baseline="central">A4</text></g>
+        <g><circle cx="500" cy="200" r="42" fill="white" stroke="#222" stroke-width="2"/><text x="500" y="200" text-anchor="middle" dominant-baseline="central">C5</text></g>
+      </g>
+    </svg>
+  </div>
+  <div class="caption">A <b>D3 Kurd 18</b> layout sitting on the sandstone matte.</div>
+</body>
+</html>

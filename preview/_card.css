@@ -1,0 +1,124 @@
+/* Preview card baseline — every card in preview/ uses this.
+   The editor is now warm-light; cards extend the same palette so the
+   design-system tab feels like a continuation of the editor. */
+
+@import url('../colors_and_type.css');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--surface-app);
+  color: var(--fg-1);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body { padding: 24px 26px; min-height: 100vh; }
+
+/* ── Framing chrome ── */
+
+.card-intro {
+  font: 12px/1.55 var(--font-sans);
+  color: var(--fg-2);
+  margin-bottom: 18px;
+  max-width: 600px;
+}
+.card-intro b { color: var(--fg-1); font-weight: 600; }
+
+.group {
+  background: var(--surface-card);
+  border: 1px solid var(--border-card);
+  border-radius: 10px;
+  padding: 16px 18px 14px;
+  box-shadow: var(--shadow-light);
+}
+
+.group-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.group-title {
+  font: 600 12px/1 var(--font-sans);
+  color: var(--fg-1);
+}
+.group-meta {
+  font: 10px/1 var(--font-mono);
+  color: var(--fg-faint);
+  text-transform: uppercase;
+  letter-spacing: .6px;
+}
+
+.group + .group { margin-top: 14px; }
+
+/* Dark stage was used to show the dark-themed product UI. Now that the
+   product is warm-light, the "stage" inside a card is just a slightly
+   different cream surface from the card itself. */
+.stage {
+  background: var(--surface-panel);
+  border: 1px solid var(--border-card);
+  border-radius: 6px;
+  padding: 14px 16px;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  min-height: 50px;
+}
+
+.group-note {
+  margin-top: 10px;
+  font: 11px/1.5 var(--font-sans);
+  color: var(--fg-2);
+}
+.group-note b { color: var(--fg-1); font-weight: 600; }
+
+/* Generic helpers */
+.row { display: flex; align-items: center; gap: 10px; }
+.col { display: flex; flex-direction: column; gap: 10px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+
+/* Product-correct chrome primitives — for use INSIDE .stage elements.
+   These mirror the editor's actual button, pill, input styling. */
+
+.p-btn {
+  background: var(--surface-card);
+  color: var(--fg-2);
+  border: 1px solid var(--border-input);
+  border-radius: 4px;
+  padding: 5px 11px;
+  font: 12px/1 Arial, sans-serif;
+  cursor: pointer;
+  transition: background .12s, border-color .12s, color .12s;
+}
+.p-btn:hover, .p-btn.is-hover {
+  background: var(--accent-fill-hover);
+  border-color: var(--accent);
+  color: var(--accent-bright);
+}
+.p-btn.is-active {
+  background: var(--accent-fill);
+  border-color: var(--accent);
+  color: var(--accent-bright);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.p-btn.is-danger { border-color: var(--danger-border); color: var(--danger); }
+.p-btn.is-danger.is-hover { background: var(--danger-hover-bg); color: var(--danger); }
+.p-btn.is-sm   { padding: 3px 9px; font-size: 11px; }
+.p-btn.is-icon { padding: 5px 8px; font-size: 14px; }
+.p-btn.is-full { width: 100%; text-align: center; }
+
+.p-pill {
+  background: var(--surface-card);
+  color: var(--fg-muted);
+  border: 1px solid var(--border-input);
+  border-radius: 12px;
+  padding: 4px 12px;
+  font: 11px/1 Arial, sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.p-pill:hover, .p-pill.is-hover { border-color: var(--accent); color: var(--fg-2); }
+.p-pill.is-active {
+  background: var(--accent-fill);
+  border-color: var(--accent);
+  color: var(--accent-bright);
+}

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Chord tile</title>
+<link rel="stylesheet" href="_card.css">
+<style>
+  /* Anatomy */
+  .anatomy {
+    background: var(--surface-card);
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+    padding: 22px;
+    margin-bottom: 16px;
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 26px;
+    align-items: center;
+    box-shadow: var(--shadow-light);
+  }
+  .anatomy-stage {
+    background: var(--surface-panel);
+    border: 1px solid var(--border-card);
+    border-radius: 6px;
+    padding: 18px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .anatomy-tile {
+    background: var(--surface-card);
+    border: 1px solid var(--border-input);
+    border-radius: 5px;
+    padding: 8px 11px 7px;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    min-width: 76px;
+    border-top: 2px solid var(--fn-tonic);
+  }
+  .anatomy-tile .roman { font: 10px/1.3 var(--font-mono); color: var(--fg-faint); }
+  .anatomy-tile .t-root { font: bold 16px/1.1 var(--font-sans); color: var(--fg-1); }
+  .anatomy-tile .t-sym { font: 10px/1.2 var(--font-sans); color: var(--accent); }
+  .anatomy-tile .play-dot { font: 10px/1 var(--font-sans); margin-top: 2px; color: var(--play-full); }
+
+  .legend-list {
+    display: grid; grid-template-columns: max-content 1fr;
+    gap: 8px 14px;
+    font: 12px/1.4 var(--font-sans);
+    color: var(--fg-2);
+  }
+  .legend-list dt {
+    font-weight: 600; color: var(--fg-1);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .legend-list dd { color: var(--fg-2); margin: 0; }
+  .legend-list .dot { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+  .legend-list .stripe-T { background: var(--fn-tonic); }
+
+  /* Examples */
+  .examples { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .example {
+    background: var(--surface-card);
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+    padding: 16px 16px 14px;
+    box-shadow: var(--shadow-light);
+  }
+  .example-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .example-title { font: 600 12px/1 var(--font-sans); color: var(--fg-1); }
+  .example-mood {
+    font: 10px/1 var(--font-mono); color: var(--fg-faint);
+    text-transform: uppercase; letter-spacing: .6px;
+  }
+  .example-stage {
+    background: var(--surface-panel);
+    border: 1px solid var(--border-card);
+    border-radius: 6px;
+    padding: 12px 12px 10px;
+  }
+  .roman-strip {
+    font: 11px/1 var(--font-mono); color: var(--fg-faint);
+    padding: 6px 0 0; letter-spacing: .3px;
+  }
+  .chord-row { display: flex; gap: 4px; flex-wrap: wrap; }
+  .tile {
+    background: var(--surface-card);
+    border: 1px solid var(--border-input);
+    border-radius: 5px;
+    padding: 5px 6px 4px; min-width: 56px;
+    display: flex; flex-direction: column; align-items: center; gap: 1px;
+    cursor: pointer; user-select: none;
+  }
+  .tile.fn-T { border-top: 2px solid var(--fn-tonic); }
+  .tile.fn-S { border-top: 2px solid var(--fn-subdom); }
+  .tile.fn-D { border-top: 2px solid var(--fn-dominant); }
+  .tile.is-active {
+    background: var(--accent-fill); border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+  .tile .roman { font: 9px/1.3 var(--font-mono); color: var(--fg-faint); }
+  .tile .t-root { font: bold 13px/1.1 var(--font-sans); color: var(--fg-1); }
+  .tile .t-sym { font: 9px/1.2 var(--font-sans); color: var(--accent); }
+  .tile .play-dot { font: 9px/1 var(--font-sans); margin-top: 1px; }
+  .play-full       { color: var(--play-full); }
+  .play-partial    { color: var(--play-partial); }
+  .play-incomplete { color: var(--play-incomplete); }
+  .play-none       { color: var(--play-none); }
+
+  .example-note {
+    margin-top: 10px;
+    font: 11px/1.5 var(--font-sans);
+    color: var(--fg-2);
+  }
+  .example-note b { color: var(--fg-1); font-weight: 600; }
+</style>
+</head>
+<body>
+  <p class="card-intro">A <b>chord tile</b> packs four signals: <b>function</b> (top stripe), <b>roman numeral</b>, <b>chord root + symbol</b>, and <b>playability</b> on the user's current pan.</p>
+
+  <div class="anatomy">
+    <div class="anatomy-stage">
+      <div class="anatomy-tile">
+        <div class="roman">I</div>
+        <div class="t-root">D</div>
+        <div class="t-sym">△</div>
+        <div class="play-dot">●</div>
+      </div>
+    </div>
+    <dl class="legend-list">
+      <dt><span class="dot stripe-T"></span> Top stripe</dt><dd>Harmonic function — Tonic, Subdominant or Dominant.</dd>
+      <dt>Roman numeral</dt><dd>Position in the key — case shows quality (uppercase = major).</dd>
+      <dt>Root letter</dt><dd>The chord's root note, in the user's enharmonic spelling.</dd>
+      <dt>Chord symbol</dt><dd>Unicode glyph — <b>△ −  °  +  sus  ⁷  ø⁷</b>.</dd>
+      <dt>Status dot</dt><dd><span style="color:var(--play-full)">●</span> complete · <span style="color:var(--play-partial)">◕</span> −1 · <span style="color:var(--play-incomplete)">◔</span> −2+ · <span style="color:var(--play-none)">○</span> none.</dd>
+    </dl>
+  </div>
+
+  <div class="examples">
+    <div class="example">
+      <div class="example-head"><div class="example-title">Pop Anthem</div><div class="example-mood">happy · epic</div></div>
+      <div class="example-stage">
+        <div class="chord-row">
+          <div class="tile fn-T is-active"><div class="roman">I</div><div class="t-root">D</div><div class="t-sym">△</div><div class="play-dot play-full">●</div></div>
+          <div class="tile fn-D"><div class="roman">V</div><div class="t-root">A</div><div class="t-sym">△</div><div class="play-dot play-full">●</div></div>
+          <div class="tile fn-T"><div class="roman">vi</div><div class="t-root">B</div><div class="t-sym">−</div><div class="play-dot play-partial">◕</div></div>
+          <div class="tile fn-S"><div class="roman">IV</div><div class="t-root">G</div><div class="t-sym">△</div><div class="play-dot play-full">●</div></div>
+        </div>
+        <div class="roman-strip">I — V — vi — IV</div>
+      </div>
+      <div class="example-note">Three of four play fully on a D-Kurd pan. First tile selected.</div>
+    </div>
+
+    <div class="example">
+      <div class="example-head"><div class="example-title">ii–V–I</div><div class="example-mood">jazz</div></div>
+      <div class="example-stage">
+        <div class="chord-row">
+          <div class="tile fn-S"><div class="roman">ii</div><div class="t-root">E</div><div class="t-sym">−⁷</div><div class="play-dot play-full">●</div></div>
+          <div class="tile fn-D"><div class="roman">V</div><div class="t-root">A</div><div class="t-sym">⁷</div><div class="play-dot play-partial">◕</div></div>
+          <div class="tile fn-T"><div class="roman">I</div><div class="t-root">D</div><div class="t-sym">△⁷</div><div class="play-dot play-incomplete">◔</div></div>
+        </div>
+        <div class="roman-strip">ii — V — I</div>
+      </div>
+      <div class="example-note">A jazz turnaround — the 7ths reveal which notes are missing.</div>
+    </div>
+  </div>
+</body>
+</html>

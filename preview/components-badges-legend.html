@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Badges &amp; legend</title>
+<link rel="stylesheet" href="_card.css">
+<style>
+  .badge {
+    font: 9px/1 Arial, sans-serif; padding: 2px 7px;
+    border: 1px solid; border-radius: 8px; letter-spacing: .3px;
+    display: inline-flex; align-items: center;
+  }
+  .badge.default  { background: var(--accent-soft-bg); border-color: var(--accent-soft-border); color: var(--accent); }
+  .badge.imported { background: var(--state-imported-bg); border-color: var(--state-imported-border); color: var(--state-imported-fg); }
+  .badge.edited   { background: var(--state-edited-bg); border-color: var(--state-edited-border); color: var(--state-edited-fg); }
+
+  .beta-host {
+    background: var(--surface-card); color: var(--fg-2);
+    border: 1px solid var(--border-input); border-radius: 4px;
+    padding: 5px 11px; font: 12px/1 Arial, sans-serif;
+    display: inline-flex; align-items: baseline;
+  }
+  .badge.beta {
+    background: transparent; border: 0; color: var(--accent-warm);
+    font: bold 9px/1 Arial, sans-serif;
+    vertical-align: super; margin-left: 2px; padding: 0;
+  }
+
+  .legend-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    background: var(--surface-panel);
+    border: 1px solid var(--border-card);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .legend-cell {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 16px;
+    border-right: 1px solid var(--border-card);
+  }
+  .legend-cell:last-child { border-right: 0; }
+  .legend-cell .glyph {
+    width: 22px; flex-shrink: 0; text-align: center;
+    font: 16px/1 Arial, sans-serif;
+  }
+  .legend-cell .label {
+    font: 12px/1 Arial, sans-serif;
+    color: var(--fg-1); white-space: nowrap;
+  }
+
+  .play-full       { color: var(--play-full); }
+  .play-partial    { color: var(--play-partial); }
+  .play-incomplete { color: var(--play-incomplete); }
+  .play-none       { color: var(--play-none); }
+
+  .fn-T { color: var(--fn-tonic-label); }
+  .fn-S { color: var(--fn-subdom-label); }
+  .fn-D { color: var(--fn-dominant-label); }
+</style>
+</head>
+<body>
+
+  <div class="group">
+    <div class="group-head">
+      <div class="group-title">Badges</div>
+      <div class="group-meta">small metadata pills</div>
+    </div>
+    <div class="stage">
+      <span class="badge default">4/4 · ♩90</span>
+      <span class="badge imported">imported</span>
+      <span class="badge edited">edited</span>
+      <span class="beta-host">♩ Rhythm<span class="badge beta">β</span></span>
+    </div>
+    <div class="group-note">Sit beside titles and inside rows to mark state. The beta superscript is the one place the warm copper accent appears in the toolbar.</div>
+  </div>
+
+  <div class="group">
+    <div class="group-head">
+      <div class="group-title">Playability legend</div>
+      <div class="group-meta">how well a chord plays on the pan</div>
+    </div>
+    <div class="legend-grid">
+      <div class="legend-cell"><span class="glyph play-full">●</span><span class="label">Complete</span></div>
+      <div class="legend-cell"><span class="glyph play-partial">◕</span><span class="label">−1 note</span></div>
+      <div class="legend-cell"><span class="glyph play-incomplete">◔</span><span class="label">−2+ notes</span></div>
+      <div class="legend-cell"><span class="glyph play-none">○</span><span class="label">None</span></div>
+    </div>
+    <div class="group-note">Four equal columns — same glyph size, same label weight, best-to-worst order.</div>
+  </div>
+
+  <div class="group">
+    <div class="group-head">
+      <div class="group-title">Function legend</div>
+      <div class="group-meta">harmonic role of each chord</div>
+    </div>
+    <div class="legend-grid" style="grid-template-columns: repeat(3, 1fr);">
+      <div class="legend-cell"><span class="glyph fn-T">■</span><span class="label">Tonic</span></div>
+      <div class="legend-cell"><span class="glyph fn-S">■</span><span class="label">Subdominant</span></div>
+      <div class="legend-cell"><span class="glyph fn-D">■</span><span class="label">Dominant</span></div>
+    </div>
+    <div class="group-note">Colours match the top stripe on each chord tile.</div>
+  </div>
+
+</body>
+</html>

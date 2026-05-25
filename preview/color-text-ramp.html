@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Colors — Text ramp</title>
+<link rel="stylesheet" href="_card.css">
+<style>
+  .stage {
+    background: var(--surface-card);
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+    padding: 4px 0;
+    display: block;
+    overflow: hidden;
+    box-shadow: var(--shadow-light);
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 40px 1fr 100px;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border-card);
+  }
+  .row:last-child { border-bottom: 0; }
+  .chip {
+    width: 28px; height: 18px; border-radius: 3px;
+    border: 1px solid var(--border-input);
+  }
+  .name { font: 13px/1 Arial, sans-serif; }
+  .hex  { font: 10px/1 var(--font-mono); color: var(--fg-faint); text-align: right; }
+</style>
+</head>
+<body>
+  <p class="card-intro">A <b>seven-step ramp</b> from primary text down to whisper. Warm espresso → muted cream.</p>
+  <div class="stage">
+    <div class="row"><div class="chip" style="background:#3a3027;"></div><div class="name" style="color:#3a3027;">fg-1 — primary body text</div><div class="hex">#3a3027</div></div>
+    <div class="row"><div class="chip" style="background:#5a4d3e;"></div><div class="name" style="color:#5a4d3e;">fg-2 — secondary, button label</div><div class="hex">#5a4d3e</div></div>
+    <div class="row"><div class="chip" style="background:#7d7060;"></div><div class="name" style="color:#7d7060;">fg-3 — tertiary, checkbox labels</div><div class="hex">#7d7060</div></div>
+    <div class="row"><div class="chip" style="background:#948774;"></div><div class="name" style="color:#948774;">fg-muted — row labels, default pill</div><div class="hex">#948774</div></div>
+    <div class="row"><div class="chip" style="background:#a89c89;"></div><div class="name" style="color:#a89c89;">fg-faint — hints</div><div class="hex">#a89c89</div></div>
+    <div class="row"><div class="chip" style="background:#b8ad9b;"></div><div class="name" style="color:#b8ad9b;">fg-subtle — sub-section titles</div><div class="hex">#b8ad9b</div></div>
+    <div class="row"><div class="chip" style="background:#c4b9a6;"></div><div class="name" style="color:#c4b9a6;">fg-whisper — shortcuts, empty state</div><div class="hex">#c4b9a6</div></div>
+  </div>
+</body>
+</html>

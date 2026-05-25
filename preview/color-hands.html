@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Colors — Hand dyad</title>
+<link rel="stylesheet" href="_card.css">
+<style>
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  .hand-card {
+    background: var(--surface-card);
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow-light);
+  }
+  .hand-head {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 14px;
+  }
+  .lbadge {
+    width: 30px; height: 30px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font: bold 16px/1 var(--font-mono);
+  }
+  .lbadge.r { background: #e3eaf2; color: #2c5e7a; border: 1px solid #b8c9d6; }
+  .lbadge.l { background: #f5e8d5; color: #8e5828; border: 1px solid #d4b896; }
+  .hand-name { font: 600 14px/1.1 var(--font-sans); color: var(--fg-1); }
+  .hand-sub { font: 11px/1 var(--font-sans); color: var(--fg-faint); margin-top: 4px; }
+
+  .cells-stage {
+    background: var(--surface-panel);
+    border: 1px solid var(--border-card);
+    border-radius: 6px;
+    padding: 12px;
+    display: flex; gap: 6px; justify-content: center;
+    margin-bottom: 12px;
+  }
+  .cell {
+    width: 40px; height: 44px; border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    font: bold 17px/1 var(--font-mono);
+    border: 1px solid;
+  }
+  .cell.r-hit   { background: #e3eaf2; color: #2c5e7a; border-color: #b8c9d6; }
+  .cell.r-mute  { background: #eef2f7; color: #7a98ad; border-color: #cad6df; font-style: italic; font-size: 13px; }
+  .cell.r-ghost { background: #f3f6fa; color: #b3c0cc; border-color: #d8e0e8; font-size: 13px; }
+  .cell.l-hit   { background: #f5e8d5; color: #8e5828; border-color: #d4b896; }
+  .cell.l-mute  { background: #faf0de; color: #b8956b; border-color: #e0c7a3; font-style: italic; font-size: 13px; }
+  .cell.l-ghost { background: #fbf4e4; color: #d4be9c; border-color: #e6d2b3; font-size: 13px; }
+
+  .swatches { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+  .sw { height: 22px; border-radius: 3px; border: 1px solid var(--border-card); }
+  .sw-labels {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px;
+    margin-top: 4px;
+    font: 9px/1 var(--font-mono);
+    color: var(--fg-faint);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+  <p class="card-intro">The <b>R / L dyad</b> is the most semantically loaded pair in the system. <b>Cool steel-blue is always right hand</b>, <b>warm copper is always left hand</b>.</p>
+
+  <div class="grid">
+    <div class="hand-card">
+      <div class="hand-head">
+        <div class="lbadge r">R</div>
+        <div>
+          <div class="hand-name">Right hand</div>
+          <div class="hand-sub">cool steel-blue family</div>
+        </div>
+      </div>
+      <div class="cells-stage">
+        <div class="cell r-hit">D</div>
+        <div class="cell r-hit">T</div>
+        <div class="cell r-mute">d</div>
+        <div class="cell r-ghost">•</div>
+      </div>
+      <div class="swatches">
+        <div class="sw" style="background:#e3eaf2;"></div>
+        <div class="sw" style="background:#b8c9d6;"></div>
+        <div class="sw" style="background:#2c5e7a;"></div>
+        <div class="sw" style="background:#7a98ad;"></div>
+        <div class="sw" style="background:#b3c0cc;"></div>
+      </div>
+      <div class="sw-labels"><span>fill</span><span>border</span><span>hit</span><span>mute</span><span>ghost</span></div>
+    </div>
+
+    <div class="hand-card">
+      <div class="hand-head">
+        <div class="lbadge l">L</div>
+        <div>
+          <div class="hand-name">Left hand</div>
+          <div class="hand-sub">warm copper family</div>
+        </div>
+      </div>
+      <div class="cells-stage">
+        <div class="cell l-hit">D</div>
+        <div class="cell l-hit">T</div>
+        <div class="cell l-mute">t</div>
+        <div class="cell l-ghost">•</div>
+      </div>
+      <div class="swatches">
+        <div class="sw" style="background:#f5e8d5;"></div>
+        <div class="sw" style="background:#d4b896;"></div>
+        <div class="sw" style="background:#8e5828;"></div>
+        <div class="sw" style="background:#b8956b;"></div>
+        <div class="sw" style="background:#d4be9c;"></div>
+      </div>
+      <div class="sw-labels"><span>fill</span><span>border</span><span>hit</span><span>mute</span><span>ghost</span></div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Brand — Wordmark</title>
+<link rel="stylesheet" href="_card.css">
+<style>
+  .stage {
+    background: var(--surface-panel);
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+    padding: 40px 28px;
+    display: flex; flex-direction: column; gap: 24px; align-items: center;
+  }
+  .lockup-xl { font: bold 38px/1 Arial, sans-serif; color: var(--accent-title); display: flex; align-items: baseline; gap: 12px; }
+  .lockup-xl .glyph { font-size: 44px; }
+  .lockup-md { font: bold 22px/1 Arial, sans-serif; color: var(--accent-title); display: flex; align-items: baseline; gap: 8px; }
+  .lockup-sm { font: bold 15px/1 Arial, sans-serif; color: var(--accent-title); display: flex; align-items: baseline; gap: 6px; }
+
+  .caption {
+    margin-top: 8px;
+    font: 11px/1.5 var(--font-sans);
+    color: var(--fg-2);
+    text-align: center;
+  }
+  .caption code { font-family: var(--font-mono); color: var(--fg-faint); }
+</style>
+</head>
+<body>
+  <p class="card-intro">No graphic logo — just the <b>wordmark</b>, in bold Arial, painted in deep steel-blue. Pairs with the quarter-note glyph.</p>
+  <div class="stage">
+    <div class="lockup-xl"><span class="glyph">♩</span><span>Handpan Editor</span></div>
+    <div class="lockup-md"><span>♩</span><span>Handpan Editor</span></div>
+    <div class="lockup-sm"><span>♩</span><span>Handpan Editor</span></div>
+  </div>
+  <div class="caption"><b style="color:var(--fg-1);">bold Arial · #2c5e7a</b>  ·  on panel <code>#fbf7ee</code></div>
+</body>
+</html>

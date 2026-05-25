@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Form controls</title>
+<link rel="stylesheet" href="_card.css">
+<style>
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field + .field { margin-top: 12px; }
+  .field-label { font: 11px/1.3 Arial, sans-serif; color: var(--fg-muted); }
+
+  input[type=text], select {
+    background: var(--surface-card);
+    border: 1px solid var(--border-input);
+    border-radius: 3px;
+    color: var(--fg-1);
+    padding: 4px 7px;
+    font: 13px/1 Arial, sans-serif;
+    width: 100%; outline: none;
+  }
+  input[type=text]:focus, select:focus { border-color: var(--accent); }
+
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+
+  input[type=search] {
+    background: var(--surface-card);
+    border: 1px solid var(--border-input);
+    border-radius: 4px;
+    color: var(--fg-1); padding: 4px 8px;
+    font: 11px/1 Arial, sans-serif;
+    width: 100%; outline: none;
+  }
+  input[type=search]:focus { border-color: var(--accent); }
+  input::placeholder { color: var(--fg-faint); }
+
+  .check-row {
+    display: flex; align-items: center; gap: 5px;
+    font: 11px/1 Arial, sans-serif; color: var(--fg-2);
+  }
+  input[type=checkbox] { accent-color: var(--accent); cursor: pointer; }
+
+  .range-meta {
+    font: 11px/1.3 Arial, sans-serif; color: var(--fg-muted);
+    display: flex; justify-content: space-between;
+  }
+  .range-meta b { color: var(--fg-1); }
+
+  .stage { display: block; }
+</style>
+</head>
+<body>
+  <p class="card-intro">Inputs sit on the white card surface; focus brings up the steel-blue border.</p>
+
+  <div class="grid">
+    <div class="group">
+      <div class="group-head"><div class="group-title">Text · select</div><div class="group-meta">single line</div></div>
+      <div class="stage">
+        <div class="field">
+          <div class="field-label">Label</div>
+          <input type="text" placeholder="D3, B♭4, F♯5 …" value="D3">
+        </div>
+        <div class="field">
+          <div class="field-label">Enharmonics</div>
+          <select>
+            <option>— default</option>
+            <option>proper (auto key)</option>
+            <option># sharps</option>
+            <option>♭ flats</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-head"><div class="group-title">Range</div><div class="group-meta">accent-coloured thumb</div></div>
+      <div class="stage">
+        <div class="field">
+          <div class="range-meta"><span>Radius:</span><span><b>320</b> px</span></div>
+          <input type="range" min="80" max="480" value="320">
+        </div>
+        <div class="field">
+          <div class="range-meta"><span>Sustain:</span><span><b>0.8</b> s</span></div>
+          <input type="range" min="0.2" max="4" value="0.8" step="0.1">
+        </div>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-head"><div class="group-title">Search</div><div class="group-meta">rhythm browser</div></div>
+      <div class="stage">
+        <input type="search" placeholder="Search rhythms…">
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-head"><div class="group-title">Checkbox grid</div><div class="group-meta">multi-select</div></div>
+      <div class="stage">
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;width:100%;">
+          <label class="check-row"><input type="checkbox" checked>△ Major</label>
+          <label class="check-row"><input type="checkbox" checked>− Minor</label>
+          <label class="check-row"><input type="checkbox">° Dim</label>
+          <label class="check-row"><input type="checkbox">+ Aug</label>
+          <label class="check-row"><input type="checkbox" checked>△⁷ Maj7</label>
+          <label class="check-row"><input type="checkbox" checked>−⁷ Min7</label>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Buttons</title>
+<link rel="stylesheet" href="_card.css">
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  .state {
+    background: var(--surface-card);
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+    padding: 14px 14px 12px;
+    box-shadow: var(--shadow-light);
+  }
+  .state-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .state-name { font: 600 12px/1 var(--font-sans); color: var(--fg-1); }
+  .state-tag  { font: 9px/1 var(--font-mono); color: var(--fg-faint);
+                text-transform: uppercase; letter-spacing: .6px; }
+  .state-stage {
+    background: var(--surface-panel);
+    border: 1px solid var(--border-card);
+    border-radius: 6px;
+    padding: 14px 12px;
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    min-height: 50px;
+  }
+  .state-note {
+    margin-top: 10px;
+    font: 11px/1.45 var(--font-sans);
+    color: var(--fg-2);
+  }
+</style>
+</head>
+<body>
+  <div class="grid">
+
+    <div class="state">
+      <div class="state-head"><div class="state-name">Rest</div><div class="state-tag">default</div></div>
+      <div class="state-stage">
+        <button class="p-btn">⬇ Export</button>
+        <button class="p-btn">+ Add</button>
+        <button class="p-btn">⧉ Dup</button>
+      </div>
+      <div class="state-note">Quiet white card, warm taupe border. Readable but never shouts.</div>
+    </div>
+
+    <div class="state">
+      <div class="state-head"><div class="state-name">Hover</div><div class="state-tag">on pointer</div></div>
+      <div class="state-stage">
+        <button class="p-btn is-hover">⬇ SVG</button>
+        <button class="p-btn is-hover">▶ Play</button>
+      </div>
+      <div class="state-note">Border &amp; text shift to the steel-blue accent — 120 ms cross-fade.</div>
+    </div>
+
+    <div class="state">
+      <div class="state-head"><div class="state-name">Active</div><div class="state-tag">currently on</div></div>
+      <div class="state-stage">
+        <button class="p-btn is-active">♬ Progressions</button>
+        <button class="p-btn is-active">♩ Chords</button>
+      </div>
+      <div class="state-note">Soft accent plate, dark accent text, plus a 1-px accent outline. For toggles in the "on" state.</div>
+    </div>
+
+    <div class="state">
+      <div class="state-head"><div class="state-name">Danger</div><div class="state-tag">destructive</div></div>
+      <div class="state-stage">
+        <button class="p-btn is-danger">✕ Delete</button>
+        <button class="p-btn is-danger is-hover">✕ Delete</button>
+      </div>
+      <div class="state-note">Red border + red text. Hover lifts to a soft red plate.</div>
+    </div>
+
+    <div class="state">
+      <div class="state-head"><div class="state-name">Compact</div><div class="state-tag">small &amp; icon</div></div>
+      <div class="state-stage">
+        <button class="p-btn is-sm">Tap</button>
+        <button class="p-btn is-sm">▶ Play</button>
+        <button class="p-btn is-icon">↩</button>
+        <button class="p-btn is-icon">↪</button>
+        <button class="p-btn is-icon">⤢</button>
+      </div>
+      <div class="state-note">Small for tight rows. Icon-only for chrome controls — always paired with a tooltip.</div>
+    </div>
+
+    <div class="state">
+      <div class="state-head"><div class="state-name">Full-width</div><div class="state-tag">in a panel</div></div>
+      <div class="state-stage">
+        <button class="p-btn is-full">⬇ Export ZIP</button>
+      </div>
+      <div class="state-note">Stretches to its container — the one primary action at the bottom of a side panel.</div>
+    </div>
+
+  </div>
+</body>
+</html>
