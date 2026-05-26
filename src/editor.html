@@ -334,6 +334,8 @@ body {
   letter-spacing: .3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   flex: 1; margin-top: 1px;
 }
+.chord-tile.sel-dimmed { opacity: 0.18; pointer-events: none; }
+
 .prog-expand-btn {
   background: none; border: 1px solid var(--border-divider); border-radius: 3px;
   color: var(--fg-whisper); font-size: 11px; cursor: pointer; padding: 0 4px; line-height: 16px;
@@ -2863,7 +2865,11 @@ function onPanDown(e) {
 
 document.getElementById('bg').addEventListener('mousedown', e => {
   const p0 = pt(e);
-  if (!e.shiftKey) { selectedIds.clear(); render(); syncSidebar(); }
+  if (!e.shiftKey) {
+    const wasSelMode = appMode === 'explore' && hlMode === 'selection' && selectedIds.size > 0;
+    selectedIds.clear(); render(); syncSidebar();
+    if (wasSelMode) updateSelectionInfo();
+  }
   iact = { type: 'box', x0: p0.x, y0: p0.y };
   e.preventDefault();
 });
@@ -3179,6 +3185,29 @@ function identifyChord(pcs) {
   return matches;
 }
 
+// Returns the Set of pitch classes of currently selected notes, or null if empty.
+function getSelectedPcs() {
+  if (selectedIds.size === 0) return null;
+  const pcs = new Set();
+  for (const n of state.notes) {
+    if (selectedIds.has(n.id)) {
+      const pc = parsePitchClass(n.label);
+      if (pc >= 0) pcs.add(pc);
+    }
+  }
+  return pcs.size > 0 ? pcs : null;
+}
+
+// Returns true if the chord (rootPc, typeName) contains ALL pitch classes in selPcs.
+function chordContainsSelPcs(rootPc, typeName, selPcs) {
+  if (!selPcs || selPcs.size === 0) return true;
+  const ivs = CHORD_TYPES[typeName];
+  if (!ivs) return false;
+  const chordPcs = new Set(ivs.map(i => (rootPc + i) % 12));
+  for (const p of selPcs) { if (!chordPcs.has(p)) return false; }
+  return true;
+}
+
 function getViableSelectionPcs() {
   if (hlMode !== 'selection' || selectedIds.size === 0) return null;
   const selectedPcs = new Set();
@@ -3264,6 +3293,12 @@ function updateSelectionInfo() {
   }
 
   el.innerHTML = html;
+
+  // Keep the explore chord/prog list in sync with the selection
+  if (appMode === 'explore') {
+    if (exploreTab === 'chords') renderChords();
+    else renderProgressions();
+  }
 }
 
 // ─── Sidebar controls wiring ──────────────────────────────────────────────────
@@ -4005,6 +4040,11 @@ function moodAvailability(moodId) {
 function buildMoodPills() {
   const el = document.getElementById('mood-pills');
   el.innerHTML = '';
+  const allPill = document.createElement('button');
+  allPill.className = 'mood-pill' + (activeMood === 'all' ? ' active' : '');
+  allPill.textContent = 'All';
+  allPill.addEventListener('click', () => { activeMood = 'all'; buildMoodPills(); renderProgressions(); });
+  el.appendChild(allPill);
   const avails = Object.fromEntries(MOODS.map(m => [m.id, moodAvailability(m.id)]));
   const maxAvail = Math.max(...Object.values(avails), 1e-9);
   for (const mood of MOODS) {
@@ -4060,10 +4100,21 @@ function buildRootBar() {
 function renderProgressions() {
   const el = document.getElementById('explore-list');
   el.innerHTML = '';
-  const filtered = PROGRESSIONS.filter(p => p.moods.includes(activeMood));
+  const selPcs = (hlMode === 'selection') ? getSelectedPcs() : null;
+  const moodFiltered = activeMood === 'all' ? PROGRESSIONS : PROGRESSIONS.filter(p => p.moods.includes(activeMood));
+
+  // When selection is active, only show progressions with ≥1 chord containing all selected pcs
+  const filtered = selPcs
+    ? moodFiltered.filter(prog => {
+        const rootPc = activeRootPc === -1 ? bestRootForProg(prog) : activeRootPc;
+        return prog.chords.some(c => chordContainsSelPcs((rootPc + c.s) % 12, c.t, selPcs));
+      })
+    : moodFiltered;
 
   if (!filtered.length) {
-    el.innerHTML = '<div style="padding:20px;font-size:12px;color:var(--fg-whisper);text-align:center;">No progressions for this mood.</div>';
+    el.innerHTML = selPcs
+      ? '<div style="padding:20px;font-size:12px;color:var(--fg-whisper);text-align:center;">No progressions contain the selected notes.</div>'
+      : '<div style="padding:20px;font-size:12px;color:var(--fg-whisper);text-align:center;">No progressions for this mood.</div>';
     return;
   }
 
@@ -4111,8 +4162,9 @@ function renderProgressions() {
       const isActive = _activeTile && _activeTile.progName === prog.name && _activeTile.chordIdx === ci;
 
       const fn = chordFunction(c.s);
+      const selMatch = !selPcs || chordContainsSelPcs(chordRoot, c.t, selPcs);
       const tile = document.createElement('div');
-      tile.className = 'chord-tile' + (isActive ? ' active-tile' : '') + (fn ? ` fn-${fn}` : '');
+      tile.className = 'chord-tile' + (isActive ? ' active-tile' : '') + (fn ? ` fn-${fn}` : '') + (selMatch ? '' : ' sel-dimmed');
       tile.innerHTML =
         `<span class="roman">${roman}</span>` +
         `<span class="t-root">${getDisplayNames()[chordRoot]}</span>` +
@@ -4211,12 +4263,21 @@ function renderChords() {
   const el = document.getElementById('explore-list');
   el.innerHTML = '';
 
+  const selPcs = (hlMode === 'selection') ? getSelectedPcs() : null;
+
   const types = activeChordTypeFilter === 'all'
     ? Object.keys(CHORD_TYPES)
     : [activeChordTypeFilter];
 
+  let anyShown = false;
   for (const typeName of types) {
     const sym = CHORD_SYMBOLS[typeName] ?? typeName;
+    const rootsToShow = activeRootPc >= 0 ? [activeRootPc] : [...Array(12).keys()];
+    const visibleRoots = selPcs
+      ? rootsToShow.filter(r => chordContainsSelPcs(r, typeName, selPcs))
+      : rootsToShow;
+    if (visibleRoots.length === 0) continue; // skip type entirely when none match
+    anyShown = true;
 
     const card = document.createElement('div');
     card.className = 'chords-card';
@@ -4229,8 +4290,7 @@ function renderChords() {
     const row = document.createElement('div');
     row.className = 'chord-row chord-row--grid4';
 
-    const rootsToShow = activeRootPc >= 0 ? [activeRootPc] : [...Array(12).keys()];
-    for (const rootPc of rootsToShow) {
+    for (const rootPc of visibleRoots) {
       const play = chordPlayability(rootPc, typeName);
       const isActive = hlMode === 'chord' && hlChordRoot === rootPc && hlChordType === typeName;
 
@@ -4260,6 +4320,9 @@ function renderChords() {
 
     card.appendChild(row);
     el.appendChild(card);
+  }
+  if (selPcs && !anyShown) {
+    el.innerHTML = '<div style="padding:20px;font-size:12px;color:var(--fg-whisper);text-align:center;">No chords contain all selected notes.</div>';
   }
 }
 
