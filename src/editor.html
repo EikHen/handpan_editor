@@ -101,13 +101,33 @@ body {
 
 /* ── Sidebar ─────────────────────────────────────────────────────────── */
 #sidebar {
-  width: var(--width-sidebar); min-width: var(--width-sidebar);
+  width: 252px; min-width: 180px; max-width: 480px;
   background: var(--surface-panel);
   border-right: 1px solid var(--border-divider);
   display: flex; flex-direction: column;
   overflow-y: auto; overflow-x: hidden;
-  flex-shrink: 0;
+  flex-shrink: 0; position: relative;
+  transition: width .15s, min-width .15s;
 }
+#sidebar.collapsed { width: 0; min-width: 0; overflow: hidden; border-right: none; }
+#sidebar-resize-handle {
+  position: absolute; right: 0; top: 0; bottom: 0; width: 4px;
+  cursor: col-resize; background: transparent; z-index: 10; transition: background .15s;
+}
+#sidebar-resize-handle:hover, #sidebar-resize-handle.dragging { background: var(--accent); }
+#explore-panel.collapsed { width: 0 !important; min-width: 0 !important; overflow: hidden; border-left: none; }
+/* Edge toggle buttons — live inside #canvas-col, poke out over sidebars */
+.panel-edge-btn {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 30;
+  width: 14px; height: 36px; padding: 0;
+  background: var(--surface-panel); border: 1px solid var(--border-divider);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 9px; color: var(--fg-whisper);
+  transition: background .12s, color .12s, border-color .12s;
+}
+.panel-edge-btn:hover { background: var(--accent-fill); color: var(--accent); border-color: var(--accent); }
+#sidebar-toggle  { left: -1px;  border-radius: 0 4px 4px 0; border-left: none; }
+#explore-toggle  { right: -1px; border-radius: 4px 0 0 4px; border-right: none; }
 .panel { padding: var(--pad-panel); border-bottom: 1px solid var(--border-divider); }
 .panel-title {
   font-size: var(--text-10); text-transform: uppercase; letter-spacing: var(--tracking-loose);
@@ -191,10 +211,24 @@ body {
 }
 
 /* ── Canvas ──────────────────────────────────────────────────────────── */
+#canvas-col {
+  flex: 1; display: flex; flex-direction: column; overflow: visible; min-width: 0; position: relative;
+}
 #canvas-wrap {
   flex: 1; display: flex; align-items: center; justify-content: center;
-  background: var(--surface-canvas-bg); overflow: auto; position: relative;
+  background: var(--surface-canvas-bg); overflow: auto; position: relative; min-height: 0;
 }
+#custom-prog-panel {
+  display: none; flex-direction: column; flex-shrink: 0;
+  border-top: 2px solid var(--accent); background: var(--surface-panel);
+  height: 33vh; min-height: 120px; position: relative; overflow: hidden;
+}
+#custom-prog-panel.open { display: flex; }
+#custom-prog-resize-handle {
+  position: absolute; left: 0; right: 0; top: 0; height: 4px;
+  cursor: row-resize; background: transparent; transition: background .15s; z-index: 10;
+}
+#custom-prog-resize-handle:hover, #custom-prog-resize-handle.dragging { background: var(--accent); }
 #canvas { background: white; box-shadow: var(--shadow-canvas); display: block; flex-shrink: 0; }
 
 /* ── Explore panel ───────────────────────────────────────────────────── */
@@ -363,6 +397,42 @@ body {
 .chord-tile.fn-T { border-top: 2px solid var(--fn-tonic); }
 .chord-tile.fn-S { border-top: 2px solid var(--fn-subdom); }
 .chord-tile.fn-D { border-top: 2px solid var(--fn-dominant); }
+/* ── Custom Progression Builder ─────────────────────────────────────────────── */
+.custom-prog-inner {
+  display: flex; flex-direction: column; flex: 1; padding: 8px 12px 8px; min-height: 0; overflow: hidden;
+}
+.custom-prog-header { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; flex-shrink: 0; }
+.custom-prog-title { font-size: 11px; font-weight: 600; color: var(--fg-muted); flex: 1; letter-spacing: .3px; }
+.custom-prog-slots { display: flex; gap: 6px; align-items: stretch; flex: 1; min-height: 0; overflow: hidden; }
+/* Each filled chord: a flex column (image + label underneath) */
+.custom-prog-slot-wrap {
+  flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; min-height: 0; cursor: pointer;
+}
+.custom-prog-slot-wrap .slot-lbl {
+  flex-shrink: 0; text-align: center; font-size: 11px; font-weight: 600;
+  color: var(--fg-2); line-height: 1.2; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.custom-prog-slot-wrap.selected .custom-prog-slot {
+  border-color: var(--accent) !important; box-shadow: 0 0 0 2px var(--accent-fill);
+}
+.custom-prog-slot-wrap.selected .slot-lbl { color: var(--accent); }
+.custom-prog-slot {
+  flex: 1; min-height: 0; border-radius: 6px;
+  border: 2px solid var(--border-card); background: var(--surface-card);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; transition: border-color .12s;
+}
+.custom-prog-slot img { width: 100%; height: 100%; object-fit: contain; display: block; }
+/* Narrow [+] drop target */
+.custom-prog-add-slot {
+  width: 36px; flex-shrink: 0; border-radius: 6px; align-self: stretch;
+  border: 2px dashed var(--border-input); background: var(--surface-card);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; color: var(--fg-whisper);
+  transition: border-color .12s, background .12s;
+}
+.custom-prog-add-slot.drag-over { border-color: var(--accent); background: var(--accent-fill); color: var(--accent); }
 .prog-roman-strip {
   font-family: 'Courier New', Courier, monospace;
   font-size: 11px; color: var(--fg-whisper); padding: 4px 2px 2px;
@@ -987,10 +1057,13 @@ body {
 .edit-only   { display: block; }
 .explore-only { display: none; }
 
-body[data-mode="explore"] #sidebar { width: 210px; min-width: 210px; }
+body[data-mode="explore"] #sidebar:not(.collapsed) { width: 210px; min-width: 210px; }
 body[data-mode="explore"] .edit-only   { display: none !important; }
 body[data-mode="explore"] .explore-only { display: block !important; }
 body[data-mode="explore"] #explore-panel { display: flex; }
+/* Show/hide edge toggle buttons by mode */
+#explore-toggle { display: none; }
+body[data-mode="explore"] #explore-toggle { display: flex; }
 
 body[data-mode="rhythm"] #workspace-row { display: none; }
 body[data-mode="rhythm"] #rhythm-panel { display: flex; flex: 1; height: auto !important; min-height: 0 !important; flex-shrink: 1; }
@@ -1057,6 +1130,7 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
   <div id="workspace-row">
 
   <div id="sidebar">
+    <div id="sidebar-resize-handle"></div>
 
     <!-- Pan name / note count -->
     <div class="panel">
@@ -1247,15 +1321,32 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
 
   </div><!-- /sidebar -->
 
-  <div id="canvas-wrap">
-    <svg id="canvas" viewBox="0 0 1000 1400">
-      <rect id="bg" width="1000" height="1400" fill="white"/>
-      <g id="pan-layer"></g>
-      <g id="notes-layer"></g>
-      <rect id="sel-box" x="0" y="0" width="0" height="0"
-        fill="rgba(91,141,184,.12)" stroke="#5b8db8" stroke-width="1"
-        stroke-dasharray="5 3" pointer-events="none" visibility="hidden"/>
-    </svg>
+  <div id="canvas-col">
+    <button id="sidebar-toggle" class="panel-edge-btn" onclick="toggleSidebar()" title="Toggle sidebar">‹</button>
+    <button id="explore-toggle" class="panel-edge-btn" onclick="toggleExplorePanel()" title="Toggle explore panel">›</button>
+    <div id="canvas-wrap">
+      <svg id="canvas" viewBox="0 0 1000 1400">
+        <rect id="bg" width="1000" height="1400" fill="white"/>
+        <g id="pan-layer"></g>
+        <g id="notes-layer"></g>
+        <rect id="sel-box" x="0" y="0" width="0" height="0"
+          fill="rgba(91,141,184,.12)" stroke="#5b8db8" stroke-width="1"
+          stroke-dasharray="5 3" pointer-events="none" visibility="hidden"/>
+      </svg>
+    </div>
+
+    <!-- Custom progression panel (bottom of canvas area) -->
+    <div id="custom-prog-panel">
+      <div id="custom-prog-resize-handle"></div>
+      <div class="custom-prog-inner">
+        <div class="custom-prog-header">
+          <span class="custom-prog-title">Custom Progression</span>
+          <button class="btn is-sm cta" onclick="playCustomProg()" title="Play">▶ Play</button>
+          <button class="btn is-sm" onclick="toggleCustomProg()">✕</button>
+        </div>
+        <div id="custom-prog-slots" class="custom-prog-slots"></div>
+      </div>
+    </div>
   </div>
 
   <!-- ══ Explore Panel ════════════════════════════════════════════════════ -->
@@ -1272,7 +1363,10 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
     <!-- Filters -->
     <div class="explore-filters">
       <div id="mood-filter-section" style="display:none">
-        <div class="filter-label">Mood</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <div class="filter-label" style="margin-bottom:0">Mood</div>
+          <button class="btn is-sm" id="custom-prog-toggle-btn" onclick="toggleCustomProg()" style="font-size:10px;padding:2px 7px;">＋ Custom</button>
+        </div>
         <div id="mood-pills" class="mood-pills"></div>
       </div>
       <div>
@@ -2528,6 +2622,11 @@ let activeRootPc = -1;       // -1 = auto (best root per progression)
 let _activeTile  = null;     // { progName, chordIdx } — currently highlighted tile
 let activeChordTypeFilter = 'all'; // 'all' | any key of CHORD_TYPES
 
+// Custom progression builder state
+let customProgChords   = [];          // [{root: pc, type: typeName}, ...]
+let customProgOpen     = false;
+let customProgSelIdxs  = new Set();
+
 // Progressions export state
 let progExportRootPcs = new Set([-1]); // -1 = auto; multi-select
 
@@ -3457,6 +3556,14 @@ function getSelectedChordTypes() {
 
 document.addEventListener('keydown', e => {
   const inInput = ['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName);
+  if (!inInput && customProgOpen && customProgSelIdxs.size > 0 &&
+      (e.key === 'Delete' || e.key === 'Backspace')) {
+    e.preventDefault();
+    customProgChords = customProgChords.filter((_, i) => !customProgSelIdxs.has(i));
+    customProgSelIdxs.clear();
+    renderCustomProgBar();
+    return;
+  }
   if (!inInput && appMode === 'edit') {
     if (e.key === 'Delete' || e.key === 'Backspace') { deleteSelected(); return; }
     if (e.key === 'Escape') { selectedIds.clear(); render(); syncSidebar(); return; }
@@ -4002,6 +4109,7 @@ function _initExplorePanel() {
 
   buildRootBar();
   if (isChords) {
+    if (customProgOpen) { customProgOpen = false; renderCustomProgBar(); }
     buildChordTypePills();
     renderChords();
   } else {
@@ -4183,6 +4291,14 @@ function renderProgressions() {
         render(); updateHighlightPanel(); renderProgressions();
       });
 
+      if (selMatch) {
+        tile.draggable = true;
+        tile.addEventListener('dragstart', e => {
+          e.dataTransfer.setData('application/json', JSON.stringify({ root: chordRoot, type: c.t }));
+          e.dataTransfer.effectAllowed = 'copy';
+        });
+      }
+
       row.appendChild(tile);
     });
 
@@ -4315,6 +4431,12 @@ function renderChords() {
         if (appMode === 'explore' && exploreTab === 'progs') renderProgressions();
       });
 
+      tile.draggable = true;
+      tile.addEventListener('dragstart', e => {
+        e.dataTransfer.setData('application/json', JSON.stringify({ root: rootPc, type: typeName }));
+        e.dataTransfer.effectAllowed = 'copy';
+      });
+
       row.appendChild(tile);
     }
 
@@ -4324,6 +4446,128 @@ function renderChords() {
   if (selPcs && !anyShown) {
     el.innerHTML = '<div style="padding:20px;font-size:12px;color:var(--fg-whisper);text-align:center;">No chords contain all selected notes.</div>';
   }
+}
+
+// ─── Custom Progression Builder ───────────────────────────────────────────────
+
+function buildTightSVGString(highlightPcs) {
+  const { cx, cy, r } = state.pan;
+  const margin = Math.max(18, Math.round(r * 0.07));
+  let bx0 = cx - r - margin, by0 = cy - r - margin;
+  let bx1 = cx + r + margin, by1 = cy + r + margin;
+  for (const n of state.notes) {
+    bx0 = Math.min(bx0, n.x - n.r - margin);
+    by0 = Math.min(by0, n.y - n.r - margin);
+    bx1 = Math.max(bx1, n.x + n.r + margin);
+    by1 = Math.max(by1, n.y + n.r + margin);
+  }
+  const bw = bx1 - bx0, bh = by1 - by0;
+  if (bw > bh) { const d = (bw - bh) / 2; by0 -= d; by1 += d; }
+  else          { const d = (bh - bw) / 2; bx0 -= d; bx1 += d; }
+  const size = Math.round(bx1 - bx0);
+  return buildSVGString(highlightPcs, '').replace(
+    'viewBox="0 0 1000 1400"',
+    `viewBox="${Math.round(bx0)} ${Math.round(by0)} ${size} ${size}"`
+  );
+}
+
+function renderCustomProgBar() {
+  const bar = document.getElementById('custom-prog-panel');
+  if (!bar) return;
+  bar.classList.toggle('open', customProgOpen);
+  const btn = document.getElementById('custom-prog-toggle-btn');
+  if (btn) btn.classList.toggle('cta', customProgOpen);
+  if (!customProgOpen) return;
+
+  const container = document.getElementById('custom-prog-slots');
+  container.innerHTML = '';
+
+  customProgChords.forEach((ch, i) => {
+    const pcs    = new Set((CHORD_TYPES[ch.type] || []).map(iv => (ch.root + iv) % 12));
+    const svgStr = buildTightSVGString(pcs);
+    const dataUrl = 'data:image/svg+xml,' + encodeURIComponent(svgStr);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'custom-prog-slot-wrap' + (customProgSelIdxs.has(i) ? ' selected' : '');
+
+    const slot = document.createElement('div');
+    slot.className = 'custom-prog-slot';
+    const img = document.createElement('img');
+    img.src = dataUrl; img.alt = ''; img.draggable = false;
+    slot.appendChild(img);
+
+    const sym = CHORD_SYMBOLS[ch.type] ?? ch.type;
+    const lbl = document.createElement('div');
+    lbl.className = 'slot-lbl';
+    lbl.textContent = getDisplayNames()[ch.root] + sym;
+
+    wrap.appendChild(slot);
+    wrap.appendChild(lbl);
+    wrap.addEventListener('click', e => {
+      if (e.shiftKey) {
+        customProgSelIdxs.has(i) ? customProgSelIdxs.delete(i) : customProgSelIdxs.add(i);
+      } else {
+        customProgSelIdxs = new Set([i]);
+      }
+      renderCustomProgBar();
+      e.stopPropagation();
+    });
+    container.appendChild(wrap);
+  });
+
+  if (customProgChords.length < 5) {
+    const add = document.createElement('div');
+    add.className = 'custom-prog-add-slot';
+    add.title = 'Drag a chord here';
+    add.textContent = '＋';
+    container.appendChild(add);
+  }
+}
+
+function toggleCustomProg() {
+  customProgOpen = !customProgOpen;
+  if (!customProgOpen) customProgSelIdxs.clear();
+  renderCustomProgBar();
+  resizeCanvas();
+}
+
+function playCustomProg() {
+  if (!customProgChords.length) return;
+  const beatMs = (60 / 90) * 1000;
+  customProgChords.forEach((ch, i) => {
+    const labels = _chordLabels(ch.root, ch.type);
+    if (labels.length) setTimeout(() => playChordAudio(labels), i * beatMs);
+  });
+}
+
+function setupCustomProgDnD() {
+  const container = document.getElementById('custom-prog-slots');
+  if (!container) return;
+
+  container.addEventListener('dragover', e => {
+    if (customProgOpen && customProgChords.length < 5) e.preventDefault();
+  });
+  container.addEventListener('dragenter', e => {
+    if (!customProgOpen || customProgChords.length >= 5) return;
+    const addSlot = container.querySelector('.custom-prog-add-slot');
+    if (addSlot) addSlot.classList.add('drag-over');
+  });
+  container.addEventListener('dragleave', e => {
+    if (!container.contains(e.relatedTarget)) {
+      container.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+    }
+  });
+  container.addEventListener('drop', e => {
+    e.preventDefault();
+    container.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+    if (!customProgOpen || customProgChords.length >= 5) return;
+    let data;
+    try { data = JSON.parse(e.dataTransfer.getData('application/json')); } catch { return; }
+    if (typeof data.root !== 'number' || !data.type) return;
+    customProgChords.push({ root: data.root, type: data.type });
+    customProgSelIdxs.clear();
+    renderCustomProgBar();
+  });
 }
 
 // ─── Progressions export ─────────────────────────────────────────────────────
@@ -7023,6 +7267,68 @@ async function exportRhythmsZip() {
   });
 })();
 
+// ─── Custom prog panel resize (vertical — top edge drag) ─────────────────────
+(function () {
+  const handle = document.getElementById('custom-prog-resize-handle');
+  const panel  = document.getElementById('custom-prog-panel');
+  let active = false, startY = 0, startH = 0;
+  handle.addEventListener('mousedown', e => {
+    active = true; startY = e.clientY; startH = panel.offsetHeight;
+    handle.classList.add('dragging'); e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!active) return;
+    const h = Math.max(120, Math.min(window.innerHeight - 160, startH - (e.clientY - startY)));
+    panel.style.height = h + 'px';
+    resizeCanvas();
+  });
+  document.addEventListener('mouseup', () => {
+    if (active) { active = false; handle.classList.remove('dragging'); }
+  });
+})();
+
+// ─── Sidebar resize (right-edge drag) ────────────────────────────────────────
+(function () {
+  const handle = document.getElementById('sidebar-resize-handle');
+  const panel  = document.getElementById('sidebar');
+  let active = false, startX = 0, startW = 0;
+  handle.addEventListener('mousedown', e => {
+    active = true; startX = e.clientX; startW = panel.offsetWidth;
+    handle.classList.add('dragging'); e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!active) return;
+    const w = Math.max(180, Math.min(480, startW + (e.clientX - startX)));
+    panel.style.width = w + 'px'; panel.style.minWidth = w + 'px';
+    resizeCanvas();
+  });
+  document.addEventListener('mouseup', () => {
+    if (active) { active = false; handle.classList.remove('dragging'); }
+  });
+})();
+
+// ─── Sidebar / explore panel collapse toggles ─────────────────────────────────
+function _updateEdgeBtnIcons() {
+  const sidebarCollapsed  = document.getElementById('sidebar').classList.contains('collapsed');
+  const exploreCollapsed  = document.getElementById('explore-panel').classList.contains('collapsed');
+  const sBtn = document.getElementById('sidebar-toggle');
+  const eBtn = document.getElementById('explore-toggle');
+  if (sBtn) sBtn.textContent = sidebarCollapsed  ? '›' : '‹';
+  if (eBtn) eBtn.textContent = exploreCollapsed  ? '‹' : '›';
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+  _updateEdgeBtnIcons();
+  resizeCanvas();
+}
+
+function toggleExplorePanel() {
+  document.getElementById('explore-panel').classList.toggle('collapsed');
+  _updateEdgeBtnIcons();
+  resizeCanvas();
+}
+
 // ─── Canvas sizing ────────────────────────────────────────────────────────────
 
 function resizeCanvas() {
@@ -7119,7 +7425,7 @@ document.addEventListener('click', e => {
     }
   } catch(e) {}
 
-  pushHistory(); resizeCanvas(); render(); syncSidebar(); syncPanSlider();
+  pushHistory(); resizeCanvas(); render(); syncSidebar(); syncPanSlider(); setupCustomProgDnD(); _updateEdgeBtnIcons();
 })();
 </script>
 
