@@ -3589,7 +3589,10 @@ function toggleExplorePanel() {
 function resizeCanvas() {
   if (appMode === 'rhythm') return; // canvas not visible
   const wrap = document.getElementById('canvas-wrap');
-  if (!wrap || !wrap.clientWidth || !wrap.clientHeight) return;
+  if (!wrap || !wrap.clientWidth || !wrap.clientHeight) {
+    requestAnimationFrame(resizeCanvas); // layout not settled yet — retry
+    return;
+  }
   const maxW = wrap.clientWidth - 24;
   const maxH = wrap.clientHeight - 24;
   const aspect = 1000 / 1400; // card aspect ratio (5:7)
@@ -3657,7 +3660,6 @@ function syncPanSlider() {
 
 
   pushHistory(); resizeCanvas(); render(); syncSidebar(); syncPanSlider(); setupCustomProgDnD(); _updateEdgeBtnIcons();
-  requestAnimationFrame(resizeCanvas);
 })();
 
 // ─────────────────────────────────────────────
@@ -3758,6 +3760,9 @@ function _buildHatThemeVars() {
     // Overlays
     '--scrim':   'rgba(60,40,20,0.55)',
     '--playing': 'rgba(0,0,0,0.87)',
+    // Typography — host values from colors_and_type.css
+    '--font-mono': '"Courier New", Courier, ui-monospace, monospace',
+    '--font-ui':   'Arial, "Helvetica Neue", Helvetica, sans-serif',
   };
 }
 
