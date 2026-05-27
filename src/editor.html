@@ -3656,6 +3656,7 @@ function syncPanSlider() {
 
 
   pushHistory(); resizeCanvas(); render(); syncSidebar(); syncPanSlider(); setupCustomProgDnD(); _updateEdgeBtnIcons();
+  requestAnimationFrame(resizeCanvas);
 })();
 
 // ─────────────────────────────────────────────
@@ -3676,6 +3677,7 @@ function _hatFrameInit() {
   if (_hatReady) {
     _syncHatNotes();
     _hatSendLibrary();
+    _hatSendTheme();
   }
   // ping in case the iframe was already loaded before we switched to rhythm mode
   const fr = _hatFrame();
@@ -3698,6 +3700,60 @@ function _hatSendLibrary() {
     category: p.cat || 'library'
   }));
   _hatSend({ type: 'hat:load-library', patterns, merge: true });
+}
+
+function _buildHatThemeVars() {
+  const cs = getComputedStyle(document.documentElement);
+  const g = v => cs.getPropertyValue(v).trim();
+  return {
+    // Surfaces
+    '--bg':  g('--surface-app'),
+    '--bg2': g('--surface-panel'),
+    '--bg3': g('--surface-input'),
+    '--bg4': g('--surface-card-hover'),
+    // Text
+    '--fg':  g('--fg-1'),
+    '--fg2': g('--fg-2'),
+    '--fg3': g('--fg-muted'),
+    // Accent & border
+    '--accent': g('--accent'),
+    '--border': g('--border-divider'),
+    // Hands
+    '--R':   g('--hand-r'),
+    '--Rbg': g('--hand-r-fill'),
+    '--L':   g('--hand-l'),
+    // Hit colours
+    '--hit-D':    g('--hand-r'),
+    '--hit-T':    g('--accent'),
+    '--hit-K':    g('--hand-l'),
+    '--hit-S':    g('--danger'),
+    '--hit-note': g('--play-full'),
+    // Cell backgrounds (light washes)
+    '--cell-rest-bg':  g('--surface-panel-2'),
+    '--cell-D-bg':     g('--hand-r-fill'),
+    '--cell-T-bg':     g('--accent-fill'),
+    '--cell-K-bg':     g('--hand-l-fill'),
+    '--cell-S-bg':     g('--danger-hover-bg'),
+    '--cell-ghost-bg': g('--surface-panel-2'),
+    '--cell-note-bg':  '#e6f5e0',
+    // Bar
+    '--bar-bg':          g('--surface-app'),
+    '--bar-border':      g('--border-card'),
+    '--bar-selected-bg': g('--accent-fill'),
+    // Separators
+    '--sep-beat':     g('--accent'),
+    '--sep-beat-dim': g('--accent-fill'),
+    '--sep-sub':      g('--border-divider'),
+    '--sep-sub-dim':  g('--border-card'),
+    // Overlay & playhead
+    '--scrim':   'rgba(60,40,20,0.55)',
+    '--playing': 'rgba(0,0,0,0.87)',
+  };
+}
+
+function _hatSendTheme() {
+  if (!_hatReady) return;
+  _hatSend({ type: 'hat:set-theme', mode: 'light', vars: _buildHatThemeVars() });
 }
 
 // Pan note highlighting
@@ -3749,6 +3805,7 @@ window.addEventListener('message', (event) => {
   switch (msg.type) {
     case 'hat:ready':
       _hatReady = true;
+      _hatSendTheme();
       _syncHatNotes();
       _hatSendLibrary();
       break;
