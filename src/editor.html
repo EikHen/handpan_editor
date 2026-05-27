@@ -2673,6 +2673,7 @@ function setMode(mode) {
   if (mode === 'explore') {
     _initExplorePanel();
     document.querySelector('.panel-audio').classList.remove('collapsed');
+    render();
   } else if (mode === 'rhythm') {
     _hatFrameInit();
   } else { // 'edit'
@@ -3667,9 +3668,9 @@ window.addEventListener('resize', resizeCanvas);
   const wrap = document.getElementById('canvas-wrap');
   if (!wrap) return;
   if (window.ResizeObserver) {
-    new ResizeObserver(() => { if (appMode !== 'rhythm') resizeCanvas(); }).observe(wrap);
+    new ResizeObserver(() => { if (appMode !== 'rhythm') { resizeCanvas(); render(); } }).observe(wrap);
   } else {
-    window.addEventListener('load', resizeCanvas); // Safari <13 fallback
+    window.addEventListener('load', () => { resizeCanvas(); render(); }); // Safari <13 fallback
   }
 })();
 
@@ -3727,14 +3728,14 @@ function syncPanSlider() {
   pushHistory(); resizeCanvas(); render(); syncSidebar(); syncPanSlider(); setupCustomProgDnD(); _updateEdgeBtnIcons();
   // Post-layout resize: flex layout settles after synchronous script execution,
   // so schedule a second call to ensure the SVG gets correct dimensions.
-  requestAnimationFrame(() => resizeCanvas());
+  requestAnimationFrame(() => { resizeCanvas(); render(); });
 })();
 
 // ─────────────────────────────────────────────
 //  HAT IFRAME BRIDGE  (M3–M5)
 // ─────────────────────────────────────────────
 
-let _hatReady = false;
+var _hatReady = false; // var (not let) — avoids TDZ when called from init IIFE before this line
 
 function _hatFrame() { return document.getElementById('hat-frame'); }
 
@@ -3753,6 +3754,14 @@ function _hatFrameInit() {
   // ping in case the iframe was already loaded before we switched to rhythm mode
   const fr = _hatFrame();
   if (fr) fr.contentWindow.postMessage({ type: 'hat:ping' }, '*');
+  // Ensure keyboard events reach the iframe when the mouse enters it.
+  // Browsers only route keydown to an iframe if it has focus; hovering alone
+  // does not transfer focus.  We push focus from the parent side (the only
+  // side that can do it without a user click) on every mouseenter.
+  if (fr && !fr._focusListenerAttached) {
+    fr._focusListenerAttached = true;
+    fr.addEventListener('mouseenter', () => { try { fr.focus(); } catch(_) {} });
+  }
 }
 
 function _syncHatNotes() {
@@ -3775,9 +3784,9 @@ function _buildHatThemeVars() {
   return {
     // Surfaces — mapped from Explorer tokens
     '--bg':  v('--surface-panel',      '#fbf7ee'), // match #rhythm-panel background
-    '--bg2': v('--surface-panel-2',    '#f0e8d8'),
+    '--bg2': v('--surface-panel',      '#fbf7ee'), // HAT toolbars/sidebar match Explorer panels
     '--bg3': v('--surface-card-hover', '#fdf9f0'),
-    '--bg4': v('--surface-card-hover', '#fdf9f0'),
+    '--bg4': v('--surface-panel-2',    '#f0e8d8'), // hover: slightly warmer/darker than panel
     // Text
     '--fg':  v('--fg-1',     '#3a3027'),
     '--fg2': v('--fg-2',     '#5a4d3e'),
