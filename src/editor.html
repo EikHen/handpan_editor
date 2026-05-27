@@ -3647,10 +3647,7 @@ function toggleExplorePanel() {
 function resizeCanvas() {
   if (appMode === 'rhythm') return; // canvas not visible
   const wrap = document.getElementById('canvas-wrap');
-  if (!wrap || !wrap.clientWidth || !wrap.clientHeight) {
-    requestAnimationFrame(resizeCanvas); // layout not settled yet — retry
-    return;
-  }
+  if (!wrap || !wrap.clientWidth || !wrap.clientHeight) return; // ResizeObserver will re-trigger
   const maxW = wrap.clientWidth - 24;
   const maxH = wrap.clientHeight - 24;
   const aspect = 1000 / 1400; // card aspect ratio (5:7)
@@ -3664,7 +3661,17 @@ function resizeCanvas() {
   SVG.style.height = h + 'px';
 }
 window.addEventListener('resize', resizeCanvas);
-window.addEventListener('load', resizeCanvas);
+// ResizeObserver fires when canvas-wrap first gets a non-zero layout size —
+// more reliable than rAF or window 'load' (which is blocked by iframe loading).
+(function () {
+  const wrap = document.getElementById('canvas-wrap');
+  if (!wrap) return;
+  if (window.ResizeObserver) {
+    new ResizeObserver(() => { if (appMode !== 'rhythm') resizeCanvas(); }).observe(wrap);
+  } else {
+    window.addEventListener('load', resizeCanvas); // Safari <13 fallback
+  }
+})();
 
 function syncPanSlider() {
   panR.value = state.pan.r;
@@ -3758,53 +3765,56 @@ function _hatSendLibrary() {
 }
 
 function _buildHatThemeVars() {
-  // Hardcoded from colors_and_type.css (warm light theme — no dark mode)
+  // Read live values from colors_and_type.css via getComputedStyle.
+  // This ensures the HAT editor always matches the Explorer's actual palette.
+  const cs = getComputedStyle(document.documentElement);
+  const v = (name, fallback) => cs.getPropertyValue(name).trim() || fallback;
   return {
-    // Surfaces
-    '--bg':  '#f5efe3',
-    '--bg2': '#fbf7ee',
-    '--bg3': '#fbf7ee',
-    '--bg4': '#fdf9f0',
+    // Surfaces — mapped from Explorer tokens
+    '--bg':  v('--surface-app',        '#f5efe3'),
+    '--bg2': v('--surface-panel',      '#fbf7ee'),
+    '--bg3': v('--surface-panel',      '#fbf7ee'),
+    '--bg4': v('--surface-card-hover', '#fdf9f0'),
     // Text
-    '--fg':  '#3a3027',
-    '--fg2': '#5a4d3e',
-    '--fg3': '#948774',
+    '--fg':  v('--fg-1',     '#3a3027'),
+    '--fg2': v('--fg-2',     '#5a4d3e'),
+    '--fg3': v('--fg-muted', '#948774'),
     // Accent & border
-    '--accent': '#3d7395',
-    '--border': '#ddd2bd',
+    '--accent': v('--accent',         '#3d7395'),
+    '--border': v('--border-divider', '#ddd2bd'),
     // Right hand
-    '--R':    '#2c5e7a',
-    '--Rdim': '#7baac4',
-    '--Rbg':  '#e3eaf2',
+    '--R':    v('--hand-r',       '#2c5e7a'),
+    '--Rdim': v('--hand-r-muted', '#7baac4'),
+    '--Rbg':  v('--hand-r-fill',  '#e3eaf2'),
     // Left hand
-    '--L':    '#8e5828',
-    '--Ldim': '#c49a60',
-    '--Lbg':  '#f5e8d5',
+    '--L':    v('--hand-l',       '#8e5828'),
+    '--Ldim': v('--hand-l-muted', '#c49a60'),
+    '--Lbg':  v('--hand-l-fill',  '#f5e8d5'),
     // Hit colours
-    '--hit-D':    '#2c5e7a',
-    '--hit-T':    '#3d7395',
-    '--hit-K':    '#8e5828',
-    '--hit-S':    '#c63838',
-    '--hit-note': '#1a9966',
-    // Cell backgrounds
-    '--cell-rest-bg':  '#f0e8d8',
-    '--cell-D-bg':     '#e3eaf2',
-    '--cell-T-bg':     '#dce6ef',
-    '--cell-K-bg':     '#f5e8d5',
-    '--cell-S-bg':     '#f7e3df',
-    '--cell-ghost-bg': '#f0e8d8',
-    '--cell-note-bg':  '#e6f5e0',
+    '--hit-D':    v('--hand-r',      '#2c5e7a'),
+    '--hit-T':    v('--accent',      '#3d7395'),
+    '--hit-K':    v('--hand-l',      '#8e5828'),
+    '--hit-S':    v('--danger',      '#c63838'),
+    '--hit-note': v('--play-full',   '#1a9966'),
+    // Cell backgrounds (no direct Explorer token — keep warm-palette values)
+    '--cell-rest-bg':  v('--surface-panel-2', '#f0e8d8'),
+    '--cell-D-bg':     v('--hand-r-fill',     '#e3eaf2'),
+    '--cell-T-bg':                            '#dce6ef',
+    '--cell-K-bg':     v('--hand-l-fill',     '#f5e8d5'),
+    '--cell-S-bg':     v('--danger-hover-bg', '#f7e3df'),
+    '--cell-ghost-bg': v('--surface-panel-2', '#f0e8d8'),
+    '--cell-note-bg':                         '#e6f5e0',
     // Bar
-    '--bar-bg':          '#f5efe3',
-    '--bar-border':      '#e6dcc6',
-    '--bar-selected-bg': '#e3eaf2',
+    '--bar-bg':          v('--surface-app',   '#f5efe3'),
+    '--bar-border':      v('--border-card',   '#e6dcc6'),
+    '--bar-selected-bg': v('--hand-r-fill',   '#e3eaf2'),
     // Separators
-    '--sep-beat':     '#3d7395',
-    '--sep-beat-dim': '#b8ccd8',
-    '--sep-sub':      '#ddd2bd',
-    '--sep-sub-dim':  '#e6dcc6',
+    '--sep-beat':     v('--accent',          '#3d7395'),
+    '--sep-beat-dim': v('--hand-r-border',   '#b8ccd8'),
+    '--sep-sub':      v('--border-divider',  '#ddd2bd'),
+    '--sep-sub-dim':  v('--border-card',     '#e6dcc6'),
     // Count tokens
-    '--count-tok-fg': '#2c5e7a',
+    '--count-tok-fg': v('--hand-r',  '#2c5e7a'),
     '--count-tok-bg': 'rgba(44,94,122,0.12)',
     // Column selection
     '--col-sel-cell':  'rgba(61,115,149,0.15)',
@@ -3812,9 +3822,9 @@ function _buildHatThemeVars() {
     // Overlays
     '--scrim':   'rgba(60,40,20,0.55)',
     '--playing': 'rgba(0,0,0,0.87)',
-    // Typography — host values from colors_and_type.css
-    '--font-mono': '"Courier New", Courier, ui-monospace, monospace',
-    '--font-ui':   'Arial, "Helvetica Neue", Helvetica, sans-serif',
+    // Typography — read directly from colors_and_type.css
+    '--font-mono': v('--font-mono', '"Courier New", Courier, ui-monospace, monospace'),
+    '--font-ui':   v('--font-sans', 'Arial, "Helvetica Neue", Helvetica, sans-serif'),
   };
 }
 
