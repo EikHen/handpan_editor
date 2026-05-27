@@ -1,0 +1,3 @@
+[submodule "vendor/hat_spec"]
+	path = vendor/hat_spec
+	url = https://github.com/EikHen/hat_spec.git
