@@ -902,7 +902,7 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
     <div id="rhythm-resize-handle"></div>
     <iframe id="hat-frame"
       src="../vendor/hat_spec/src/editor.html?embed=1"
-      sandbox="allow-scripts allow-same-origin allow-downloads"
+      sandbox="allow-scripts allow-same-origin allow-downloads allow-modals"
       title="HAT Rhythm Editor"
       style="width:100%;height:100%;border:none;flex:1;min-height:0;display:block;"
     ></iframe>
@@ -3589,7 +3589,7 @@ function toggleExplorePanel() {
 function resizeCanvas() {
   if (appMode === 'rhythm') return; // canvas not visible
   const wrap = document.getElementById('canvas-wrap');
-  if (!wrap || !wrap.clientWidth) return;
+  if (!wrap || !wrap.clientWidth || !wrap.clientHeight) return;
   const maxW = wrap.clientWidth - 24;
   const maxH = wrap.clientHeight - 24;
   const aspect = 1000 / 1400; // card aspect ratio (5:7)
@@ -3603,6 +3603,7 @@ function resizeCanvas() {
   SVG.style.height = h + 'px';
 }
 window.addEventListener('resize', resizeCanvas);
+window.addEventListener('load', resizeCanvas);
 
 function syncPanSlider() {
   panR.value = state.pan.r;
@@ -3703,49 +3704,58 @@ function _hatSendLibrary() {
 }
 
 function _buildHatThemeVars() {
-  const cs = getComputedStyle(document.documentElement);
-  const g = v => cs.getPropertyValue(v).trim();
+  // Hardcoded from colors_and_type.css (warm light theme — no dark mode)
   return {
     // Surfaces
-    '--bg':  g('--surface-app'),
-    '--bg2': g('--surface-panel'),
-    '--bg3': g('--surface-input'),
-    '--bg4': g('--surface-card-hover'),
+    '--bg':  '#f5efe3',
+    '--bg2': '#fbf7ee',
+    '--bg3': '#fbf7ee',
+    '--bg4': '#fdf9f0',
     // Text
-    '--fg':  g('--fg-1'),
-    '--fg2': g('--fg-2'),
-    '--fg3': g('--fg-muted'),
+    '--fg':  '#3a3027',
+    '--fg2': '#5a4d3e',
+    '--fg3': '#948774',
     // Accent & border
-    '--accent': g('--accent'),
-    '--border': g('--border-divider'),
-    // Hands
-    '--R':   g('--hand-r'),
-    '--Rbg': g('--hand-r-fill'),
-    '--L':   g('--hand-l'),
+    '--accent': '#3d7395',
+    '--border': '#ddd2bd',
+    // Right hand
+    '--R':    '#2c5e7a',
+    '--Rdim': '#7baac4',
+    '--Rbg':  '#e3eaf2',
+    // Left hand
+    '--L':    '#8e5828',
+    '--Ldim': '#c49a60',
+    '--Lbg':  '#f5e8d5',
     // Hit colours
-    '--hit-D':    g('--hand-r'),
-    '--hit-T':    g('--accent'),
-    '--hit-K':    g('--hand-l'),
-    '--hit-S':    g('--danger'),
-    '--hit-note': g('--play-full'),
-    // Cell backgrounds (light washes)
-    '--cell-rest-bg':  g('--surface-panel-2'),
-    '--cell-D-bg':     g('--hand-r-fill'),
-    '--cell-T-bg':     g('--accent-fill'),
-    '--cell-K-bg':     g('--hand-l-fill'),
-    '--cell-S-bg':     g('--danger-hover-bg'),
-    '--cell-ghost-bg': g('--surface-panel-2'),
+    '--hit-D':    '#2c5e7a',
+    '--hit-T':    '#3d7395',
+    '--hit-K':    '#8e5828',
+    '--hit-S':    '#c63838',
+    '--hit-note': '#1a9966',
+    // Cell backgrounds
+    '--cell-rest-bg':  '#f0e8d8',
+    '--cell-D-bg':     '#e3eaf2',
+    '--cell-T-bg':     '#dce6ef',
+    '--cell-K-bg':     '#f5e8d5',
+    '--cell-S-bg':     '#f7e3df',
+    '--cell-ghost-bg': '#f0e8d8',
     '--cell-note-bg':  '#e6f5e0',
     // Bar
-    '--bar-bg':          g('--surface-app'),
-    '--bar-border':      g('--border-card'),
-    '--bar-selected-bg': g('--accent-fill'),
+    '--bar-bg':          '#f5efe3',
+    '--bar-border':      '#e6dcc6',
+    '--bar-selected-bg': '#e3eaf2',
     // Separators
-    '--sep-beat':     g('--accent'),
-    '--sep-beat-dim': g('--accent-fill'),
-    '--sep-sub':      g('--border-divider'),
-    '--sep-sub-dim':  g('--border-card'),
-    // Overlay & playhead
+    '--sep-beat':     '#3d7395',
+    '--sep-beat-dim': '#b8ccd8',
+    '--sep-sub':      '#ddd2bd',
+    '--sep-sub-dim':  '#e6dcc6',
+    // Count tokens
+    '--count-tok-fg': '#2c5e7a',
+    '--count-tok-bg': 'rgba(44,94,122,0.12)',
+    // Column selection
+    '--col-sel-cell':  'rgba(61,115,149,0.15)',
+    '--col-sel-strip': 'rgba(61,115,149,0.10)',
+    // Overlays
     '--scrim':   'rgba(60,40,20,0.55)',
     '--playing': 'rgba(0,0,0,0.87)',
   };
