@@ -1,1 +1,4 @@
 .codegraph/
+.playwright-mcp/
+.claude/plans/
+.claude/prds/
