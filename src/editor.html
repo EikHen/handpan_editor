@@ -3725,6 +3725,9 @@ function syncPanSlider() {
 
 
   pushHistory(); resizeCanvas(); render(); syncSidebar(); syncPanSlider(); setupCustomProgDnD(); _updateEdgeBtnIcons();
+  // Post-layout resize: flex layout settles after synchronous script execution,
+  // so schedule a second call to ensure the SVG gets correct dimensions.
+  requestAnimationFrame(() => resizeCanvas());
 })();
 
 // ─────────────────────────────────────────────
@@ -3771,9 +3774,9 @@ function _buildHatThemeVars() {
   const v = (name, fallback) => cs.getPropertyValue(name).trim() || fallback;
   return {
     // Surfaces — mapped from Explorer tokens
-    '--bg':  v('--surface-app',        '#f5efe3'),
-    '--bg2': v('--surface-panel',      '#fbf7ee'),
-    '--bg3': v('--surface-panel',      '#fbf7ee'),
+    '--bg':  v('--surface-panel',      '#fbf7ee'), // match #rhythm-panel background
+    '--bg2': v('--surface-panel-2',    '#f0e8d8'),
+    '--bg3': v('--surface-card-hover', '#fdf9f0'),
     '--bg4': v('--surface-card-hover', '#fdf9f0'),
     // Text
     '--fg':  v('--fg-1',     '#3a3027'),
