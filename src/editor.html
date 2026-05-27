@@ -1372,6 +1372,64 @@ const LS_LAYOUT   = 'handpan-layout-v1';
 const LS_SETTINGS = 'handpan-settings-v1';
 const LS_RHYTHMS  = 'handpan-rhythms-v1';
 
+// ─── Audio preview (re-added; accidentally removed in M6) ─────────────────────
+
+let audioPreviewVol     = 0.6;  // 0–1
+let audioPreviewSustain = 1.4;  // seconds
+let _audioCtx = null;
+
+function ensureAudioCtx() {
+  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (_audioCtx.state === 'suspended') _audioCtx.resume();
+  return _audioCtx;
+}
+
+function midiToFreq(midi) {
+  return 440 * Math.pow(2, (midi - 69) / 12);
+}
+
+// Play a single handpan note: sine harmonics with metallic decay envelope.
+function playNote(label, when = 0, vol = null) {
+  try {
+    const ctx = ensureAudioCtx();
+    const freq = midiToFreq(midiNote(label));
+    const g = vol !== null ? vol : audioPreviewVol;
+    const t = ctx.currentTime + when;
+    const sus = audioPreviewSustain;
+    for (const [h, hg] of [[1, 0.70], [2, 0.20], [3, 0.10]]) {
+      const osc = ctx.createOscillator();
+      const env = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq * h;
+      env.gain.setValueAtTime(0, t);
+      env.gain.linearRampToValueAtTime(g * hg, t + 0.008);
+      env.gain.exponentialRampToValueAtTime(0.001, t + sus);
+      osc.connect(env);
+      env.connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + sus + 0.05);
+    }
+  } catch(e) {}
+}
+
+function playChordAudio(labels) {
+  if (!Array.isArray(labels) || !labels.length) return;
+  ensureAudioCtx();
+  labels.forEach(l => playNote(l));
+}
+
+function playProgression(chords, rootPc) {
+  if (!chords || !chords.length) return;
+  ensureAudioCtx();
+  const beatMs = (60 / 80) * 1000; // 80 bpm default
+  chords.forEach((chord, i) => {
+    const root = chord.root !== undefined ? chord.root : (rootPc !== undefined ? rootPc : 0);
+    const type = chord.type || chord.t || 'Major';
+    const labels = typeof _chordLabels === 'function' ? _chordLabels(root, type) : [];
+    if (labels && labels.length) setTimeout(() => playChordAudio(labels), i * beatMs);
+  });
+}
+
 let _saveTimer = null;
 function scheduleSave() {
   clearTimeout(_saveTimer);
@@ -3696,13 +3754,7 @@ function _syncHatNotes() {
 }
 
 function _hatSendLibrary() {
-  if (!_hatReady || typeof HAT_PATTERNS === 'undefined') return;
-  const patterns = HAT_PATTERNS.map((p, i) => ({
-    id: p.id || `builtin-${i}`,
-    hat: p.hat,
-    category: p.cat || 'library'
-  }));
-  _hatSend({ type: 'hat:load-library', patterns, merge: true });
+  // HAT editor ships its own built-in PATTERNS array; no host injection needed.
 }
 
 function _buildHatThemeVars() {
@@ -3827,7 +3879,15 @@ window.addEventListener('message', (event) => {
     case 'hat:hit':
       if (msg.isNote) {
         const delay = Math.max(0, (msg.tOffsetMs || 0) - 10);
-        setTimeout(() => _highlightPanNote(msg.symbol), delay);
+        const sym = msg.symbol;
+        setTimeout(() => {
+          _highlightPanNote(sym);
+          try {
+            const notes = sym.includes('+') ? sym.split('+') : [sym];
+            if (notes.length === 1) playNote(notes[0]);
+            else playChordAudio(notes);
+          } catch(e) {}
+        }, delay);
       }
       break;
     case 'hat:playback-state':
