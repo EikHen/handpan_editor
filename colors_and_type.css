@@ -191,7 +191,7 @@
 
 
   /* ── Type ────────────────────────────────────────────────────────────── */
-  --font-sans: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --font-sans: system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
   --font-mono: "Courier New", Courier, ui-monospace, monospace;
   --font-alt:  "DM Sans", "Inter Tight", system-ui, sans-serif;
 

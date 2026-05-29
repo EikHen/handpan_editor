@@ -46,6 +46,7 @@ body {
   gap: 6px;
   flex-shrink: 0;
   user-select: none;
+  overflow-x: auto;
 }
 #toolbar h1 { font-family: var(--font-alt); font-size: var(--text-15); color: var(--accent-title); margin-right: 4px; white-space: nowrap; }
 .sep { width: 1px; background: var(--border-divider); height: 28px; margin: 0 4px; flex-shrink: 0; }
@@ -57,6 +58,7 @@ body {
 }
 .btn:hover { background: var(--accent-fill-hover); border-color: var(--accent); color: var(--fg-1); }
 .btn:active { background: var(--accent-fill); }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .btn.danger { border-color: var(--danger-border); }
 .btn.danger:hover { background: var(--danger-hover-bg); border-color: var(--danger); color: var(--danger); }
 .btn.icon { padding: 5px 8px; font-size: 14px; }
@@ -86,6 +88,7 @@ body {
   display: inline-flex; align-items: center; gap: 5px;
 }
 .mode-tab:hover { background: var(--accent-fill-hover); border-color: var(--accent); color: var(--fg-1); }
+.mode-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .mode-tab.is-active {
   background: var(--accent-fill); border-color: var(--accent);
   color: var(--accent-bright); box-shadow: var(--focus-ring);
@@ -111,7 +114,7 @@ body {
 }
 #sidebar.collapsed { width: 0; min-width: 0; overflow: hidden; border-right: none; }
 #sidebar-resize-handle {
-  position: absolute; right: 0; top: 0; bottom: 0; width: 4px;
+  position: absolute; right: 0; top: 0; bottom: 0; width: 10px;
   cursor: col-resize; background: transparent; z-index: 10; transition: background .15s;
 }
 #sidebar-resize-handle:hover, #sidebar-resize-handle.dragging { background: var(--accent); }
@@ -119,12 +122,13 @@ body {
 /* Edge toggle buttons — live inside #canvas-col, poke out over sidebars */
 .panel-edge-btn {
   position: absolute; top: 50%; transform: translateY(-50%); z-index: 30;
-  width: 14px; height: 36px; padding: 0;
+  width: 20px; height: 44px; padding: 0;
   background: var(--surface-panel); border: 1px solid var(--border-divider);
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; font-size: 9px; color: var(--fg-whisper);
   transition: background .12s, color .12s, border-color .12s;
 }
+.panel-edge-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .panel-edge-btn:hover { background: var(--accent-fill); color: var(--accent); border-color: var(--accent); }
 #sidebar-toggle  { left: -1px;  border-radius: 0 4px 4px 0; border-left: none; }
 #explore-toggle  { right: -1px; border-radius: 4px 0 0 4px; border-right: none; }
@@ -151,11 +155,12 @@ body {
   color: var(--fg-1); padding: var(--pad-input); font-size: 13px; width: 100%; outline: none;
 }
 .row input[type=text]:focus, .row select:focus { border-color: var(--accent); }
+.row input[type=text]:focus-visible, .row select:focus-visible { outline: 2px solid var(--accent-soft-border); outline-offset: 0; }
 .row input[type=range] { width: 100%; accent-color: var(--accent); }
 
 /* Pan editing sub-labels and button rows */
 .panel-sub-label {
-  font-size: var(--text-9); text-transform: uppercase; letter-spacing: var(--tracking-medium);
+  font-size: var(--text-11); text-transform: uppercase; letter-spacing: var(--tracking-medium);
   color: var(--fg-whisper); margin-bottom: 5px; margin-top: 10px;
 }
 .panel-sub-label:first-child { margin-top: 0; }
@@ -225,11 +230,11 @@ body {
 }
 #custom-prog-panel.open { display: flex; }
 #custom-prog-resize-handle {
-  position: absolute; left: 0; right: 0; top: 0; height: 4px;
+  position: absolute; left: 0; right: 0; top: 0; height: 10px;
   cursor: row-resize; background: transparent; transition: background .15s; z-index: 10;
 }
 #custom-prog-resize-handle:hover, #custom-prog-resize-handle.dragging { background: var(--accent); }
-#canvas { background: white; box-shadow: var(--shadow-canvas); display: block; flex-shrink: 0; }
+#canvas { background: var(--surface-paper); box-shadow: var(--shadow-canvas); display: block; flex-shrink: 0; }
 
 /* ── Explore panel ───────────────────────────────────────────────────── */
 #explore-panel {
@@ -240,7 +245,7 @@ body {
   overflow: hidden; flex-shrink: 0; position: relative;
 }
 #explore-resize-handle {
-  position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  position: absolute; left: 0; top: 0; bottom: 0; width: 10px;
   cursor: col-resize; background: transparent; transition: background var(--transition-medium); z-index: 10;
 }
 #explore-resize-handle:hover,
@@ -266,7 +271,7 @@ body {
   flex-shrink: 0; display: flex; flex-direction: column; gap: 7px;
 }
 .filter-label {
-  font: var(--text-9)/1 var(--font-sans); color: var(--fg-whisper);
+  font: var(--text-11)/1 var(--font-sans); color: var(--fg-whisper);
   text-transform: uppercase; letter-spacing: var(--tracking-medium); margin-bottom: 4px;
 }
 /* Chord type pills — scrollable row */
@@ -470,7 +475,7 @@ body {
 #hat-frame { flex: 1; min-height: 0; width: 100%; border: none; display: block; }
 #rhythm-panel.open { display: flex; }
 #rhythm-resize-handle {
-  position: absolute; left: 0; right: 0; top: 0; height: 4px;
+  position: absolute; left: 0; right: 0; top: 0; height: 10px;
   cursor: row-resize; background: transparent; transition: background .15s; z-index: 10;
 }
 #rhythm-resize-handle:hover, #rhythm-resize-handle.dragging { background: var(--accent); }
@@ -557,12 +562,12 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
   <h1>Handpan Explorer</h1>
   <div class="sep"></div>
   <div class="mode-tabs" role="tablist" aria-label="Editor mode">
-    <button class="mode-tab is-active" id="tab-edit"    data-mode="edit"    onclick="setMode('edit')"    role="tab"><svg class="icon" aria-hidden="true"><use href="#i-pan"/></svg> Pan</button>
-    <button class="mode-tab"           id="tab-explore" data-mode="explore" onclick="setMode('explore')" role="tab"><svg class="icon" aria-hidden="true"><use href="#i-music"/></svg> Explore</button>
-    <button class="mode-tab"           id="tab-rhythm"  data-mode="rhythm"  onclick="setMode('rhythm')"  role="tab"><svg class="icon" aria-hidden="true"><use href="#i-rhythm"/></svg> Rhythm<sup class="beta-sup">β</sup></button>
+    <button class="mode-tab is-active" id="tab-edit"    data-mode="edit"    onclick="setMode('edit')"    role="tab" aria-selected="true"><svg class="icon" aria-hidden="true"><use href="#i-pan"/></svg> Pan</button>
+    <button class="mode-tab"           id="tab-explore" data-mode="explore" onclick="setMode('explore')" role="tab" aria-selected="false"><svg class="icon" aria-hidden="true"><use href="#i-music"/></svg> Explore</button>
+    <button class="mode-tab"           id="tab-rhythm"  data-mode="rhythm"  onclick="setMode('rhythm')"  role="tab" aria-selected="false"><svg class="icon" aria-hidden="true"><use href="#i-rhythm"/></svg> Rhythm<sup class="beta-sup">β</sup></button>
   </div>
   <div class="sep"></div>
-  <span id="status" style="font-size:11px;color:var(--fg-subtle);"></span>
+  <span id="status" style="font-size:11px;color:var(--fg-subtle);" aria-live="polite" aria-atomic="true"></span>
 </div>
 
 <!-- ══ Workspace ════════════════════════════════════════════════════════ -->
@@ -574,10 +579,10 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
 
     <!-- Pan name / note count -->
     <div class="panel">
-      <div class="panel-title" onclick="togglePanel(this)">Pan <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section"></button></div>
+      <div class="panel-title" onclick="togglePanel(this)">Pan <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section" aria-label="Toggle Pan section"></button></div>
       <div class="panel-body">
         <div class="row">
-          <label>Name</label>
+          <label for="pan-name">Name</label>
           <input type="text" id="pan-name" placeholder="My Pan…" maxlength="40"/>
         </div>
         <div class="t-hint" id="pan-note-count" style="margin-top:4px;"></div>
@@ -586,10 +591,10 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
 
     <!-- Templates -->
     <div class="panel edit-only">
-      <div class="panel-title" onclick="togglePanel(this)">Template <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section"></button></div>
+      <div class="panel-title" onclick="togglePanel(this)">Template <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section" aria-label="Toggle Template section"></button></div>
       <div class="panel-body">
         <div class="row">
-          <select id="template-select">
+          <select id="template-select" aria-label="Choose a template">
             <option value="">— choose a template —</option>
           </select>
         </div>
@@ -598,7 +603,7 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
 
     <!-- Pan Editing -->
     <div class="panel edit-only">
-      <div class="panel-title" onclick="togglePanel(this)">Pan Editing <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section"></button></div>
+      <div class="panel-title" onclick="togglePanel(this)">Pan Editing <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section" aria-label="Toggle Pan Editing section"></button></div>
       <div class="panel-body">
         <div class="panel-sub-label">Layout file</div>
         <div class="btn-row" style="margin-bottom:8px;">
@@ -624,23 +629,23 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
 
     <!-- Note properties -->
     <div class="panel edit-only">
-      <div class="panel-title" onclick="togglePanel(this)">Note <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section"></button></div>
+      <div class="panel-title" onclick="togglePanel(this)">Note <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section" aria-label="Toggle Note section"></button></div>
       <div class="panel-body">
         <div id="props-empty" style="font-size:12px;color:var(--fg-whisper);">Select a note to edit.</div>
         <div id="props-single" style="display:none;">
           <div class="row">
-            <label>Label</label>
+            <label for="prop-label">Label</label>
             <input type="text" id="prop-label" placeholder="D3, Bb4, F#5 …" maxlength="8"/>
           </div>
           <div class="row">
-            <label>Radius: <b id="prop-r-val">50</b> px</label>
+            <label for="prop-r">Radius: <b id="prop-r-val">50</b> px</label>
             <input type="range" id="prop-r" min="14" max="130" step="1"/>
           </div>
         </div>
         <div id="props-multi" style="display:none;">
           <div id="hint-multi" class="t-hint" style="margin-bottom:6px;"></div>
           <div class="row">
-            <label>Radius all: <b id="prop-r-multi-val">—</b> px</label>
+            <label for="prop-r-multi">Radius all: <b id="prop-r-multi-val">—</b> px</label>
             <input type="range" id="prop-r-multi" min="14" max="130" step="1" value="50"/>
           </div>
         </div>
@@ -649,10 +654,10 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
 
     <!-- Highlight (explore only) -->
     <div class="panel explore-only">
-      <div class="panel-title" onclick="togglePanel(this)">Highlight <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section"></button></div>
+      <div class="panel-title" onclick="togglePanel(this)">Highlight <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section" aria-label="Toggle Highlight section"></button></div>
       <div class="panel-body">
         <div class="row">
-          <label>Mode</label>
+          <label for="hl-mode">Mode</label>
           <select id="hl-mode">
             <option value="none">None</option>
             <option value="note">By Note (pitch class)</option>
@@ -674,11 +679,11 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
         <!-- By-chord options -->
         <div id="hl-chord-opts" style="display:none;">
           <div class="row">
-            <label>Chord type</label>
+            <label for="hl-chord-type">Chord type</label>
             <select id="hl-chord-type"></select>
           </div>
           <div class="row">
-            <label>Root</label>
+            <label for="hl-chord-root">Root</label>
             <select id="hl-chord-root"></select>
           </div>
           <div id="hl-chord-info"></div>
@@ -693,15 +698,15 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
 
     <!-- Audio -->
     <div class="panel panel-audio collapsed">
-      <div class="panel-title" onclick="togglePanel(this)">Audio <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section"></button></div>
+      <div class="panel-title" onclick="togglePanel(this)">Audio <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section" aria-label="Toggle Audio section"></button></div>
       <div class="panel-body">
         <div class="t-hint" style="margin-bottom:6px;">Alt+Click notes, chords or tiles to hear them</div>
         <div class="row">
-          <label>Volume: <b id="audio-vol-val">50</b>%</label>
+          <label for="audio-vol">Volume: <b id="audio-vol-val">50</b>%</label>
           <input type="range" id="audio-vol" min="0" max="100" step="5" value="50"/>
         </div>
         <div class="row">
-          <label>Sustain: <b id="audio-sustain-val">2.5</b>s</label>
+          <label for="audio-sustain">Sustain: <b id="audio-sustain-val">2.5</b>s</label>
           <input type="range" id="audio-sustain" min="0.2" max="4" step="0.1" value="2.5"/>
         </div>
       </div>
@@ -709,7 +714,7 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
 
     <!-- Shortcuts -->
     <div class="panel edit-only collapsed" style="flex:1;">
-      <div class="panel-title" onclick="togglePanel(this)">Shortcuts <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section"></button></div>
+      <div class="panel-title" onclick="togglePanel(this)">Shortcuts <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section" aria-label="Toggle Shortcuts section"></button></div>
       <div class="panel-body">
         <div class="kbd">
           <b>Click</b> — select<br>
@@ -732,11 +737,11 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
 
     <!-- Advanced -->
     <div class="panel collapsed">
-      <div class="panel-title" onclick="togglePanel(this)">Advanced <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section"></button></div>
+      <div class="panel-title" onclick="togglePanel(this)">Advanced <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section" aria-label="Toggle Advanced section"></button></div>
       <div class="panel-body">
         <div class="panel-sub-label">Enharmonics</div>
         <div class="row" style="margin-bottom:8px;">
-          <select id="enharmonic-mode" title="Note name spelling">
+          <select id="enharmonic-mode" title="Note name spelling" aria-label="Note name spelling">
             <option value="-">— default</option>
             <option value="proper">proper (auto key)</option>
             <option value="#"># sharps</option>
@@ -745,7 +750,7 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
         </div>
         <div class="panel-sub-label">Pan body</div>
         <div class="row" style="margin-bottom:8px;">
-          <label>Radius: <b id="pan-r-val">320</b> px</label>
+          <label for="pan-r">Radius: <b id="pan-r-val">320</b> px</label>
           <input type="range" id="pan-r" min="80" max="480" step="1" value="320"/>
         </div>
         <div class="btn-row" style="margin-bottom:8px;">
@@ -762,8 +767,8 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
   </div><!-- /sidebar -->
 
   <div id="canvas-col">
-    <button id="sidebar-toggle" class="panel-edge-btn" onclick="toggleSidebar()" title="Toggle sidebar">‹</button>
-    <button id="explore-toggle" class="panel-edge-btn" onclick="toggleExplorePanel()" title="Toggle explore panel">›</button>
+    <button id="sidebar-toggle" class="panel-edge-btn" onclick="toggleSidebar()" title="Toggle sidebar" aria-label="Collapse sidebar">‹</button>
+    <button id="explore-toggle" class="panel-edge-btn" onclick="toggleExplorePanel()" title="Toggle explore panel" aria-label="Toggle explore panel">›</button>
     <div id="canvas-wrap">
       <svg id="canvas" viewBox="0 0 1000 1400">
         <rect id="bg" width="1000" height="1400" fill="white"/>
@@ -836,7 +841,7 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
 
     <!-- Export section (tab-dependent, collapsible) -->
     <div class="panel collapsed" style="border-top:1px solid var(--border-divider);flex-shrink:0;border-bottom:none;">
-      <div class="panel-title" onclick="togglePanel(this)">Export <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section"></button></div>
+      <div class="panel-title" onclick="togglePanel(this)">Export <button class="panel-collapse-btn" onclick="event.stopPropagation();togglePanel(this)" title="Toggle section" aria-label="Toggle Export section"></button></div>
       <div class="panel-body" id="explore-export-section">
       <div id="chords-export-inner">
         <div class="chord-export-section">
@@ -870,7 +875,7 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
           </div>
 
           <button class="btn full cta" onclick="exportAllChordsZip()"><svg class="icon" aria-hidden="true"><use href="#i-arrow-down"/></svg> Export ZIP</button>
-          <div id="export-status"></div>
+          <div id="export-status" aria-live="polite" aria-atomic="true"></div>
         </div>
       </div>
       <div id="progs-export-inner" style="display:none">
@@ -888,7 +893,7 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
           <div class="root-bar" id="prog-export-root-bar"></div>
 
           <button class="btn full cta" style="margin-top:9px;" onclick="exportProgressionsZip()"><svg class="icon" aria-hidden="true"><use href="#i-arrow-down"/></svg> Export ZIP</button>
-          <div id="prog-export-status" style="min-height:15px;margin-top:4px;color:var(--accent);font-size:var(--text-11);"></div>
+          <div id="prog-export-status" style="min-height:15px;margin-top:4px;color:var(--accent);font-size:var(--text-11);" aria-live="polite" aria-atomic="true"></div>
         </div>
       </div>
       </div><!-- /panel-body -->
@@ -1412,6 +1417,21 @@ function playNote(label, when = 0, vol = null) {
   } catch(e) {}
 }
 
+// Return the labels of pan notes that belong to the chord (root pc + type intervals).
+// Picks the lowest-octave match per pitch class so the chord sounds natural.
+function _chordLabels(rootPc, typeName) {
+  const intervals = CHORD_TYPES[typeName];
+  if (!intervals) return [];
+  const targetPcs = new Set(intervals.map(i => (rootPc + i) % 12));
+  const byPc = {};
+  for (const n of state.notes) {
+    const pc = parsePitchClass(n.label);
+    if (pc < 0 || !targetPcs.has(pc)) continue;
+    if (!byPc[pc] || midiNote(n.label) < midiNote(byPc[pc])) byPc[pc] = n.label;
+  }
+  return Object.values(byPc);
+}
+
 function playChordAudio(labels) {
   if (!Array.isArray(labels) || !labels.length) return;
   ensureAudioCtx();
@@ -1423,7 +1443,7 @@ function playProgression(chords, rootPc) {
   ensureAudioCtx();
   const beatMs = (60 / 80) * 1000; // 80 bpm default
   chords.forEach((chord, i) => {
-    const root = chord.root !== undefined ? chord.root : (rootPc !== undefined ? rootPc : 0);
+    const root = chord.root !== undefined ? chord.root : ((rootPc ?? 0) + (chord.s ?? 0)) % 12;
     const type = chord.type || chord.t || 'Major';
     const labels = typeof _chordLabels === 'function' ? _chordLabels(root, type) : [];
     if (labels && labels.length) setTimeout(() => playChordAudio(labels), i * beatMs);
@@ -1677,6 +1697,12 @@ function onNoteDown(e) {
       selectedIds = new Set([id]);
     }
     render(); updateSelectionInfo();
+    return;
+  }
+  if (appMode === 'explore') {
+    const id = e.currentTarget.getAttribute('data-id');
+    const note = state.notes.find(n => n.id === id);
+    if (note) { playNote(note.label); e.preventDefault(); }
     return;
   }
   if (appMode !== 'edit') return;
@@ -1943,6 +1969,10 @@ function buildNoteLegend() {
     swatch.className = 'color-swatch';
     swatch.style.background = PC_COLORS[pc];
     swatch.title = `${name} — click to change color`;
+    swatch.setAttribute('aria-label', `Change color for ${name}`);
+    swatch.setAttribute('role', 'button');
+    swatch.setAttribute('tabindex', '0');
+    swatch.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showColorPopup(pc, swatch); } });
     swatch.addEventListener('click', e => { e.stopPropagation(); showColorPopup(pc, swatch); });
 
     const span = document.createElement('span');
@@ -2654,10 +2684,10 @@ function bestRootForProg(prog) {
 }
 
 function playDot(play) {
-  if (play === 'complete')   return '<span class="play-dot play-full">●</span>';
-  if (play === 'partial')    return '<span class="play-dot play-partial">◕</span>';
-  if (play === 'incomplete') return '<span class="play-dot play-incomplete">◔</span>';
-  return '<span class="play-dot play-none">○</span>';
+  if (play === 'complete')   return '<span class="play-dot play-full"   title="Complete — all notes available"  aria-label="Complete">●</span>';
+  if (play === 'partial')    return '<span class="play-dot play-partial" title="Partial — 1 note missing"        aria-label="Partial, 1 note missing">◕</span>';
+  if (play === 'incomplete') return '<span class="play-dot play-incomplete" title="Incomplete — 2+ notes missing" aria-label="Incomplete, 2 or more notes missing">◔</span>';
+  return '<span class="play-dot play-none" title="No coverage" aria-label="No coverage">○</span>';
 }
 
 
@@ -2669,9 +2699,11 @@ function setMode(mode) {
   appMode = mode;
   document.body.dataset.mode = mode;
 
-  document.querySelectorAll('.mode-tab').forEach(btn =>
-    btn.classList.toggle('is-active', btn.dataset.mode === mode)
-  );
+  document.querySelectorAll('.mode-tab').forEach(btn => {
+    const active = btn.dataset.mode === mode;
+    btn.classList.toggle('is-active', active);
+    btn.setAttribute('aria-selected', active ? 'true' : 'false');
+  });
 
   if (mode === 'explore') {
     _initExplorePanel();
@@ -2848,7 +2880,7 @@ function renderProgressions() {
     card.appendChild(header);
 
     card.addEventListener('click', e => {
-      if (e.altKey) { playProgression(prog.chords, rootPc); e.stopPropagation(); }
+      playProgression(prog.chords, rootPc);
     });
 
     const row = document.createElement('div');
@@ -2872,7 +2904,8 @@ function renderProgressions() {
         playDot(play);
 
       tile.addEventListener('click', (e) => {
-        if (e.altKey) { e.stopPropagation(); playChordAudio(_chordLabels(chordRoot, c.t)); return; }
+        e.stopPropagation(); // prevent card-level click from also firing
+        playChordAudio(_chordLabels(chordRoot, c.t));
         _activeTile = { progName: prog.name, chordIdx: ci };
         hlMode      = 'chord';
         hlChordRoot = chordRoot;
@@ -3011,7 +3044,7 @@ function renderChords() {
         playDot(play);
 
       tile.addEventListener('click', (e) => {
-        if (e.altKey) { playChordAudio(_chordLabels(rootPc, typeName)); return; }
+        playChordAudio(_chordLabels(rootPc, typeName));
         _activeTile  = null;
         hlMode       = 'chord';
         hlChordRoot  = rootPc;
@@ -3630,8 +3663,14 @@ function _updateEdgeBtnIcons() {
   const exploreCollapsed  = document.getElementById('explore-panel').classList.contains('collapsed');
   const sBtn = document.getElementById('sidebar-toggle');
   const eBtn = document.getElementById('explore-toggle');
-  if (sBtn) sBtn.textContent = sidebarCollapsed  ? '›' : '‹';
-  if (eBtn) eBtn.textContent = exploreCollapsed  ? '‹' : '›';
+  if (sBtn) {
+    sBtn.textContent = sidebarCollapsed ? '›' : '‹';
+    sBtn.setAttribute('aria-label', sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar');
+  }
+  if (eBtn) {
+    eBtn.textContent = exploreCollapsed ? '‹' : '›';
+    eBtn.setAttribute('aria-label', exploreCollapsed ? 'Expand explore panel' : 'Collapse explore panel');
+  }
 }
 
 function toggleSidebar() {
