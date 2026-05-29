@@ -1456,6 +1456,9 @@ function clearSavedData() {
   localStorage.removeItem(LS_LAYOUT);
   localStorage.removeItem(LS_SETTINGS);
   localStorage.removeItem(LS_RHYTHMS);
+  // Also clear HAT editor settings stored by the embedded iframe
+  localStorage.removeItem('hat_settings');
+  localStorage.removeItem('hat_src_collapsed');
   location.reload();
 }
 
