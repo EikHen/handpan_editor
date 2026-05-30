@@ -523,6 +523,117 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
   text-align: center; font-family: Arial, sans-serif; color: #222;
   outline: none; padding: 0; box-sizing: border-box;
 }
+
+/* ── Help modal ──────────────────────────────────────────────────────────── */
+#welcome-backdrop {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(40,28,16,0.6);
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(3px);
+  animation: welcome-fade-in .2s ease;
+}
+#welcome-backdrop.hidden { display: none; }
+@keyframes welcome-fade-in { from { opacity: 0; } to { opacity: 1; } }
+#welcome-modal {
+  background: var(--surface-panel);
+  border: 1px solid var(--border-card);
+  border-radius: 16px;
+  box-shadow: 0 12px 56px rgba(0,0,0,0.32);
+  width: min(620px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  animation: welcome-slide-in .22s ease;
+}
+@keyframes welcome-slide-in { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
+/* Tab bar */
+.help-tab-bar {
+  display: flex; align-items: center;
+  border-bottom: 1px solid var(--border-divider);
+  padding: 0 8px 0 20px;
+  flex-shrink: 0;
+  background: var(--surface-card);
+  border-radius: 16px 16px 0 0;
+}
+.help-modal-title {
+  font-family: var(--font-alt); font-size: var(--text-15);
+  color: var(--accent-title); white-space: nowrap; flex-shrink: 0;
+  padding: 13px 12px 13px 0;
+}
+.help-tab {
+  padding: 11px 12px; font: bold var(--text-11)/1 var(--font-sans);
+  color: var(--fg-muted); text-transform: uppercase; letter-spacing: var(--tracking-tight);
+  border: none; border-bottom: 2px solid transparent; margin-bottom: -1px;
+  background: none; cursor: pointer; white-space: nowrap;
+  transition: color var(--transition-base), border-color var(--transition-base);
+}
+.help-tab:hover { color: var(--fg-2); }
+.help-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.help-tab.is-active { color: var(--accent-bright); border-bottom-color: var(--accent); }
+.help-close {
+  margin-left: auto; flex-shrink: 0; background: none; border: none; cursor: pointer;
+  color: var(--fg-whisper); font-size: 20px; line-height: 1;
+  padding: 8px 9px; border-radius: var(--radius-md);
+  transition: color .12s, background .12s;
+}
+.help-close:hover { color: var(--fg-1); background: var(--surface-card-hover); }
+.help-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* Content */
+.help-content { padding: 22px 28px 26px; overflow-y: auto; flex: 1; }
+.help-pane { display: flex; flex-direction: column; }
+.help-pane[hidden] { display: none; }
+/* Welcome tab */
+.welcome-subtitle {
+  text-align: center; font-size: var(--text-12); color: var(--fg-muted);
+  line-height: 1.6; margin-bottom: 18px;
+}
+.welcome-pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-bottom: 18px; }
+.welcome-pillar {
+  background: var(--surface-card); border: 1px solid var(--border-card);
+  border-radius: 10px; padding: 16px 12px 13px;
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 7px;
+  cursor: pointer; transition: border-color .13s, background .13s;
+}
+.welcome-pillar:hover { border-color: var(--accent); background: var(--accent-fill); }
+.welcome-pillar:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.welcome-pillar-icon { color: var(--accent); width: 26px; height: 26px; flex-shrink: 0; }
+.welcome-pillar-icon svg { width: 26px; height: 26px; }
+.welcome-pillar-title { font-size: var(--text-12); font-weight: bold; color: var(--fg-1); }
+.welcome-pillar-desc { font-size: var(--text-11); color: var(--fg-muted); line-height: 1.55; }
+.welcome-pillar-link { font-size: var(--text-11); color: var(--accent); margin-top: 1px; }
+.welcome-footer { display: flex; justify-content: center; margin-top: 6px; }
+#welcome-get-started { min-width: 140px; font-size: var(--text-12); padding: 8px 24px; }
+/* Steps & tips (shared across tabs) */
+.help-section {
+  font-size: var(--text-11); text-transform: uppercase; letter-spacing: var(--tracking-loose);
+  color: var(--accent); font-weight: bold; margin: 18px 0 8px;
+}
+.help-section:first-child { margin-top: 0; }
+.help-steps { display: flex; flex-direction: column; gap: 7px; margin-bottom: 4px; }
+.help-step { display: flex; gap: 10px; align-items: flex-start; }
+.help-step-num {
+  flex-shrink: 0; width: 20px; height: 20px;
+  background: var(--accent-fill); border: 1px solid var(--accent);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: var(--accent-bright); font-weight: bold; margin-top: 2px;
+}
+.help-step-body { font-size: var(--text-12); color: var(--fg-2); line-height: 1.6; }
+.help-step-body b { color: var(--fg-1); }
+.help-tips { display: flex; flex-direction: column; gap: 4px; margin: 8px 0 0; }
+.help-tip {
+  font-size: var(--text-11); color: var(--fg-muted); line-height: 1.6;
+  padding-left: 14px; position: relative;
+}
+.help-tip::before { content: '•'; position: absolute; left: 4px; color: var(--accent); }
+.help-tip b { color: var(--fg-2); }
+/* Hit type grid (Rhythm tab) */
+.help-hits { display: grid; grid-template-columns: auto 1fr; gap: 5px 12px; margin: 8px 0 2px; }
+.help-hit-key {
+  font: bold var(--text-12)/1 var(--font-mono); color: var(--accent-bright);
+  background: var(--accent-fill); border: 1px solid var(--accent);
+  border-radius: 3px; padding: 4px 8px; text-align: center; align-self: center;
+}
+.help-hit-val { font-size: var(--text-11); color: var(--fg-2); align-self: center; }
 </style>
 </head>
 <body>
@@ -568,6 +679,10 @@ body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
   </div>
   <div class="sep"></div>
   <span id="status" style="font-size:11px;color:var(--fg-subtle);" aria-live="polite" aria-atomic="true"></span>
+  <div style="flex:1"></div>
+  <button class="btn icon-only" onclick="showHelp()" title="Help &amp; Getting Started" aria-label="Help">
+    <svg class="icon" aria-hidden="true"><use href="#i-help-circle"/></svg>
+  </button>
 </div>
 
 <!-- ══ Workspace ════════════════════════════════════════════════════════ -->
@@ -1376,6 +1491,7 @@ let enharmonicMode = '-'; // '-' | 'proper' | '#' | 'b'
 const LS_LAYOUT   = 'handpan-layout-v1';
 const LS_SETTINGS = 'handpan-settings-v1';
 const LS_RHYTHMS  = 'handpan-rhythms-v1';
+const LS_WELCOME  = 'handpan-welcome-seen-v1';
 
 // ─── Audio preview (re-added; accidentally removed in M6) ─────────────────────
 
@@ -3721,6 +3837,30 @@ function syncPanSlider() {
   document.getElementById('pan-r-val').textContent = state.pan.r;
 }
 
+// ─── Help modal ───────────────────────────────────────────────────────────────
+
+function setHelpTab(tab) {
+  document.querySelectorAll('.help-tab').forEach(t => t.classList.remove('is-active'));
+  document.querySelectorAll('.help-pane').forEach(p => { p.hidden = true; });
+  document.getElementById('htab-' + tab).classList.add('is-active');
+  document.getElementById('hpane-' + tab).hidden = false;
+}
+
+function showHelp(tab) {
+  setHelpTab(tab || 'welcome');
+  document.getElementById('welcome-backdrop').classList.remove('hidden');
+  document.addEventListener('keydown', _welcomeEscHandler);
+  (document.getElementById('welcome-get-started') || document.querySelector('.help-close')).focus();
+}
+
+function closeWelcome() {
+  document.getElementById('welcome-backdrop').classList.add('hidden');
+  document.removeEventListener('keydown', _welcomeEscHandler);
+  try { localStorage.setItem(LS_WELCOME, '1'); } catch(e) {}
+}
+
+function _welcomeEscHandler(e) { if (e.key === 'Escape') closeWelcome(); }
+
 // ─── Init: load saved layout ──────────────────────────────────────────────────
 
 (function () {
@@ -3771,6 +3911,9 @@ function syncPanSlider() {
   // Post-layout resize: flex layout settles after synchronous script execution,
   // so schedule a second call to ensure the SVG gets correct dimensions.
   requestAnimationFrame(() => { resizeCanvas(); render(); });
+
+  // Show help on first visit
+  try { if (!localStorage.getItem(LS_WELCOME)) showHelp(); } catch(e) {}
 })();
 
 // ─────────────────────────────────────────────
@@ -3965,6 +4108,122 @@ window.addEventListener('message', (event) => {
   }
 });
 </script>
+
+<!-- ══ Help Modal ═════════════════════════════════════════════════════════ -->
+<div id="welcome-backdrop" class="hidden" role="dialog" aria-modal="true" aria-labelledby="help-modal-title"
+     onclick="if(event.target===this)closeWelcome()">
+  <div id="welcome-modal">
+
+    <!-- Tab bar -->
+    <div class="help-tab-bar">
+      <span class="help-modal-title" id="help-modal-title">Handpan Explorer</span>
+      <button class="help-tab is-active" id="htab-welcome" onclick="setHelpTab('welcome')">Welcome</button>
+      <button class="help-tab" id="htab-build"   onclick="setHelpTab('build')">Build Pan</button>
+      <button class="help-tab" id="htab-explore" onclick="setHelpTab('explore')">Explore</button>
+      <button class="help-tab" id="htab-rhythm"  onclick="setHelpTab('rhythm')">Rhythm</button>
+      <button class="help-close" onclick="closeWelcome()" aria-label="Close help">&times;</button>
+    </div>
+
+    <div class="help-content">
+
+      <!-- ── Welcome ───────────────────────────────────────────────────── -->
+      <div id="hpane-welcome" class="help-pane">
+        <p class="welcome-subtitle">Your all-in-one toolkit for handpan scales, music&nbsp;theory and practice.<br>Click a pillar to learn more.<br>Choose from the bar at the top of the explorer to switch.</p>
+        <div class="welcome-pillars">
+          <div class="welcome-pillar" onclick="setHelpTab('build')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')setHelpTab('build')">
+            <div class="welcome-pillar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-pan"/></svg></div>
+            <div class="welcome-pillar-title">Build Pan</div>
+            <div class="welcome-pillar-desc">Configure your instrument — choose notes, adjust the layout, name and export it.</div>
+            <div class="welcome-pillar-link">How to build →</div>
+          </div>
+          <div class="welcome-pillar" onclick="setHelpTab('explore')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')setHelpTab('explore')">
+            <div class="welcome-pillar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-music"/></svg></div>
+            <div class="welcome-pillar-title">Explore</div>
+            <div class="welcome-pillar-desc">Discover chords and progressions matched to your pan.</div>
+            <div class="welcome-pillar-link">How to explore →</div>
+          </div>
+          <div class="welcome-pillar" onclick="setHelpTab('rhythm')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')setHelpTab('rhythm')">
+            <div class="welcome-pillar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-rhythm"/></svg></div>
+            <div class="welcome-pillar-title">Create &amp; Practice</div>
+            <div class="welcome-pillar-desc">Write tablatures and practice rhythms with the built-in rhythm editor. Based on the OpenSource HAT project.</div>
+            <div class="welcome-pillar-link">How to practice →</div>
+          </div>
+        </div>
+        <div class="welcome-footer">
+          <button class="btn cta" id="welcome-get-started" onclick="closeWelcome()">Get Started</button>
+        </div>
+      </div>
+
+      <!-- ── Build Pan ─────────────────────────────────────────────────── -->
+      <div id="hpane-build" class="help-pane" hidden>
+        <div class="help-section">Getting started</div>
+        <div class="help-steps">
+          <div class="help-step"><div class="help-step-num">1</div><div class="help-step-body"><b>Pick a template</b> — open the <b>Template</b> section in the left sidebar and choose a known scale to start from.</div></div>
+          <div class="help-step"><div class="help-step-num">2</div><div class="help-step-body"><b>Make it your own</b> — add and delete notes using the sidebar at the left. Double-click notes to edit their labels (note name + octave number, e.g., D3, F#3, Bb3). Drag and drop notes to rearrange them.</div></div>
+          <div class="help-step"><div class="help-step-num">3</div><div class="help-step-body"><b>Export</b> — save your layout as a JSON file, which you can also share with others or use as a backup to import again later. open <b>Advanced → Pan body</b> to download the current view as image.</div></div>
+        </div>
+        <div class="help-section">Tips</div>
+        <div class="help-tips">
+          <div class="help-tip"><b>Enharmonics</b> — choose sharp (#) or flat (b) spelling under Advanced.</div>
+          <div class="help-tip"><b>Undo / Redo</b> — Ctrl+Z / Ctrl+Y, or the buttons in Pan Editing.</div>
+          <div class="help-tip"><b>Pan size</b> — drag the radius slider in Advanced to make the canvas larger or smaller.</div>
+          <div class="help-tip"><b>Import / Export JSON</b> — save and share your layout file via Pan Editing.</div>
+        </div>
+      </div>
+
+      <!-- ── Explore ───────────────────────────────────────────────────── -->
+      <div id="hpane-explore" class="help-pane" hidden>
+        <!-- <div class="help-section">Opening the Explore panel</div>
+        <div class="help-steps">
+          <div class="help-step"><div class="help-step-num">1</div><div class="help-step-body">Click the <b>Explore</b> button in the top bar to switch to the Explore panel.</div></div>
+        </div> -->
+        <div class="help-section">Chords</div>
+        <div class="help-steps">
+          <div class="help-step"><div class="help-step-num">1</div><div class="help-step-body"><b>Click a chord tile</b> — the notes highlight on your pan and play through your speakers.</div></div>
+          <div class="help-step"><div class="help-step-num">2</div><div class="help-step-body"><b>Filter by chord type</b> — use the pills above the list (triads, 7ths, sus, …).</div></div>
+          <div class="help-step"><div class="help-step-num">3</div><div class="help-step-body"><b>Highlight mode</b> — use the Highlight dropdown in the left sidebar to colour notes by note name or chord. Choose </b>'By Selection'</b> to interactively choose notes and let the Explorer tell you the chord.</div></div>
+        </div>
+        <div class="help-section">Progressions</div>
+        <div class="help-steps">
+          <div class="help-step"><div class="help-step-num">1</div><div class="help-step-body"><b>Filter by mood</b> — pick Melancholic, Uplifting, Meditative, … to narrow the list.</div></div>
+          <div class="help-step"><div class="help-step-num">2</div><div class="help-step-body"><b>Click individual chords</b> in a card to highlight and hear them one at a time.</div></div>
+          <div class="help-step"><div class="help-step-num">3</div><div class="help-step-body"><b>Play a sequence</b> — click on the card itself to hear the whole progression.</div></div>
+          <div class="help-step"><div class="help-step-num">4</div><div class="help-step-body"><b>Custom progression</b> — click <b>＋ Custom</b>, then drag and drop chord tiles to queue them up and create your own progression..</div></div>
+        </div>
+        <div class="help-tips">
+          <div class="help-tip">The <b>Root filter</b> narrows results to progressions that start on a note your pan has.</div>
+          <div class="help-tip">Use <b>Export</b> in the Chords panel to download chord diagrams as a PDF or text sheet.</div>
+          <div class="help-tip">Click the expand button on the upper right corner of progressions to view them in a larger format in a separate popup.</div>
+        </div>
+      </div>
+
+      <!-- ── Rhythm ────────────────────────────────────────────────────── -->
+      <div id="hpane-rhythm" class="help-pane" hidden>
+        <div class="help-section">Getting started</div>
+        <div class="help-steps">
+          <div class="help-step"><div class="help-step-num">1</div><div class="help-step-body"><b>Click NEW</b> to create a new tablature.</div></div>
+          <div class="help-step"><div class="help-step-num">2</div><div class="help-step-body"><b>Hover over cells</b> and use shortcuts to set them. Press <b>?</b> (upper right corner)to show all shortcuts. By learning them, you will be able to create your own tablatures in no time!</div></div>
+          <div class="help-step"><div class="help-step-num">3</div><div class="help-step-body">Press <b>▶ Play</b> to listen to your tablature.</div></div>
+          <div class="help-step"><div class="help-step-num">4</div><div class="help-step-body"><b>Try yourself out!</b> You can move bars, create sections, copy pieces of tablature, select columns, create lists of favourite tablatures and much more.</div></div>
+        </div>
+        <div class="help-section">Hit types</div>
+        <div class="help-hits">
+          <div class="help-hit-key">D</div><div class="help-hit-val">Doum — ding stroke</div>
+          <div class="help-hit-key">T/K</div><div class="help-hit-val">Tak — ding shoulder or interstitial stroke</div>
+          <div class="help-hit-key">S</div><div class="help-hit-val">Slap/Knock — percussive stroke</div>
+          <div class="help-hit-key">F#3/Bb3/...</div><div class="help-hit-val">Tonefields</div>
+        </div>
+        <div class="help-section">Note hits</div>
+        <div class="help-tips">
+          <div class="help-tip">Use the <b>Export</b> button in the HAT toolbar to save your rhythm to share and backup.</div>
+          <div class="help-tip">Edit the <b>C</b> row via hover shortcuts to make counting and learning rhythms easier.</div>
+          <div class="help-tip">Have a look at HAT code. Always remember: You can also edit the HAT code, if you prefer, in the editor will display it nicely for you.</div>
+        </div>
+      </div>
+
+    </div><!-- /.help-content -->
+  </div><!-- /#welcome-modal -->
+</div><!-- /#welcome-backdrop -->
 
 <div id="toast" role="status" aria-live="polite"></div>
 <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "c25d0543c71f4140b28b197bed42af14"}'></script><!-- End Cloudflare Web Analytics -->
