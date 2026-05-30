@@ -64,11 +64,13 @@ document.getElementById('audio-vol').addEventListener('input', function() {
   audioPreviewVol = this.value / 100;
   document.getElementById('audio-vol-val').textContent = this.value;
   saveSettings();
+  _hatSend({ type: 'hat:set-volume', masterVolume: audioPreviewVol });
 });
 document.getElementById('audio-sustain').addEventListener('input', function() {
   audioPreviewSustain = parseFloat(this.value);
   document.getElementById('audio-sustain-val').textContent = this.value;
   saveSettings();
+  _hatSend({ type: 'hat:set-sustain', sustain: audioPreviewSustain });
 });
 
 // Templates dropdown

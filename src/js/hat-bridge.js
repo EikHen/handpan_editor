@@ -164,7 +164,25 @@ window.addEventListener('message', (event) => {
       _hatSendTheme();
       _syncHatNotes();
       _hatSendLibrary();
+      _hatSend({ type: 'hat:set-volume',  masterVolume: audioPreviewVol });
+      _hatSend({ type: 'hat:set-sustain', sustain: audioPreviewSustain });
       break;
+    case 'hat:volume-changed': {
+      const vol = Math.max(0, Math.min(1, +msg.masterVolume || 0));
+      audioPreviewVol = vol;
+      const volEl = document.getElementById('audio-vol');
+      if (volEl) { volEl.value = Math.round(vol * 100); document.getElementById('audio-vol-val').textContent = volEl.value; }
+      saveSettings();
+      break;
+    }
+    case 'hat:sustain-changed': {
+      const sus = Math.max(0.2, Math.min(6, +msg.sustain || 1.4));
+      audioPreviewSustain = sus;
+      const susEl = document.getElementById('audio-sustain');
+      if (susEl) { susEl.value = sus; document.getElementById('audio-sustain-val').textContent = sus; }
+      saveSettings();
+      break;
+    }
     case 'hat:hit':
       if (msg.isNote) {
         const delay = Math.max(0, (msg.tOffsetMs || 0) - 10);
