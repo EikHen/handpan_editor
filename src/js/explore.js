@@ -516,9 +516,38 @@ function renderCustomProgBar() {
   }
 }
 
+let customProgMaximized = false;
+function toggleCustomProgMax() {
+  customProgMaximized = !customProgMaximized;
+  const panel = document.getElementById('custom-prog-panel');
+  const wrap = document.getElementById('canvas-wrap');
+  const btn = document.getElementById('custom-prog-max-btn');
+  if (customProgMaximized) {
+    panel.style.height = '100%'; panel.style.flex = '1';
+    wrap.style.display = 'none';
+    btn.textContent = '⤡'; btn.title = 'Restore';
+  } else {
+    panel.style.height = ''; panel.style.flex = '';
+    wrap.style.display = '';
+    btn.textContent = '⤢'; btn.title = 'Maximize';
+  }
+  resizeCanvas();
+}
+
 function toggleCustomProg() {
   customProgOpen = !customProgOpen;
-  if (!customProgOpen) customProgSelIdxs.clear();
+  if (!customProgOpen) {
+    customProgSelIdxs.clear();
+    if (customProgMaximized) {
+      customProgMaximized = false;
+      const panel = document.getElementById('custom-prog-panel');
+      const wrap = document.getElementById('canvas-wrap');
+      const btn = document.getElementById('custom-prog-max-btn');
+      panel.style.height = ''; panel.style.flex = '';
+      wrap.style.display = '';
+      btn.textContent = '⤢'; btn.title = 'Maximize';
+    }
+  }
   renderCustomProgBar();
   resizeCanvas();
 }

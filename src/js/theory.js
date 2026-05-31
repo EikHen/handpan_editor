@@ -64,6 +64,29 @@ function generateNoteNumbers(notes) {
   return nn;
 }
 
+// ─── Transpose helper ────────────────────────────────────────────────────
+
+function midiToLabel(midi) {
+  const oct = Math.floor(midi / 12) - 1;
+  const pc = midi % 12;
+  return getDisplayNames()[pc] + oct;
+}
+
+function transposeNotes(semitones) {
+  const newNumbers = {};
+  for (const note of state.notes) {
+    const midi = midiNote(note.label) + semitones;
+    const oldLabel = note.label;
+    note.label = midiToLabel(midi);
+    if (state.noteNumbers && oldLabel in state.noteNumbers) {
+      newNumbers[note.label] = state.noteNumbers[oldLabel];
+    }
+  }
+  state.noteNumbers = newNumbers;
+  pushHistory(); render(); syncSidebar();
+  if (hatAutoUpdateNotes) _syncHatNotes();
+}
+
 // ─── MIDI helpers ─────────────────────────────────────────────────────────────
 
 // Convert a note label (e.g. "F#3", "Bb2") to a MIDI note number.

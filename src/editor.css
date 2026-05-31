@@ -472,6 +472,7 @@ body {
   pointer-events: none; white-space: nowrap; z-index: 9999;
 }
 .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.warn { background: var(--danger-hover-bg); border-color: var(--danger); color: var(--danger); }
 
 /* ── Mode-based layout ───────────────────────────────────────────────── */
 .edit-only   { display: block; }

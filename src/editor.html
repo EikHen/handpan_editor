@@ -261,9 +261,19 @@
             <input type="checkbox" id="show-note-numbers"> Show numbers on notes
           </label>
         </div>
+        <div class="row" style="margin-bottom:4px;">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+            <input type="checkbox" id="focus-numbers"> Focus numbers instead of notes
+          </label>
+        </div>
         <div class="btn-row" style="margin-bottom:8px;">
           <button class="btn" onclick="renumberNotes()" title="Re-assign 0-based numbers sorted by pitch">Re-number</button>
           <button class="btn" onclick="clearNoteNumbers()" title="Remove all note numbers">Clear</button>
+        </div>
+        <div class="panel-sub-label">Transpose</div>
+        <div class="btn-row" style="margin-bottom:8px;">
+          <button class="btn" onclick="transposeNotes(-1)" title="Shift all notes down one semitone">▼ −1</button>
+          <button class="btn" onclick="transposeNotes(1)" title="Shift all notes up one semitone">▲ +1</button>
         </div>
         <div class="panel-sub-label">Pan body</div>
         <div class="row" style="margin-bottom:8px;">
@@ -305,6 +315,7 @@
         <div class="custom-prog-header">
           <span class="custom-prog-title">Custom Progression</span>
           <button class="btn is-sm cta" onclick="playCustomProg()" title="Play">▶ Play</button>
+          <button class="btn is-sm" onclick="toggleCustomProgMax()" id="custom-prog-max-btn" title="Maximize">⤢</button>
           <button class="btn is-sm" onclick="toggleCustomProg()">✕</button>
         </div>
         <div id="custom-prog-slots" class="custom-prog-slots"></div>
@@ -550,7 +561,7 @@
   </div><!-- /#welcome-modal -->
 </div><!-- /#welcome-backdrop -->
 
-<div id="toast" role="status" aria-live="polite"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <script src="js/constants.js"></script>
 <script src="js/templates.js"></script>

@@ -88,6 +88,7 @@ function saveSettings() {
       vol: Math.round(audioPreviewVol * 100),
       sustain: audioPreviewSustain,
       showNoteNumbers,
+      focusNumbers,
       hatAutoUpdateNotes,
     }));
   } catch(e) {}

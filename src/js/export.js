@@ -21,16 +21,27 @@ function buildSVGString(highlightPcs = null, chordLabel = '') {
 
     const fs  = Math.max(10, Math.min(Math.round(note.r * 0.46), 22));
     const lbl = fmtLabel(note.label);
-    let numSvg = '';
-    if (showNoteNumbers && state.noteNumbers && state.noteNumbers[note.label] != null) {
+    const hasNum = showNoteNumbers && state.noteNumbers && state.noteNumbers[note.label] != null;
+    const swapped = hasNum && focusNumbers;
+    let centerText, subText = '';
+    if (swapped) {
+      centerText = `<text x="${note.x}" y="${note.y}" text-anchor="middle" dominant-baseline="central" ` +
+                   `font-family="Arial, sans-serif" font-size="${fs}" fill="#222">${state.noteNumbers[note.label]}</text>`;
       const nfs = Math.max(8, Math.round(fs * 0.7));
-      numSvg = `<text x="${note.x}" y="${note.y + note.r * 0.45}" text-anchor="middle" dominant-baseline="central" ` +
-               `font-family="Arial, sans-serif" font-size="${nfs}" fill="#666">${state.noteNumbers[note.label]}</text>`;
+      subText = `<text x="${note.x}" y="${note.y + note.r * 0.45}" text-anchor="middle" dominant-baseline="central" ` +
+                `font-family="Arial, sans-serif" font-size="${nfs}" fill="#666">${lbl}</text>`;
+    } else {
+      centerText = `<text x="${note.x}" y="${note.y}" text-anchor="middle" dominant-baseline="central" ` +
+                   `font-family="Arial, sans-serif" font-size="${fs}" fill="#222">${lbl}</text>`;
+      if (hasNum) {
+        const nfs = Math.max(8, Math.round(fs * 0.7));
+        subText = `<text x="${note.x}" y="${note.y + note.r * 0.45}" text-anchor="middle" dominant-baseline="central" ` +
+                  `font-family="Arial, sans-serif" font-size="${nfs}" fill="#666">${state.noteNumbers[note.label]}</text>`;
+      }
     }
     s += `\n<g opacity="${opacity}">` +
          `<circle cx="${note.x}" cy="${note.y}" r="${note.r}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeW}"/>` +
-         `<text x="${note.x}" y="${note.y}" text-anchor="middle" dominant-baseline="central" ` +
-         `font-family="Arial, sans-serif" font-size="${fs}" fill="#222">${lbl}</text>${numSvg}</g>`;
+         `${centerText}${subText}</g>`;
   }
 
   if (chordLabel) {
@@ -160,10 +171,11 @@ function getPlayableChords(types) {
   return getAllChords(types).filter(c => c.native);
 }
 
-function showToast(msg, ms = 3500) {
+function showToast(msg, ms = 3500, type) {
   const el = document.getElementById('toast');
   if (!el) return;
   el.textContent = msg;
+  el.classList.toggle('warn', type === 'warn');
   el.classList.add('visible');
   clearTimeout(el._timer);
   el._timer = setTimeout(() => el.classList.remove('visible'), ms);

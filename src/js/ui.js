@@ -56,7 +56,7 @@ propNum.addEventListener('change', () => {
       // Duplicate guard: reject if another label already uses this number
       const dup = Object.entries(state.noteNumbers).find(([lbl, v]) => v === num && lbl !== n.label);
       if (dup) {
-        // Reset to previous value
+        showToast('Number already in use', 2500, 'warn');
         propNum.value = (state.noteNumbers[n.label] != null) ? state.noteNumbers[n.label] : '';
         return;
       }
@@ -71,6 +71,12 @@ propNum.addEventListener('change', () => {
 // Show note numbers toggle
 document.getElementById('show-note-numbers').addEventListener('change', function() {
   showNoteNumbers = this.checked;
+  render(); saveSettings();
+});
+
+// Focus numbers toggle
+document.getElementById('focus-numbers').addEventListener('change', function() {
+  focusNumbers = this.checked;
   render(); saveSettings();
 });
 
@@ -467,6 +473,11 @@ function _welcomeEscHandler(e) { if (e.key === 'Escape') closeWelcome(); }
         showNoteNumbers = s.showNoteNumbers;
         const cb = document.getElementById('show-note-numbers');
         if (cb) cb.checked = showNoteNumbers;
+      }
+      if (s.focusNumbers != null) {
+        focusNumbers = s.focusNumbers;
+        const cb2 = document.getElementById('focus-numbers');
+        if (cb2) cb2.checked = focusNumbers;
       }
       if (s.hatAutoUpdateNotes != null) {
         hatAutoUpdateNotes = s.hatAutoUpdateNotes;

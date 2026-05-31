@@ -36,6 +36,7 @@ let enharmonicMode = '-'; // '-' | 'proper' | '#' | 'b'
 
 // Note numbers & HAT auto-update
 let showNoteNumbers = false;
+let focusNumbers = false;
 let hatAutoUpdateNotes = false;
 
 // ─── localStorage persistence ─────────────────────────────────────────────────

@@ -594,7 +594,7 @@ function startInlineNumberEdit(note) {
       // Duplicate guard: reject if another label already uses this number
       const dup = Object.entries(state.noteNumbers).find(([lbl, v]) => v === num && lbl !== note.label);
       if (dup) {
-        // Reset to original value — don't apply
+        showToast('Number already in use', 2500, 'warn');
         document.body.removeChild(inp);
         render(); syncSidebar();
         return;

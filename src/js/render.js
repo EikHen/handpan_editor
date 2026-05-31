@@ -167,33 +167,74 @@ function renderNotes() {
     const sel = selectedIds.has(note.id);
     const { stroke, strokeW, opacity, fill } = noteVisual(note, sel);
     const fs = Math.max(10, Math.min(Math.round(note.r * 0.46), 22));
+    const hasNum = showNoteNumbers && state.noteNumbers && state.noteNumbers[note.label] != null;
+    const swapped = hasNum && focusNumbers;
 
     const g = svgEl('g', { 'data-id': note.id, cursor: 'grab', opacity });
 
     g.appendChild(svgEl('circle', { cx: note.x, cy: note.y, r: note.r,
       fill, stroke, 'stroke-width': strokeW }));
 
-    const txt = svgEl('text', { x: note.x, y: note.y,
-      'text-anchor': 'middle', 'dominant-baseline': 'central',
-      'font-family': 'Arial, sans-serif', 'font-size': fs,
-      fill: '#222', 'pointer-events': 'none' });
-    txt.textContent = fmtLabel(note.label);
-    g.appendChild(txt);
-
-    if (showNoteNumbers && state.noteNumbers && state.noteNumbers[note.label] != null) {
-      const nfs = Math.max(8, Math.round(fs * 0.7));
-      const numTxt = svgEl('text', { x: note.x, y: note.y + note.r * 0.45,
+    if (swapped) {
+      // Number is big + centered, label is small below
+      const numTxt = svgEl('text', { x: note.x, y: note.y,
         'text-anchor': 'middle', 'dominant-baseline': 'central',
-        'font-family': 'Arial, sans-serif', 'font-size': nfs,
-        fill: '#666', cursor: 'pointer' });
+        'font-family': 'Arial, sans-serif', 'font-size': fs,
+        fill: '#222', 'pointer-events': 'none' });
       numTxt.textContent = state.noteNumbers[note.label];
-      numTxt.addEventListener('dblclick', e => {
+      g.appendChild(numTxt);
+
+      const smallFs = Math.max(8, Math.round(fs * 0.7));
+      const hitW = note.r * 0.9, hitH = smallFs * 1.6;
+      const hitRect = svgEl('rect', {
+        x: note.x - hitW / 2, y: note.y + note.r * 0.45 - hitH / 2,
+        width: hitW, height: hitH,
+        fill: 'transparent', cursor: 'pointer'
+      });
+      hitRect.addEventListener('dblclick', e => {
         e.stopPropagation();
         if (appMode !== 'edit') return;
         selectedIds = new Set([note.id]); render(); syncSidebar();
         startInlineNumberEdit(note);
       });
-      g.appendChild(numTxt);
+      g.appendChild(hitRect);
+      const lblTxt = svgEl('text', { x: note.x, y: note.y + note.r * 0.45,
+        'text-anchor': 'middle', 'dominant-baseline': 'central',
+        'font-family': 'Arial, sans-serif', 'font-size': smallFs,
+        fill: '#666', 'pointer-events': 'none' });
+      lblTxt.textContent = fmtLabel(note.label);
+      g.appendChild(lblTxt);
+    } else {
+      // Normal: label big + centered, number small below
+      const txt = svgEl('text', { x: note.x, y: note.y,
+        'text-anchor': 'middle', 'dominant-baseline': 'central',
+        'font-family': 'Arial, sans-serif', 'font-size': fs,
+        fill: '#222', 'pointer-events': 'none' });
+      txt.textContent = fmtLabel(note.label);
+      g.appendChild(txt);
+
+      if (hasNum) {
+        const nfs = Math.max(8, Math.round(fs * 0.7));
+        const hitW = note.r * 0.9, hitH = nfs * 1.6;
+        const hitRect = svgEl('rect', {
+          x: note.x - hitW / 2, y: note.y + note.r * 0.45 - hitH / 2,
+          width: hitW, height: hitH,
+          fill: 'transparent', cursor: 'pointer'
+        });
+        hitRect.addEventListener('dblclick', e => {
+          e.stopPropagation();
+          if (appMode !== 'edit') return;
+          selectedIds = new Set([note.id]); render(); syncSidebar();
+          startInlineNumberEdit(note);
+        });
+        g.appendChild(hitRect);
+        const numTxt = svgEl('text', { x: note.x, y: note.y + note.r * 0.45,
+          'text-anchor': 'middle', 'dominant-baseline': 'central',
+          'font-family': 'Arial, sans-serif', 'font-size': nfs,
+          fill: '#666', 'pointer-events': 'none' });
+        numTxt.textContent = state.noteNumbers[note.label];
+        g.appendChild(numTxt);
+      }
     }
 
     if (sel && single) {
