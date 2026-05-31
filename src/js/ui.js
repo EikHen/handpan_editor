@@ -79,10 +79,10 @@ templateSelect.addEventListener('change', e => {
   const idx = e.target.value;
   if (idx === '') return;
   const tpl    = TEMPLATES[+idx];
-  const layout = { pan: JSON.parse(JSON.stringify(tpl.pan)), notes: JSON.parse(JSON.stringify(tpl.notes)), nextId: tpl.nextId };
-  state.pan    = layout.pan;
-  state.notes  = layout.notes;
-  state.nextId = layout.nextId;
+  state.pan    = JSON.parse(JSON.stringify(tpl.pan));
+  state.notes  = JSON.parse(JSON.stringify(tpl.notes));
+  state.nextId = 1;
+  for (const n of state.notes) { const num = parseInt(n.id.replace(/\D/g,'')); if (!isNaN(num) && num >= state.nextId) state.nextId = num + 1; }
   state.pan.name = tpl.name;
   const panNameEl = document.getElementById('pan-name');
   if (panNameEl) panNameEl.value = tpl.name;
@@ -370,15 +370,18 @@ function _welcomeEscHandler(e) { if (e.key === 'Escape') closeWelcome(); }
       if (d.pan && typeof d.pan.cx === 'number' && typeof d.pan.cy === 'number' && typeof d.pan.r === 'number' && Array.isArray(d.notes)) {
         state.pan    = d.pan;
         state.notes  = d.notes;
-        state.nextId = d.nextId ?? DEFAULT_STATE.nextId;
+        state.nextId = 1;
+        for (const n of state.notes) { const num = parseInt(n.id.replace(/\D/g,'')); if (!isNaN(num) && num >= state.nextId) state.nextId = num + 1; }
         layoutLoaded = true;
+        _layoutFromStorage = true;
       }
     }
   } catch(e) {}
   if (!layoutLoaded) {
-    state.pan    = JSON.parse(JSON.stringify(DEFAULT_STATE.pan));
-    state.notes  = JSON.parse(JSON.stringify(DEFAULT_STATE.notes));
-    state.nextId = DEFAULT_STATE.nextId;
+    state.pan   = JSON.parse(JSON.stringify(DEFAULT_STATE.pan));
+    state.notes = JSON.parse(JSON.stringify(DEFAULT_STATE.notes));
+    state.nextId = 1;
+    for (const n of state.notes) { const num = parseInt(n.id.replace(/\D/g,'')); if (!isNaN(num) && num >= state.nextId) state.nextId = num + 1; }
   }
 
   // Restore settings

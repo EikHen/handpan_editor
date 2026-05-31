@@ -74,8 +74,13 @@ function togglePanel(el) {
 // ─── Export functions ─────────────────────────────────────────────────────────
 
 function exportJSON() {
-  dlBlob(new Blob([JSON.stringify({ version:1, pan:state.pan, notes:state.notes }, null, 2)],
-    { type:'application/json' }), 'handpan-layout.json');
+  const { cx, cy, r } = state.pan;
+  dlBlob(new Blob([JSON.stringify({
+    version: 1,
+    name: state.pan.name || '',
+    pan: { cx, cy, r },
+    notes: state.notes,
+  }, null, 2)], { type:'application/json' }), 'handpan-layout.json');
 }
 
 function triggerImport() { document.getElementById('file-input').click(); }
@@ -86,7 +91,7 @@ document.getElementById('file-input').addEventListener('change', e => {
   reader.onload = ev => {
     try {
       const d = JSON.parse(ev.target.result);
-      if (d.pan)   state.pan   = d.pan;
+      if (d.pan)   { state.pan = d.pan; if (typeof d.name === 'string') state.pan.name = d.name; }
       if (d.notes) {
         state.notes = d.notes.map(n => ({ ...n, label: n.label || '' }));
         state.nextId = 1;

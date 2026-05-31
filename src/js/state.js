@@ -9,6 +9,10 @@ let hlMode       = 'none';   // 'none' | 'note' | 'chord'
 let hlChordType  = 'Major';
 let hlChordRoot  = 0;
 
+// Set to true when a layout was successfully restored from localStorage on startup.
+// Used by templates.js to skip applying the default template.
+let _layoutFromStorage = false;
+
 // App mode state
 let appMode    = 'edit';    // 'edit' | 'explore' | 'rhythm'
 let exploreTab = 'chords';  // 'chords' | 'progs'

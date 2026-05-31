@@ -144,7 +144,6 @@ const DEFAULT_STATE = {
     {"id":"n22","x":909,"y":531,"r":71,"label":"F3"},
     {"id":"n23","x":193,"y":206,"r":71,"label":"G3"},
   ],
-  nextId: 24,
 };
 
 
