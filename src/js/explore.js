@@ -75,7 +75,12 @@ function setMode(mode) {
     _hatFrameInit();
   } else { // 'edit'
     document.querySelector('.panel-audio').classList.add('collapsed');
-    if (prev === 'explore') { selectedIds.clear(); }
+    if (prev === 'explore') {
+      selectedIds.clear();
+      hlMode = 'none';
+      document.getElementById('hl-mode').value = 'none';
+      updateHighlightPanel();
+    }
     if (prev === 'rhythm') {
       _clearPanHighlights();
       const panel = document.getElementById('rhythm-panel');
