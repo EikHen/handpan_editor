@@ -75,18 +75,11 @@ document.getElementById('audio-sustain').addEventListener('input', function() {
 
 // Templates dropdown
 const templateSelect = document.getElementById('template-select');
-TEMPLATES.forEach((tpl, i) => {
-  const o = document.createElement('option');
-  o.value = i; o.textContent = tpl.name;
-  templateSelect.appendChild(o);
-});
 templateSelect.addEventListener('change', e => {
   const idx = e.target.value;
   if (idx === '') return;
   const tpl    = TEMPLATES[+idx];
-  const layout = tpl.state
-    ? { pan: tpl.state.pan, notes: JSON.parse(JSON.stringify(tpl.state.notes)), nextId: tpl.state.nextId }
-    : layoutFromString(tpl.notes);
+  const layout = { pan: JSON.parse(JSON.stringify(tpl.pan)), notes: JSON.parse(JSON.stringify(tpl.notes)), nextId: tpl.nextId };
   state.pan    = layout.pan;
   state.notes  = layout.notes;
   state.nextId = layout.nextId;
@@ -374,14 +367,16 @@ function _welcomeEscHandler(e) { if (e.key === 'Escape') closeWelcome(); }
     const raw = localStorage.getItem(LS_LAYOUT);
     if (raw) {
       const d = JSON.parse(raw);
-      state.pan    = d.pan;
-      state.notes  = d.notes;
-      state.nextId = d.nextId;
-      layoutLoaded = true;
+      if (d.pan && typeof d.pan.cx === 'number' && typeof d.pan.cy === 'number' && typeof d.pan.r === 'number' && Array.isArray(d.notes)) {
+        state.pan    = d.pan;
+        state.notes  = d.notes;
+        state.nextId = d.nextId ?? DEFAULT_STATE.nextId;
+        layoutLoaded = true;
+      }
     }
   } catch(e) {}
   if (!layoutLoaded) {
-    state.pan    = DEFAULT_STATE.pan;
+    state.pan    = JSON.parse(JSON.stringify(DEFAULT_STATE.pan));
     state.notes  = JSON.parse(JSON.stringify(DEFAULT_STATE.notes));
     state.nextId = DEFAULT_STATE.nextId;
   }
