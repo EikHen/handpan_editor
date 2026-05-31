@@ -141,6 +141,10 @@
             <input type="text" id="prop-label" placeholder="D3, Bb4, F#5 …" maxlength="8"/>
           </div>
           <div class="row">
+            <label for="prop-num">Number</label>
+            <input type="number" id="prop-num" min="0" max="999" step="1"/>
+          </div>
+          <div class="row">
             <label for="prop-r">Radius: <b id="prop-r-val">50</b> px</label>
             <input type="range" id="prop-r" min="14" max="130" step="1"/>
           </div>
@@ -250,6 +254,16 @@
             <option value="#"># sharps</option>
             <option value="b">♭ flats</option>
           </select>
+        </div>
+        <div class="panel-sub-label">Note Numbers</div>
+        <div class="row" style="margin-bottom:4px;">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+            <input type="checkbox" id="show-note-numbers"> Show numbers on notes
+          </label>
+        </div>
+        <div class="btn-row" style="margin-bottom:8px;">
+          <button class="btn" onclick="renumberNotes()" title="Re-assign 0-based numbers sorted by pitch">Re-number</button>
+          <button class="btn" onclick="clearNoteNumbers()" title="Remove all note numbers">Clear</button>
         </div>
         <div class="panel-sub-label">Pan body</div>
         <div class="row" style="margin-bottom:8px;">

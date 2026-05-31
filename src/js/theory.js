@@ -55,6 +55,15 @@ function applyEnharmonics() {
   for (const n of state.notes) n.label = rewriteLabel(n.label);
 }
 
+// ─── Note number helpers ─────────────────────────────────────────────────────
+
+function generateNoteNumbers(notes) {
+  const sorted = [...notes].sort((a, b) => midiNote(a.label) - midiNote(b.label));
+  const nn = {};
+  sorted.forEach((n, i) => { nn[n.label] = i; });
+  return nn;
+}
+
 // ─── MIDI helpers ─────────────────────────────────────────────────────────────
 
 // Convert a note label (e.g. "F#3", "Bb2") to a MIDI note number.

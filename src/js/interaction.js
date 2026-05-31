@@ -149,6 +149,8 @@ function syncSidebar() {
       document.getElementById('prop-label').value = note.label;
       document.getElementById('prop-r').value     = note.r;
       document.getElementById('prop-r-val').textContent = note.r;
+      const propNum = document.getElementById('prop-num');
+      if (propNum) propNum.value = (state.noteNumbers && state.noteNumbers[note.label] != null) ? state.noteNumbers[note.label] : '';
     }
   }
   if (n > 1) document.getElementById('hint-multi').textContent = `${n} notes selected`;
@@ -539,6 +541,11 @@ function startInlineLabelEdit(note) {
     const val = inp.value.trim() || origLabel;
     note.label = (enharmonicMode !== '-') ? rewriteLabel(val) : val;
     document.body.removeChild(inp);
+    // Move noteNumber from old label key to new label key
+    if (state.noteNumbers && note.label !== origLabel && origLabel in state.noteNumbers) {
+      state.noteNumbers[note.label] = state.noteNumbers[origLabel];
+      if (!state.notes.some(n => n !== note && n.label === origLabel)) delete state.noteNumbers[origLabel];
+    }
     const pl = document.getElementById('prop-label');
     if (pl) pl.value = note.label;
     render(); updateHighlightPanel(); pushHistory();
@@ -550,5 +557,61 @@ function startInlineLabelEdit(note) {
     e.stopPropagation();
   });
   inp.addEventListener('input', () => { note.label = inp.value; renderNotes(); });
+}
+
+function startInlineNumberEdit(note) {
+  document.getElementById('note-num-inp')?.remove();
+  const svgRect = document.getElementById('canvas').getBoundingClientRect();
+  const sx = svgRect.width / 1000, sy = svgRect.height / 1400;
+  const sc = Math.min(sx, sy);
+  const cx = svgRect.left + note.x * sx;
+  const cy = svgRect.top  + (note.y + note.r * 0.45) * sy;
+  const fs = Math.max(8, Math.min(Math.round(note.r * 0.46 * 0.7 * sc), 16));
+  const w  = Math.round(note.r * 1.2 * sc);
+  const h  = Math.round(fs * 2.2);
+
+  const inp = document.createElement('input');
+  inp.id = 'note-num-inp'; inp.className = 'note-label-inp';
+  inp.type = 'number'; inp.min = 0; inp.max = 999; inp.step = 1;
+  inp.value = (state.noteNumbers && state.noteNumbers[note.label] != null) ? state.noteNumbers[note.label] : '';
+  Object.assign(inp.style, {
+    left: (cx - w / 2) + 'px', top: (cy - h / 2) + 'px',
+    width: w + 'px', height: h + 'px',
+    fontSize: fs + 'px', lineHeight: h + 'px',
+  });
+  document.body.appendChild(inp);
+  inp.focus(); inp.select();
+
+  const origVal = inp.value;
+  const finish = () => {
+    if (!document.body.contains(inp)) return;
+    const raw = inp.value.trim();
+    if (!state.noteNumbers) state.noteNumbers = {};
+    if (raw === '') {
+      delete state.noteNumbers[note.label];
+    } else {
+      const num = parseInt(raw, 10);
+      // Duplicate guard: reject if another label already uses this number
+      const dup = Object.entries(state.noteNumbers).find(([lbl, v]) => v === num && lbl !== note.label);
+      if (dup) {
+        // Reset to original value — don't apply
+        document.body.removeChild(inp);
+        render(); syncSidebar();
+        return;
+      }
+      state.noteNumbers[note.label] = num;
+    }
+    document.body.removeChild(inp);
+    const propNum = document.getElementById('prop-num');
+    if (propNum) propNum.value = (state.noteNumbers[note.label] != null) ? state.noteNumbers[note.label] : '';
+    pushHistory(); render(); syncSidebar();
+    _syncHatNotes();
+  };
+  inp.addEventListener('blur', finish);
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter')  { inp.blur(); e.preventDefault(); }
+    if (e.key === 'Escape') { inp.value = origVal; inp.blur(); }
+    e.stopPropagation();
+  });
 }
 

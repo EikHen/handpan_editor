@@ -2,6 +2,11 @@
 
 // Note props
 const propLabel = document.getElementById('prop-label');
+let _propLabelOrig = '';  // track original label before editing
+propLabel.addEventListener('focus', () => {
+  const n = state.notes.find(nd => selectedIds.has(nd.id));
+  _propLabelOrig = n ? n.label : '';
+});
 propLabel.addEventListener('input', () => {
   if (appMode !== 'edit') return;
   const n = state.notes.find(nd => selectedIds.has(nd.id));
@@ -10,10 +15,17 @@ propLabel.addEventListener('input', () => {
 propLabel.addEventListener('change', () => {
   if (appMode !== 'edit') return;
   const n = state.notes.find(nd => selectedIds.has(nd.id));
-  if (n && enharmonicMode !== '-') {
-    n.label = rewriteLabel(n.label);
-    propLabel.value = n.label;
-    render(); updateHighlightPanel();
+  if (n) {
+    if (enharmonicMode !== '-') {
+      n.label = rewriteLabel(n.label);
+      propLabel.value = n.label;
+      render(); updateHighlightPanel();
+    }
+    // Move noteNumber from original label key to new label key
+    if (state.noteNumbers && n.label !== _propLabelOrig && _propLabelOrig in state.noteNumbers) {
+      state.noteNumbers[n.label] = state.noteNumbers[_propLabelOrig];
+      if (!state.notes.some(nd => nd !== n && nd.label === _propLabelOrig)) delete state.noteNumbers[_propLabelOrig];
+    }
   }
   pushHistory();
 });
@@ -28,6 +40,52 @@ propR.addEventListener('input', () => {
   renderNotes();
 });
 propR.addEventListener('change', pushHistory);
+
+// Note number input
+const propNum = document.getElementById('prop-num');
+propNum.addEventListener('change', () => {
+  if (appMode !== 'edit') return;
+  const n = state.notes.find(nd => selectedIds.has(nd.id));
+  if (n) {
+    if (!state.noteNumbers) state.noteNumbers = {};
+    const raw = propNum.value.trim();
+    if (raw === '') {
+      delete state.noteNumbers[n.label];
+    } else {
+      const num = parseInt(raw, 10);
+      // Duplicate guard: reject if another label already uses this number
+      const dup = Object.entries(state.noteNumbers).find(([lbl, v]) => v === num && lbl !== n.label);
+      if (dup) {
+        // Reset to previous value
+        propNum.value = (state.noteNumbers[n.label] != null) ? state.noteNumbers[n.label] : '';
+        return;
+      }
+      state.noteNumbers[n.label] = num;
+    }
+    renderNotes();
+    _syncHatNotes();
+    pushHistory();
+  }
+});
+
+// Show note numbers toggle
+document.getElementById('show-note-numbers').addEventListener('change', function() {
+  showNoteNumbers = this.checked;
+  render(); saveSettings();
+});
+
+// Re-number notes (0-based, sorted by pitch)
+function renumberNotes() {
+  state.noteNumbers = generateNoteNumbers(state.notes);
+  pushHistory(); render(); syncSidebar();
+  _syncHatNotes();
+}
+
+function clearNoteNumbers() {
+  state.noteNumbers = {};
+  pushHistory(); render(); syncSidebar();
+  _syncHatNotes();
+}
 
 const propRMulti = document.getElementById('prop-r-multi');
 propRMulti.addEventListener('input', () => {
@@ -84,6 +142,7 @@ templateSelect.addEventListener('change', e => {
   state.nextId = 1;
   for (const n of state.notes) { const num = parseInt(n.id.replace(/\D/g,'')); if (!isNaN(num) && num >= state.nextId) state.nextId = num + 1; }
   state.pan.name = tpl.name;
+  state.noteNumbers = generateNoteNumbers(state.notes);
   const panNameEl = document.getElementById('pan-name');
   if (panNameEl) panNameEl.value = tpl.name;
   selectedIds.clear();
@@ -371,6 +430,7 @@ function _welcomeEscHandler(e) { if (e.key === 'Escape') closeWelcome(); }
         state.pan    = d.pan;
         state.notes  = d.notes;
         state.nextId = 1;
+        state.noteNumbers = d.noteNumbers || {};
         for (const n of state.notes) { const num = parseInt(n.id.replace(/\D/g,'')); if (!isNaN(num) && num >= state.nextId) state.nextId = num + 1; }
         layoutLoaded = true;
         _layoutFromStorage = true;
@@ -403,8 +463,21 @@ function _welcomeEscHandler(e) { if (e.key === 'Escape') closeWelcome(); }
         const susEl = document.getElementById('audio-sustain');
         if (susEl) { susEl.value = s.sustain; document.getElementById('audio-sustain-val').textContent = s.sustain; }
       }
+      if (s.showNoteNumbers != null) {
+        showNoteNumbers = s.showNoteNumbers;
+        const cb = document.getElementById('show-note-numbers');
+        if (cb) cb.checked = showNoteNumbers;
+      }
+      if (s.hatAutoUpdateNotes != null) {
+        hatAutoUpdateNotes = s.hatAutoUpdateNotes;
+      }
     }
   } catch(e) {}
+
+  // Ensure noteNumbers is initialized
+  if (!state.noteNumbers || Object.keys(state.noteNumbers).length === 0) {
+    state.noteNumbers = generateNoteNumbers(state.notes);
+  }
 
 
   pushHistory(); resizeCanvas(); render(); syncSidebar(); syncPanSlider(); setupCustomProgDnD(); _updateEdgeBtnIcons();

@@ -1,6 +1,6 @@
 // ─── History ──────────────────────────────────────────────────────────────────
 
-function snapshot()  { return JSON.stringify({ pan: state.pan, notes: state.notes, nextId: state.nextId }); }
+function snapshot()  { return JSON.stringify({ pan: state.pan, notes: state.notes, nextId: state.nextId, noteNumbers: state.noteNumbers || {} }); }
 
 function pushHistory() {
   history.splice(histIdx + 1);
@@ -9,7 +9,7 @@ function pushHistory() {
   if (history.length > 120) { history.shift(); histIdx--; }
   if (appMode === 'explore') { _initExplorePanel(); }
   scheduleSave();
-  _syncHatNotes();
+  if (hatAutoUpdateNotes) _syncHatNotes();
 }
 
 function undo() { if (histIdx > 0)                    { histIdx--; restore(history[histIdx]); } }
@@ -18,6 +18,7 @@ function redo() { if (histIdx < history.length - 1)   { histIdx++; restore(histo
 function restore(snap) {
   const d = JSON.parse(snap);
   state.pan = d.pan; state.notes = d.notes; state.nextId = d.nextId;
+  state.noteNumbers = d.noteNumbers || {};
   selectedIds.clear(); render(); syncSidebar();
 }
 
@@ -29,6 +30,11 @@ function addNote(x = 500, y = 320) {
   if (appMode !== 'edit') return;
   const note = { id: newId(), x, y, r: 50, label: rewriteLabel('A3') };
   state.notes.push(note);
+  if (!state.noteNumbers) state.noteNumbers = {};
+  const usedNums = new Set(Object.values(state.noteNumbers));
+  let nextNum = 0;
+  while (usedNums.has(nextNum)) nextNum++;
+  state.noteNumbers[note.label] = nextNum;
   selectedIds = new Set([note.id]);
   pushHistory(); render(); syncSidebar();
   setTimeout(() => startInlineLabelEdit(note), 40);
@@ -37,7 +43,14 @@ function addNote(x = 500, y = 320) {
 function deleteSelected() {
   if (appMode !== 'edit') return;
   if (!selectedIds.size) return;
+  const deletedLabels = new Set(state.notes.filter(n => selectedIds.has(n.id)).map(n => n.label));
   state.notes = state.notes.filter(n => !selectedIds.has(n.id));
+  if (state.noteNumbers) {
+    for (const lbl of deletedLabels) {
+      // Only delete if no remaining note has this label
+      if (!state.notes.some(n => n.label === lbl)) delete state.noteNumbers[lbl];
+    }
+  }
   selectedIds.clear(); pushHistory(); render(); syncSidebar();
 }
 
@@ -49,6 +62,10 @@ function duplicateSelected() {
     if (!selectedIds.has(n.id)) continue;
     const copy = { ...n, id: newId(), x: n.x + 20, y: n.y + 20 };
     toAdd.push(copy); newIds.add(copy.id);
+    if (state.noteNumbers && !(copy.label in state.noteNumbers)) {
+      const maxNum = Object.values(state.noteNumbers).reduce((m, v) => Math.max(m, v), -1);
+      state.noteNumbers[copy.label] = maxNum + 1;
+    }
   }
   state.notes.push(...toAdd);
   selectedIds = newIds; pushHistory(); render(); syncSidebar();
@@ -162,6 +179,22 @@ function renderNotes() {
       fill: '#222', 'pointer-events': 'none' });
     txt.textContent = fmtLabel(note.label);
     g.appendChild(txt);
+
+    if (showNoteNumbers && state.noteNumbers && state.noteNumbers[note.label] != null) {
+      const nfs = Math.max(8, Math.round(fs * 0.7));
+      const numTxt = svgEl('text', { x: note.x, y: note.y + note.r * 0.45,
+        'text-anchor': 'middle', 'dominant-baseline': 'central',
+        'font-family': 'Arial, sans-serif', 'font-size': nfs,
+        fill: '#666', cursor: 'pointer' });
+      numTxt.textContent = state.noteNumbers[note.label];
+      numTxt.addEventListener('dblclick', e => {
+        e.stopPropagation();
+        if (appMode !== 'edit') return;
+        selectedIds = new Set([note.id]); render(); syncSidebar();
+        startInlineNumberEdit(note);
+      });
+      g.appendChild(numTxt);
+    }
 
     if (sel && single) {
       g.appendChild(svgEl('circle', {

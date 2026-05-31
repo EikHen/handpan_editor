@@ -87,6 +87,8 @@ function saveSettings() {
       enharmonicMode,
       vol: Math.round(audioPreviewVol * 100),
       sustain: audioPreviewSustain,
+      showNoteNumbers,
+      hatAutoUpdateNotes,
     }));
   } catch(e) {}
 }

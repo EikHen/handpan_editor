@@ -35,7 +35,8 @@ function _syncHatNotes() {
   if (!_hatReady) return;
   const sorted = [...state.notes].sort((a, b) => midiNote(a.label) - midiNote(b.label));
   const notes = sorted.map(n => n.label);
-  const noteNumbers = notes.map((_, i) => i + 1);
+  const nn = state.noteNumbers || {};
+  const noteNumbers = notes.map(label => nn[label] != null ? nn[label] : '');
   _hatSend({ type: 'hat:set-notes', notes, noteNumbers });
 }
 
@@ -166,6 +167,7 @@ window.addEventListener('message', (event) => {
       _hatSendLibrary();
       _hatSend({ type: 'hat:set-volume',  masterVolume: audioPreviewVol });
       _hatSend({ type: 'hat:set-sustain', sustain: audioPreviewSustain });
+      _hatSend({ type: 'hat:set-auto-update', autoUpdate: hatAutoUpdateNotes });
       break;
     case 'hat:volume-changed': {
       const vol = Math.max(0, Math.min(1, +msg.masterVolume || 0));
@@ -199,6 +201,11 @@ window.addEventListener('message', (event) => {
       break;
     case 'hat:playback-state':
       if (!msg.playing) _clearPanHighlights();
+      break;
+    case 'hat:auto-update-changed':
+      hatAutoUpdateNotes = !!msg.autoUpdate;
+      saveSettings();
+      if (hatAutoUpdateNotes) _syncHatNotes();
       break;
     case 'hat:pattern-changed':
       // future: persist pattern state

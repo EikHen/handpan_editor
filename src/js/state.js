@@ -34,6 +34,10 @@ let progExportRootPcs = new Set([-1]); // -1 = auto; multi-select
 // Enharmonics state
 let enharmonicMode = '-'; // '-' | 'proper' | '#' | 'b'
 
+// Note numbers & HAT auto-update
+let showNoteNumbers = false;
+let hatAutoUpdateNotes = false;
+
 // ─── localStorage persistence ─────────────────────────────────────────────────
 const LS_LAYOUT   = 'handpan-layout-v1';
 const LS_SETTINGS = 'handpan-settings-v1';

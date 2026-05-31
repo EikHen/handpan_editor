@@ -21,10 +21,16 @@ function buildSVGString(highlightPcs = null, chordLabel = '') {
 
     const fs  = Math.max(10, Math.min(Math.round(note.r * 0.46), 22));
     const lbl = fmtLabel(note.label);
+    let numSvg = '';
+    if (showNoteNumbers && state.noteNumbers && state.noteNumbers[note.label] != null) {
+      const nfs = Math.max(8, Math.round(fs * 0.7));
+      numSvg = `<text x="${note.x}" y="${note.y + note.r * 0.45}" text-anchor="middle" dominant-baseline="central" ` +
+               `font-family="Arial, sans-serif" font-size="${nfs}" fill="#666">${state.noteNumbers[note.label]}</text>`;
+    }
     s += `\n<g opacity="${opacity}">` +
          `<circle cx="${note.x}" cy="${note.y}" r="${note.r}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeW}"/>` +
          `<text x="${note.x}" y="${note.y}" text-anchor="middle" dominant-baseline="central" ` +
-         `font-family="Arial, sans-serif" font-size="${fs}" fill="#222">${lbl}</text></g>`;
+         `font-family="Arial, sans-serif" font-size="${fs}" fill="#222">${lbl}</text>${numSvg}</g>`;
   }
 
   if (chordLabel) {
@@ -80,6 +86,7 @@ function exportJSON() {
     name: state.pan.name || '',
     pan: { cx, cy, r },
     notes: state.notes,
+    noteNumbers: state.noteNumbers || {},
   }, null, 2)], { type:'application/json' }), 'handpan-layout.json');
 }
 
@@ -100,6 +107,7 @@ document.getElementById('file-input').addEventListener('change', e => {
           if (!isNaN(num) && num >= state.nextId) state.nextId = num + 1;
         }
       }
+      state.noteNumbers = d.noteNumbers || generateNoteNumbers(state.notes);
       if (enharmonicMode !== '-') applyEnharmonics();
       const panNameEl = document.getElementById('pan-name');
       if (panNameEl) panNameEl.value = state.pan.name || '';
