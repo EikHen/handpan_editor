@@ -3,5 +3,6 @@
 .claude/plans/
 .claude/prds/
 node_modules/
+test-results/
 
 *png
