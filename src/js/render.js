@@ -1,3 +1,13 @@
+/**
+ * render.js — SVG rendering, undo/redo history, note CRUD
+ *
+ * Globals exported: render, renderPan, renderNotes, snapshot, pushHistory, undo, redo,
+ *                   restore, addNote, deleteSelected, duplicateSelected, selectAll,
+ *                   getHighlightedPcs, noteVisual, svgEl, pt, newId
+ * Depends on:       state.js, theory.js, constants.js, interaction.js
+ * Used by:          interaction.js, ui.js, export.js, explore.js
+ */
+
 // ─── History ──────────────────────────────────────────────────────────────────
 
 function snapshot()  { return JSON.stringify({ pan: state.pan, notes: state.notes, nextId: state.nextId, noteNumbers: state.noteNumbers || {} }); }
@@ -250,7 +260,7 @@ function renderNotes() {
     notesLayer.appendChild(g);
   }
 
-  // Chord label just below the pan
+  // Chord label just below the pan, with collision avoidance
   if (hlMode === 'chord') {
     const lbl = svgEl('text', {
       x: 500, y: 880,
@@ -260,6 +270,24 @@ function renderNotes() {
     });
     lbl.textContent = `${CHORD_SYMBOLS[hlChordType] ?? ''} ${getDisplayNames()[hlChordRoot]} ${hlChordType}`;
     notesLayer.appendChild(lbl);
+
+    // Adjust label Y to avoid overlapping note circles
+    const MARGIN = 8;
+    let y = state.pan.cy + state.pan.r + 40;
+    for (let iter = 0; iter < state.notes.length + 1; iter++) {
+      lbl.setAttribute('y', y);
+      const bb = lbl.getBBox();
+      let worstBottom = -Infinity;
+      for (const note of state.notes) {
+        const cx = Math.max(bb.x, Math.min(note.x, bb.x + bb.width));
+        const cy2 = Math.max(bb.y, Math.min(note.y, bb.y + bb.height));
+        if (Math.hypot(cx - note.x, cy2 - note.y) < note.r + MARGIN) {
+          worstBottom = Math.max(worstBottom, note.y + note.r + MARGIN);
+        }
+      }
+      if (worstBottom === -Infinity) break;
+      y = worstBottom + bb.height / 2;
+    }
   }
 }
 

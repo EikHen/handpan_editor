@@ -1,3 +1,14 @@
+/**
+ * explore.js — Chord/progression explore panel; custom progression builder
+ *
+ * Globals exported: setMode, renderChords, renderProgressions, toRoman, chordFunction,
+ *                   chordPlayability, playScore, _initExplorePanel, updateExplorePanel,
+ *                   updateHighlightPanel, getChordTitle, getProgTitle, genProgByRoot,
+ *                   applyProgAsLayout
+ * Depends on:       state.js, constants.js, theory.js, audio.js, render.js
+ * Used by:          ui.js, render.js
+ */
+
 // ─── Progressions panel ───────────────────────────────────────────────────────
 
 function toRoman(s, type) {

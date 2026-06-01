@@ -1,3 +1,13 @@
+/**
+ * audio.js — Web Audio playback and settings persistence (localStorage)
+ *
+ * Globals exported: playNote, playChordAudio, playProgression, scheduleSave,
+ *                   saveSettings, clearSavedData, audioPreviewVol, audioPreviewSustain,
+ *                   ensureAudioCtx, midiToFreq
+ * Depends on:       state.js, theory.js, constants.js
+ * Used by:          ui.js, interaction.js, explore.js, hat-bridge.js
+ */
+
 // ─── Audio preview (re-added; accidentally removed in M6) ─────────────────────
 
 let audioPreviewVol     = 0.6;  // 0–1
@@ -5,7 +15,16 @@ let audioPreviewSustain = 1.4;  // seconds
 let _audioCtx = null;
 
 function ensureAudioCtx() {
-  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (!_audioCtx) {
+    try {
+      _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch(e) {
+      if (typeof showToast === 'function') {
+        showToast('Audio unavailable in this browser.', 4000, 'error');
+      }
+      throw e;
+    }
+  }
   if (_audioCtx.state === 'suspended') _audioCtx.resume();
   return _audioCtx;
 }
@@ -35,7 +54,9 @@ function playNote(label, when = 0, vol = null) {
       osc.start(t);
       osc.stop(t + sus + 0.05);
     }
-  } catch(e) {}
+  } catch(e) {
+    console.warn('playNote failed:', e);
+  }
 }
 
 // Return the labels of pan notes that belong to the chord (root pc + type intervals).

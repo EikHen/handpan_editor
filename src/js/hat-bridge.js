@@ -1,3 +1,13 @@
+/**
+ * hat-bridge.js — HAT rhythm editor postMessage bridge; syncs notes to HAT iframe
+ *
+ * Globals exported: _syncHatNotes, _playingLayer, _hatFrame, _hatSend, _hatFrameInit,
+ *                   _hatSendLibrary, _hatSendTheme, _highlightPanNote, _clearPanHighlights,
+ *                   _buildHatThemeVars
+ * Depends on:       state.js, theory.js, audio.js
+ * Used by:          ui.js, render.js
+ */
+
 // ─────────────────────────────────────────────
 //  HAT IFRAME BRIDGE  (M3–M5)
 // ─────────────────────────────────────────────

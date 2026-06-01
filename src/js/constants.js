@@ -1,3 +1,13 @@
+/**
+ * constants.js — Static data: colors, chord types, progressions, palette
+ *
+ * Globals exported: PC_COLORS, PC_NAMES, SHARP_NAMES, FLAT_NAMES, MAJOR_KEYS,
+ *                   ROOT_FILE, CHORD_TYPES, CHORD_SYMBOLS, ACCENT, MOODS,
+ *                   PROGRESSIONS, PALETTE, DEFAULT_STATE, TEMPLATES, DEFAULT_TEMPLATE_NAME
+ * Depends on:       —
+ * Used by:          all modules
+ */
+
 // ─── Music theory constants ───────────────────────────────────────────────────
 
 // One colour per pitch class (C … B), designed to be distinct on white background

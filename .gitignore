@@ -2,6 +2,6 @@
 .playwright-mcp/
 .claude/plans/
 .claude/prds/
-
+node_modules/
 
 *png

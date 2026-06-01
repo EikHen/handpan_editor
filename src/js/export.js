@@ -1,4 +1,34 @@
+/**
+ * export.js — SVG/PNG/JSON/ZIP export, JSON import, toast notifications
+ *
+ * Globals exported: buildSVGString, exportJSON, exportCurrentSVG, exportCurrentPNG,
+ *                   exportAllChordsZip, togglePanel, showToast, triggerImport,
+ *                   svgToPngBlob, svgToPngBlobSized, dlBlob
+ * Depends on:       state.js, theory.js, constants.js, render.js
+ * Used by:          ui.js, explore.js
+ */
+
 // ─── SVG / PNG export helpers ─────────────────────────────────────────────────
+
+// Compute a safe Y position for the chord label, avoiding collisions with note circles
+function _safeChordLabelY(label, notes, pan) {
+  const tw = label.length * 16, th = 30, MARGIN = 8;
+  let y = pan.cy + pan.r + 40 + th / 2;
+  for (let iter = 0; iter < notes.length + 1; iter++) {
+    const bx = 500 - tw / 2, by = y - th / 2;
+    let worst = -Infinity;
+    for (const n of notes) {
+      const cx = Math.max(bx, Math.min(n.x, bx + tw));
+      const cy = Math.max(by, Math.min(n.y, by + th));
+      if (Math.hypot(cx - n.x, cy - n.y) < n.r + MARGIN) {
+        worst = Math.max(worst, n.y + n.r + MARGIN);
+      }
+    }
+    if (worst === -Infinity) break;
+    y = worst + th / 2;
+  }
+  return y;
+}
 
 function buildSVGString(highlightPcs = null, chordLabel = '') {
   const { cx, cy, r } = state.pan;
@@ -45,7 +75,8 @@ function buildSVGString(highlightPcs = null, chordLabel = '') {
   }
 
   if (chordLabel) {
-    s += `\n<text x="500" y="880" text-anchor="middle" font-family="Arial, sans-serif" ` +
+    const ly = _safeChordLabelY(chordLabel, state.notes, state.pan);
+    s += `\n<text x="500" y="${ly}" text-anchor="middle" font-family="Arial, sans-serif" ` +
          `font-size="30" font-weight="bold" fill="#333">${fmtLabel(chordLabel)}</text>`;
   }
 
@@ -107,8 +138,14 @@ document.getElementById('file-input').addEventListener('change', e => {
   const file = e.target.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = ev => {
+    let d;
     try {
-      const d = JSON.parse(ev.target.result);
+      d = JSON.parse(ev.target.result);
+    } catch (err) {
+      alert('Invalid JSON: ' + err.message);
+      return;
+    }
+    try {
       if (d.pan)   { state.pan = d.pan; if (typeof d.name === 'string') state.pan.name = d.name; }
       if (d.notes) {
         state.notes = d.notes.map(n => ({ ...n, label: n.label || '' }));
@@ -123,7 +160,10 @@ document.getElementById('file-input').addEventListener('change', e => {
       const panNameEl = document.getElementById('pan-name');
       if (panNameEl) panNameEl.value = state.pan.name || '';
       selectedIds.clear(); pushHistory(); render(); syncSidebar(); syncPanSlider();
-    } catch (err) { alert('Invalid JSON: ' + err.message); }
+    } catch (err) {
+      console.error('Import failed after parse:', err);
+      showToast('Import error: ' + err.message, 5000, 'error');
+    }
   };
   reader.readAsText(file); e.target.value = '';
 });
@@ -137,7 +177,15 @@ function exportCurrentSVG() {
 function exportCurrentPNG() {
   const hpcs  = getHighlightedPcs();
   const label = hlMode === 'chord' ? `${CHORD_SYMBOLS[hlChordType] ?? ''} ${getDisplayNames()[hlChordRoot]} ${hlChordType}` : '';
-  svgToPngBlob(buildSVGString(hpcs, label)).then(blob => dlBlob(blob, 'handpan-layout.png'));
+  svgToPngBlob(buildSVGString(hpcs, label))
+    .then(blob => {
+      if (!blob) throw new Error('PNG render returned empty');
+      dlBlob(blob, 'handpan-layout.png');
+    })
+    .catch(e => {
+      console.error('PNG export failed:', e);
+      showToast('PNG export failed. Try again.', 4000, 'error');
+    });
 }
 
 // All 12 roots × types; native=true when fully playable (all tones on pan).
@@ -175,10 +223,17 @@ function showToast(msg, ms = 3500, type) {
   const el = document.getElementById('toast');
   if (!el) return;
   el.textContent = msg;
-  el.classList.toggle('warn', type === 'warn');
+  el.classList.remove('warn', 'error', 'fading');
+  if (type === 'warn') el.classList.add('warn');
+  if (type === 'error') el.classList.add('error');
   el.classList.add('visible');
   clearTimeout(el._timer);
-  el._timer = setTimeout(() => el.classList.remove('visible'), ms);
+  el._timer = setTimeout(() => {
+    el.classList.add('fading');
+    setTimeout(() => {
+      el.classList.remove('visible', 'fading');
+    }, 400);
+  }, ms);
 }
 
 function setExportStatus(msg) {
@@ -209,24 +264,29 @@ async function exportAllChordsZip() {
     return;
   }
 
-  setExportStatus(`0 / ${toExport.length} …`);
-  const zip = new JSZip();
+  try {
+    setExportStatus(`0 / ${toExport.length} …`);
+    const zip = new JSZip();
 
-  // Folder per play level → per type
-  const folderName = { complete: 'Complete', partial: 'Partial (−1)', incomplete: 'Incomplete (−2+)', none: 'None' };
+    // Folder per play level → per type
+    const folderName = { complete: 'Complete', partial: 'Partial (−1)', incomplete: 'Incomplete (−2+)', none: 'None' };
 
-  for (let i = 0; i < toExport.length; i++) {
-    const c = toExport[i];
-    setExportStatus(`${i+1} / ${toExport.length}  ${c.label}`);
-    const svg = buildSVGString(c.pcs, c.label);
-    const png = await svgToPngBlob(svg);
-    zip.folder(`${folderName[c.play]}/${c.type}`).file(c.filename, png);
+    for (let i = 0; i < toExport.length; i++) {
+      const c = toExport[i];
+      setExportStatus(`${i+1} / ${toExport.length}  ${c.label}`);
+      const svg = buildSVGString(c.pcs, c.label);
+      const png = await svgToPngBlob(svg);
+      zip.folder(`${folderName[c.play]}/${c.type}`).file(c.filename, png);
+    }
+
+    setExportStatus('Building ZIP …');
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    dlBlob(zipBlob, 'handpan-chords.zip');
+    setExportStatus(`Done — ${toExport.length} chord images exported.`);
+    setTimeout(() => setExportStatus(''), 5000);
+  } catch(e) {
+    console.error('ZIP export failed:', e);
+    showToast('ZIP export failed: ' + e.message, 5000, 'error');
   }
-
-  setExportStatus('Building ZIP …');
-  const zipBlob = await zip.generateAsync({ type: 'blob' });
-  dlBlob(zipBlob, 'handpan-chords.zip');
-  setExportStatus(`Done — ${toExport.length} chord images exported.`);
-  setTimeout(() => setExportStatus(''), 5000);
 }
 

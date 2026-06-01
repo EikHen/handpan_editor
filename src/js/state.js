@@ -1,3 +1,15 @@
+/**
+ * state.js — Global mutable state and localStorage key constants
+ *
+ * Globals exported: state, selectedIds, history, histIdx, hlMode, hlChordType,
+ *                   hlChordRoot, appMode, exploreTab, activeMood, activeRootPc,
+ *                   customProgChords, customProgOpen, progExportRootPcs, enharmonicMode,
+ *                   showNoteNumbers, focusNumbers, hatAutoUpdateNotes,
+ *                   LS_LAYOUT, LS_SETTINGS, LS_RHYTHMS, LS_WELCOME
+ * Depends on:       —
+ * Used by:          all modules
+ */
+
 // ─── State ────────────────────────────────────────────────────────────────────
 
 let state = { pan: { cx: 500, cy: 500, r: 320 }, notes: [], nextId: 1 };

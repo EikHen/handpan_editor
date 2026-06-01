@@ -1,3 +1,13 @@
+/**
+ * theory.js — Music theory helpers: pitch parsing, MIDI, layout, label formatting
+ *
+ * Globals exported: parsePitchClass, midiNote, midiToLabel, layoutFromString,
+ *                   getDisplayNames, rewriteLabel, fmtLabel, applyEnharmonics,
+ *                   generateNoteNumbers, transposeNotes
+ * Depends on:       constants.js, state.js
+ * Used by:          most modules
+ */
+
 // ─── Pitch class helpers ──────────────────────────────────────────────────────
 
 function parsePitchClass(label) {

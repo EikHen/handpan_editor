@@ -1,3 +1,11 @@
+/**
+ * templates.js — Async template loader — fetches JSON from templates/ via manifest
+ *
+ * Globals exported: TEMPLATES, DEFAULT_TEMPLATE_NAME
+ * Depends on:       constants.js
+ * Used by:          ui.js
+ */
+
 // ─── Templates: loaded from src/templates/ at startup ─────────────────────────
 // TEMPLATES is populated asynchronously via the manifest; the dropdown is
 // filled by _populateTemplateDropdown() once all fetches complete.

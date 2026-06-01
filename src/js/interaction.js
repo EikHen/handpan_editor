@@ -1,3 +1,14 @@
+/**
+ * interaction.js — Mouse/touch events, drag, selection, color popup, inline editing
+ *
+ * Globals exported: startInlineLabelEdit, startInlineNumberEdit, syncSidebar,
+ *                   getViableSelectionPcs, onNoteDown, onMove, onUp, onCanvas,
+ *                   onColor, getSelectionColor, updateSelectionInfo,
+ *                   updateHighlightPanel
+ * Depends on:       state.js, render.js, theory.js, constants.js
+ * Used by:          ui.js, render.js
+ */
+
 // ─── Interaction ──────────────────────────────────────────────────────────────
 
 let iact = null, nudgeTimer = null;

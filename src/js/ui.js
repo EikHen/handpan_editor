@@ -1,3 +1,11 @@
+/**
+ * ui.js — Sidebar wiring, keyboard shortcuts, resize handles, init IIFE
+ *
+ * Globals exported: (none — initialization side-effects only)
+ * Depends on:       all other modules (requires specific load order)
+ * Used by:          (bootstraps entire application)
+ */
+
 // ─── Sidebar controls wiring ──────────────────────────────────────────────────
 
 // Note props
