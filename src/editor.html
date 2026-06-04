@@ -315,6 +315,10 @@
         <div class="custom-prog-header">
           <span class="custom-prog-title">Custom Progression</span>
           <button class="btn is-sm cta" onclick="playCustomProg()" title="Play">▶ Play</button>
+          <button class="btn is-sm" onclick="exportCustomProgJSON()" title="Export as JSON">↓ JSON</button>
+          <button class="btn is-sm" onclick="importCustomProgJSON()" title="Import JSON">↑ JSON</button>
+          <input type="file" id="custom-prog-import-input" accept=".json"
+                 onchange="_onCustomProgImport(event)" style="display:none">
           <button class="btn is-sm" onclick="toggleCustomProgMax()" id="custom-prog-max-btn" title="Maximize">⤢</button>
           <button class="btn is-sm" onclick="toggleCustomProg()">✕</button>
         </div>

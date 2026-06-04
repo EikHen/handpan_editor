@@ -417,6 +417,9 @@ body {
   transition: border-color .12s, background .12s; cursor: default;
 }
 .custom-prog-add-slot.drag-over { border-color: var(--accent); background: var(--accent-fill); color: var(--accent); }
+.custom-prog-slot-wrap.dragging { opacity: 0.35; }
+.custom-prog-slot-wrap.drag-target-left .custom-prog-slot  { border-color: var(--accent); box-shadow: -3px 0 0 var(--accent); }
+.custom-prog-slot-wrap.drag-target-right .custom-prog-slot { border-color: var(--accent); box-shadow:  3px 0 0 var(--accent); }
 .prog-roman-strip {
   font-family: 'Courier New', Courier, monospace;
   font-size: 11px; color: var(--fg-whisper); padding: 4px 2px 2px;

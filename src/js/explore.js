@@ -515,6 +515,56 @@ function renderCustomProgBar() {
       renderCustomProgBar();
       e.stopPropagation();
     });
+
+    // ── Reorder drag ──────────────────────────────────────────────────────────
+    wrap.draggable = true;
+    wrap.addEventListener('dragstart', e => {
+      _cpDragSrcIdx = i;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', String(i));   // required by Firefox
+      setTimeout(() => wrap.classList.add('dragging'), 0);
+    });
+    wrap.addEventListener('dragend', () => {
+      _cpDragSrcIdx = -1;
+      _cpDragInsertAfter = false;
+      container.querySelectorAll('.drag-target-left, .drag-target-right, .dragging')
+        .forEach(el => el.classList.remove('drag-target-left', 'drag-target-right', 'dragging'));
+    });
+    wrap.addEventListener('dragover', e => {
+      if (_cpDragSrcIdx < 0 || _cpDragSrcIdx === i) return;
+      e.preventDefault();
+      e.stopPropagation();
+      container.querySelectorAll('.drag-target-left, .drag-target-right')
+        .forEach(el => el.classList.remove('drag-target-left', 'drag-target-right'));
+      const rect = wrap.getBoundingClientRect();
+      _cpDragInsertAfter = e.clientX > rect.left + rect.width / 2;
+      wrap.classList.add(_cpDragInsertAfter ? 'drag-target-right' : 'drag-target-left');
+    });
+    wrap.addEventListener('dragleave', e => {
+      if (!wrap.contains(e.relatedTarget))
+        wrap.classList.remove('drag-target-left', 'drag-target-right');
+    });
+    wrap.addEventListener('drop', e => {
+      if (_cpDragSrcIdx < 0) return;
+      e.preventDefault();
+      e.stopPropagation();
+      wrap.classList.remove('drag-target-left', 'drag-target-right');
+      const from        = _cpDragSrcIdx;
+      const to          = i;
+      const insertAfter = _cpDragInsertAfter;
+      _cpDragSrcIdx = -1;
+      _cpDragInsertAfter = false;
+      // Compute final index in the post-splice array
+      const finalIdx = insertAfter
+        ? (from < to ? to : to + 1)
+        : (from < to ? to - 1 : to);
+      if (finalIdx === from) return;
+      const moved = customProgChords.splice(from, 1)[0];
+      customProgChords.splice(finalIdx, 0, moved);
+      customProgSelIdxs.clear();
+      renderCustomProgBar();
+    });
+
     container.appendChild(wrap);
   });
 
@@ -526,6 +576,8 @@ function renderCustomProgBar() {
 }
 
 let customProgMaximized = false;
+let _cpDragSrcIdx      = -1;    // index of slot being reordered (-1 = none)
+let _cpDragInsertAfter = false; // true → drop after target, false → before
 function toggleCustomProgMax() {
   customProgMaximized = !customProgMaximized;
   const panel = document.getElementById('custom-prog-panel');
@@ -570,6 +622,58 @@ function playCustomProg() {
   });
 }
 
+function exportCustomProgJSON() {
+  if (!customProgChords.length) return;
+  const names = getDisplayNames();
+  const chords = customProgChords.map(ch => {
+    const sym = CHORD_SYMBOLS[ch.type] ?? ch.type;
+    return {
+      root:     ch.root,
+      rootName: names[ch.root],
+      type:     ch.type,
+      symbol:   names[ch.root] + sym,
+      panNotes: _chordLabels(ch.root, ch.type),
+    };
+  });
+  const slug = (state.pan.name || 'handpan')
+    .replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '').toLowerCase();
+  dlBlob(
+    new Blob([JSON.stringify({ version: 1, type: 'custom-progression',
+      panName: state.pan.name || '', chords }, null, 2)],
+      { type: 'application/json' }),
+    `${slug}-custom-progression.json`
+  );
+}
+
+function importCustomProgJSON() {
+  const input = document.getElementById('custom-prog-import-input');
+  if (input) input.click();
+}
+
+function _onCustomProgImport(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!Array.isArray(data.chords)) throw new Error('No chords array');
+      const imported = data.chords
+        .filter(ch => typeof ch.root === 'number' && ch.root >= 0 && ch.root <= 11
+                   && typeof ch.type === 'string' && CHORD_TYPES[ch.type])
+        .map(ch => ({ root: ch.root, type: ch.type }));
+      if (!imported.length) throw new Error('No valid chords found');
+      customProgChords = imported;
+      customProgSelIdxs.clear();
+      renderCustomProgBar();
+    } catch (err) {
+      alert('Could not import progression: ' + err.message);
+    }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
 function setupCustomProgDnD() {
   const container = document.getElementById('custom-prog-slots');
   if (!container) return;
@@ -591,6 +695,7 @@ function setupCustomProgDnD() {
     e.preventDefault();
     container.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
     if (!customProgOpen) return;
+    if (_cpDragSrcIdx >= 0) { _cpDragSrcIdx = -1; return; }  // internal reorder handled by slot
     let data;
     try { data = JSON.parse(e.dataTransfer.getData('application/json')); } catch { return; }
     if (typeof data.root !== 'number' || !data.type) return;
