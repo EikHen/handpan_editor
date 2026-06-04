@@ -455,7 +455,7 @@ function renderChords() {
 
 function buildTightSVGString(highlightPcs) {
   const { cx, cy, r } = state.pan;
-  const margin = Math.max(18, Math.round(r * 0.07));
+  const margin = Math.max(4, Math.round(r * 0.02));
   let bx0 = cx - r - margin, by0 = cy - r - margin;
   let bx1 = cx + r + margin, by1 = cy + r + margin;
   for (const n of state.notes) {
@@ -469,8 +469,8 @@ function buildTightSVGString(highlightPcs) {
   else          { const d = (bh - bw) / 2; bx0 -= d; bx1 += d; }
   const size = Math.round(bx1 - bx0);
   return buildSVGString(highlightPcs, '').replace(
-    'viewBox="0 0 1000 1400"',
-    `viewBox="${Math.round(bx0)} ${Math.round(by0)} ${size} ${size}"`
+    'width="1000" height="1400" viewBox="0 0 1000 1400"',
+    `width="${size}" height="${size}" viewBox="${Math.round(bx0)} ${Math.round(by0)} ${size} ${size}"`
   );
 }
 
@@ -518,13 +518,11 @@ function renderCustomProgBar() {
     container.appendChild(wrap);
   });
 
-  if (customProgChords.length < 5) {
-    const add = document.createElement('div');
-    add.className = 'custom-prog-add-slot';
-    add.title = 'Drag a chord here';
-    add.textContent = '＋';
-    container.appendChild(add);
-  }
+  const add = document.createElement('div');
+  add.className = 'custom-prog-add-slot';
+  add.title = 'Drag a chord here';
+  add.textContent = '＋';
+  container.appendChild(add);
 }
 
 let customProgMaximized = false;
@@ -577,10 +575,10 @@ function setupCustomProgDnD() {
   if (!container) return;
 
   container.addEventListener('dragover', e => {
-    if (customProgOpen && customProgChords.length < 5) e.preventDefault();
+    if (customProgOpen) e.preventDefault();
   });
   container.addEventListener('dragenter', e => {
-    if (!customProgOpen || customProgChords.length >= 5) return;
+    if (!customProgOpen) return;
     const addSlot = container.querySelector('.custom-prog-add-slot');
     if (addSlot) addSlot.classList.add('drag-over');
   });
@@ -592,7 +590,7 @@ function setupCustomProgDnD() {
   container.addEventListener('drop', e => {
     e.preventDefault();
     container.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-    if (!customProgOpen || customProgChords.length >= 5) return;
+    if (!customProgOpen) return;
     let data;
     try { data = JSON.parse(e.dataTransfer.getData('application/json')); } catch { return; }
     if (typeof data.root !== 'number' || !data.type) return;
