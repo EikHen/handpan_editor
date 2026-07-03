@@ -275,6 +275,25 @@
           <button class="btn" onclick="transposeNotes(-1)" title="Shift all notes down one semitone">▼ −1</button>
           <button class="btn" onclick="transposeNotes(1)" title="Shift all notes up one semitone">▲ +1</button>
         </div>
+        <div class="panel-sub-label">Visualization</div>
+        <div class="row" style="margin-bottom:4px;">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+            <input type="checkbox" id="note-circle-toggle"> Note Circle view
+          </label>
+        </div>
+        <div id="note-circle-opts" style="display:none;margin-bottom:8px;">
+          <div class="row" style="margin-bottom:4px;">
+            <label for="note-circle-order">Order</label>
+            <select id="note-circle-order">
+              <option value="chromatic">Chromatic</option>
+              <option value="fifths">Circle of Fifths</option>
+            </select>
+          </div>
+          <div class="row">
+            <label for="note-circle-top">Top note</label>
+            <select id="note-circle-top"></select>
+          </div>
+        </div>
         <div class="panel-sub-label">Pan body</div>
         <div class="row" style="margin-bottom:8px;">
           <label for="pan-r">Radius: <b id="pan-r-val">320</b> px</label>
@@ -576,6 +595,7 @@
 <script src="js/interaction.js"></script>
 <script src="js/export.js"></script>
 <script src="js/explore.js"></script>
+<script src="js/notecircle.js"></script>
 <script src="js/hat-bridge.js"></script>
 <script src="js/ui.js"></script>
 <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "c25d0543c71f4140b28b197bed42af14"}'></script><!-- End Cloudflare Web Analytics -->

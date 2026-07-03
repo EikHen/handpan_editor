@@ -97,6 +97,10 @@ function getHighlightedPcs() {
     return new Set(ivs.map(i => (hlChordRoot + i) % 12));
   }
   if (hlMode === 'selection') {
+    // Circle mode: use circleSelectedPcs instead of pan note selection
+    if (noteCircleActive) {
+      return circleSelectedPcs.size > 0 ? new Set(circleSelectedPcs) : null;
+    }
     if (selectedIds.size === 0) return null;
     const pcs = new Set();
     for (const n of state.notes) {
@@ -151,7 +155,10 @@ const panLayer   = document.getElementById('pan-layer');
 const notesLayer = document.getElementById('notes-layer');
 const selBox     = document.getElementById('sel-box');
 
-function render() { renderPan(); renderNotes(); }
+function render() {
+  if (noteCircleActive) { renderNoteCircle(); }
+  else { renderPan(); renderNotes(); }
+}
 
 function renderPan() {
   const { cx, cy, r } = state.pan;

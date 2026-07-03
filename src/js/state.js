@@ -51,6 +51,12 @@ let showNoteNumbers = false;
 let focusNumbers = false;
 let hatAutoUpdateNotes = false;
 
+// Note Circle view
+let noteCircleActive = false;       // toggle circle vs pan
+let noteCircleOrder  = 'chromatic'; // 'chromatic' | 'fifths'
+let noteCircleTopPc  = 0;          // pitch class at 12 o'clock
+let circleSelectedPcs = new Set(); // selected PCs in circle selection mode
+
 // ─── localStorage persistence ─────────────────────────────────────────────────
 const LS_LAYOUT   = 'handpan-layout-v1';
 const LS_SETTINGS = 'handpan-settings-v1';

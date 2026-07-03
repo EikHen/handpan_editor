@@ -501,6 +501,11 @@ body[data-mode="rhythm"] #rhythm-panel { display: flex; flex: 1; height: auto !i
 /* Immutability cursor guard */
 body:not([data-mode="edit"]) #canvas-wrap { cursor: default; }
 
+/* Note Circle */
+.circle-note { cursor: pointer; }
+.circle-note:hover circle { filter: brightness(0.95); }
+.circle-note.unavailable { cursor: default; }
+
 /* Inline note label editor */
 .note-label-inp {
   position: fixed; z-index: 9000; border-radius: 50%;

@@ -120,6 +120,20 @@ panR.addEventListener('input', () => {
 });
 panR.addEventListener('change', pushHistory);
 
+// Note Circle controls
+document.getElementById('note-circle-toggle').addEventListener('change', function() {
+  toggleNoteCircle(this.checked);
+});
+document.getElementById('note-circle-order').addEventListener('change', function() {
+  noteCircleOrder = this.value;
+  render(); saveSettings();
+});
+document.getElementById('note-circle-top').addEventListener('change', function() {
+  noteCircleTopPc = parseInt(this.value);
+  render(); saveSettings();
+});
+populateTopNoteDropdown();
+
 // Enharmonics dropdown
 document.getElementById('enharmonic-mode').addEventListener('change', function() {
   enharmonicMode = this.value;
@@ -489,6 +503,23 @@ function _welcomeEscHandler(e) { if (e.key === 'Escape') closeWelcome(); }
       }
       if (s.hatAutoUpdateNotes != null) {
         hatAutoUpdateNotes = s.hatAutoUpdateNotes;
+      }
+      if (s.noteCircleActive != null) {
+        noteCircleActive = s.noteCircleActive;
+        const cb = document.getElementById('note-circle-toggle');
+        if (cb) cb.checked = noteCircleActive;
+        const optsEl = document.getElementById('note-circle-opts');
+        if (optsEl) optsEl.style.display = noteCircleActive ? '' : 'none';
+      }
+      if (s.noteCircleOrder != null) {
+        noteCircleOrder = s.noteCircleOrder;
+        const sel = document.getElementById('note-circle-order');
+        if (sel) sel.value = noteCircleOrder;
+      }
+      if (s.noteCircleTopPc != null) {
+        noteCircleTopPc = s.noteCircleTopPc;
+        const sel = document.getElementById('note-circle-top');
+        if (sel) sel.value = noteCircleTopPc;
       }
     }
   } catch(e) {}

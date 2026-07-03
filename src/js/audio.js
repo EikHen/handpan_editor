@@ -111,6 +111,9 @@ function saveSettings() {
       showNoteNumbers,
       focusNumbers,
       hatAutoUpdateNotes,
+      noteCircleActive,
+      noteCircleOrder,
+      noteCircleTopPc,
     }));
   } catch(e) {}
 }

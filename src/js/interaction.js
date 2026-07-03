@@ -71,6 +71,16 @@ function onPanDown(e) {
 }
 
 document.getElementById('bg').addEventListener('mousedown', e => {
+  // Circle mode + selection: clear circle selection, skip box-select
+  if (noteCircleActive && hlMode === 'selection') {
+    if (circleSelectedPcs.size > 0) {
+      circleSelectedPcs.clear();
+      render();
+      updateCircleSelectionInfo();
+    }
+    e.preventDefault();
+    return;
+  }
   const p0 = pt(e);
   if (!e.shiftKey) {
     const wasSelMode = appMode === 'explore' && hlMode === 'selection' && selectedIds.size > 0;
@@ -451,6 +461,8 @@ function getViableSelectionPcs() {
 }
 
 function updateSelectionInfo() {
+  // Delegate to circle handler when circle is active
+  if (noteCircleActive) { updateCircleSelectionInfo(); return; }
   const el = document.getElementById('hl-selection-info');
   if (!el) return;
   if (selectedIds.size === 0) {
