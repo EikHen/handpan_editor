@@ -1,10 +1,10 @@
 /**
  * export.js — SVG/PNG/JSON/ZIP export, JSON import, toast notifications
  *
- * Globals exported: buildSVGString, exportJSON, exportCurrentSVG, exportCurrentPNG,
- *                   exportAllChordsZip, togglePanel, showToast, triggerImport,
- *                   svgToPngBlob, svgToPngBlobSized, dlBlob
- * Depends on:       state.js, theory.js, constants.js, render.js
+ * Globals exported: buildSVGString, activeViewSVG, exportJSON, exportCurrentSVG,
+ *                   exportCurrentPNG, exportAllChordsZip, togglePanel, showToast,
+ *                   triggerImport, svgToPngBlob, svgToPngBlobSized, dlBlob
+ * Depends on:       state.js, theory.js, constants.js, render.js, notecircle.js
  * Used by:          ui.js, explore.js
  */
 
@@ -106,6 +106,19 @@ function svgToPngBlobSized(svgStr, w, h) {
   });
 }
 
+// Returns the right SVG builder output depending on active view (pan vs note circle)
+function activeViewSVG(highlightPcs, chordLabel) {
+  if (noteCircleActive && typeof buildNoteCircleSVGString === 'function') {
+    return buildNoteCircleSVGString(highlightPcs, chordLabel);
+  }
+  return buildSVGString(highlightPcs, chordLabel);
+}
+
+function activeViewPngBlob(svgStr) {
+  if (noteCircleActive) return svgToPngBlobSized(svgStr, 1000, 1000);
+  return svgToPngBlob(svgStr);
+}
+
 function dlBlob(blob, name) {
   const a = Object.assign(document.createElement('a'), {
     href: URL.createObjectURL(blob), download: name });
@@ -171,13 +184,13 @@ document.getElementById('file-input').addEventListener('change', e => {
 function exportCurrentSVG() {
   const hpcs = getHighlightedPcs();
   const label = hlMode === 'chord' ? `${CHORD_SYMBOLS[hlChordType] ?? ''} ${getDisplayNames()[hlChordRoot]} ${hlChordType}` : '';
-  dlBlob(new Blob([buildSVGString(hpcs, label)], { type:'image/svg+xml' }), 'handpan-layout.svg');
+  dlBlob(new Blob([activeViewSVG(hpcs, label)], { type:'image/svg+xml' }), 'handpan-layout.svg');
 }
 
 function exportCurrentPNG() {
   const hpcs  = getHighlightedPcs();
   const label = hlMode === 'chord' ? `${CHORD_SYMBOLS[hlChordType] ?? ''} ${getDisplayNames()[hlChordRoot]} ${hlChordType}` : '';
-  svgToPngBlob(buildSVGString(hpcs, label))
+  activeViewPngBlob(activeViewSVG(hpcs, label))
     .then(blob => {
       if (!blob) throw new Error('PNG render returned empty');
       dlBlob(blob, 'handpan-layout.png');
@@ -274,8 +287,8 @@ async function exportAllChordsZip() {
     for (let i = 0; i < toExport.length; i++) {
       const c = toExport[i];
       setExportStatus(`${i+1} / ${toExport.length}  ${c.label}`);
-      const svg = buildSVGString(c.pcs, c.label);
-      const png = await svgToPngBlob(svg);
+      const svg = activeViewSVG(c.pcs, c.label);
+      const png = await activeViewPngBlob(svg);
       zip.folder(`${folderName[c.play]}/${c.type}`).file(c.filename, png);
     }
 

@@ -454,6 +454,10 @@ function renderChords() {
 // ─── Custom Progression Builder ───────────────────────────────────────────────
 
 function buildTightSVGString(highlightPcs) {
+  // Note circle view: already square, just return it
+  if (noteCircleActive && typeof buildNoteCircleSVGString === 'function') {
+    return buildNoteCircleSVGString(highlightPcs, '');
+  }
   const { cx, cy, r } = state.pan;
   const margin = Math.max(4, Math.round(r * 0.02));
   let bx0 = cx - r - margin, by0 = cy - r - margin;
@@ -803,24 +807,33 @@ async function buildDetailedProgressionPng(prog, rootPc) {
   const rows    = Math.ceil(nChords / cols);
 
   // Source crop: tight bounding box around ALL notes (including outliers) + pan body
+  const _useCircle = noteCircleActive && typeof buildNoteCircleSVGString === 'function';
   const { cx: panCx, cy: panCy, r: panR } = state.pan;
   const margin = 40;
-  let bx0 = panCx - panR, by0 = panCy - panR;
-  let bx1 = panCx + panR, by1 = panCy + panR;
-  for (const n of state.notes) {
-    bx0 = Math.min(bx0, n.x - n.r);
-    by0 = Math.min(by0, n.y - n.r);
-    bx1 = Math.max(bx1, n.x + n.r);
-    by1 = Math.max(by1, n.y + n.r);
+  let bx0, by0, bx1, by1;
+  if (_useCircle) {
+    // Note circle SVG is 1000×1000, circle at (500,480) r=300, dots r=38
+    bx0 = 500 - 300 - 38 - margin; by0 = 480 - 300 - 38 - margin;
+    bx1 = 500 + 300 + 38 + margin; by1 = 480 + 300 + 38 + margin;
+  } else {
+    bx0 = panCx - panR; by0 = panCy - panR;
+    bx1 = panCx + panR; by1 = panCy + panR;
+    for (const n of state.notes) {
+      bx0 = Math.min(bx0, n.x - n.r);
+      by0 = Math.min(by0, n.y - n.r);
+      bx1 = Math.max(bx1, n.x + n.r);
+      by1 = Math.max(by1, n.y + n.r);
+    }
+    bx0 -= margin; by0 -= margin; bx1 += margin; by1 += margin;
   }
-  bx0 -= margin; by0 -= margin; bx1 += margin; by1 += margin;
   // Expand to square so drawImage doesn't distort
   const bw = bx1 - bx0, bh = by1 - by0;
   if (bw > bh) { const d = (bw - bh) / 2; by0 -= d; by1 += d; }
   else          { const d = (bh - bw) / 2; bx0 -= d; bx1 += d; }
   const srcX    = Math.max(0, Math.round(bx0));
   const srcY    = Math.max(0, Math.round(by0));
-  const srcSize = Math.min(Math.round(bx1) - srcX, Math.round(by1) - srcY, 1000 - srcX, 1400 - srcY);
+  const _svgH   = _useCircle ? 1000 : 1400;
+  const srcSize = Math.min(Math.round(bx1) - srcX, Math.round(by1) - srcY, 1000 - srcX, _svgH - srcY);
 
   const headerH = 140;
   const footerH = 44;
@@ -900,9 +913,9 @@ async function buildDetailedProgressionPng(prog, rootPc) {
     ctx.fillText(dd, icx, cellY + 138);
     ctx.textAlign = 'left';
 
-    // ── Pan image: render existing buildSVGString, crop to pan circle, paste ──
+    // ── Pan/circle image: render active view SVG, crop and paste ──
     const highlightPcs = new Set((CHORD_TYPES[c.t] ?? []).map(i => (chordRoot + i) % 12));
-    const panSvg = buildSVGString(highlightPcs, '');
+    const panSvg = activeViewSVG(highlightPcs, '');
     const panImg = await new Promise((res, rej) => {
       const blob = new Blob([panSvg], { type: 'image/svg+xml;charset=utf-8' });
       const url  = URL.createObjectURL(blob);

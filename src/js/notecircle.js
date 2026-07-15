@@ -235,6 +235,77 @@ function updateCircleSelectionInfo() {
   }
 }
 
+// ─── SVG string export (mirrors buildSVGString but draws the note circle) ───
+
+function buildNoteCircleSVGString(highlightPcs = null, chordLabel = '') {
+  const CX = 500, CY = 480, R = 300, DOT_R = 38;
+  const W = 1000, H = 1000;
+  const positions = _getCircleNotePositions(CX, CY, R);
+  const panPcs = new Set(state.notes.map(n => parsePitchClass(n.label)).filter(p => p >= 0));
+  const names = getDisplayNames();
+
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+<rect width="${W}" height="${H}" fill="white"/>
+<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="#e0e0e0" stroke-width="1.5"/>`;
+
+  // Chord polygon
+  if (highlightPcs && highlightPcs !== 'all' && highlightPcs.size >= 2) {
+    const pts = positions.filter(p => highlightPcs.has(p.pc));
+    if (pts.length >= 2) {
+      const polyColor = (hlMode === 'chord' && PC_COLORS[hlChordRoot]) || ACCENT;
+      s += `\n<polygon points="${pts.map(p => `${p.x},${p.y}`).join(' ')}" ` +
+           `fill="${polyColor}" fill-opacity="0.12" stroke="${polyColor}" stroke-opacity="0.6" stroke-width="2"/>`;
+    }
+  }
+
+  // Note dots
+  for (const pos of positions) {
+    const onPan = panPcs.has(pos.pc);
+    const isHighlighted = highlightPcs && highlightPcs !== 'all' && highlightPcs.has(pos.pc);
+    const isAllHighlight = highlightPcs === 'all';
+
+    let strokeColor = onPan ? '#333' : '#ccc';
+    let strokeW = 2;
+    let textColor = onPan ? '#222' : '#aaa';
+    let noteOpacity = onPan ? 1 : 0.35;
+
+    if (isHighlighted || isAllHighlight) {
+      strokeColor = PC_COLORS[pos.pc] || ACCENT;
+      strokeW = onPan ? 5 : 3;
+      noteOpacity = 1;
+    }
+
+    const fs = onPan ? 16 : 14;
+    const fw = onPan ? 'bold' : 'normal';
+    s += `\n<g opacity="${noteOpacity}">` +
+         `<circle cx="${pos.x}" cy="${pos.y}" r="${DOT_R}" fill="white" stroke="${strokeColor}" stroke-width="${strokeW}"/>` +
+         `<text x="${pos.x}" y="${pos.y}" text-anchor="middle" dominant-baseline="central" ` +
+         `font-family="Arial, sans-serif" font-size="${fs}" font-weight="${fw}" fill="${textColor}">${names[pos.pc]}</text></g>`;
+  }
+
+  if (chordLabel) {
+    s += `\n<text x="${CX}" y="${CY + R + 70}" text-anchor="middle" font-family="Arial, sans-serif" ` +
+         `font-size="30" font-weight="bold" fill="#333">${fmtLabel(chordLabel)}</text>`;
+  }
+
+  s += '\n</svg>';
+  return s;
+}
+
+// Position helper that accepts custom center/radius (for SVG export)
+function _getCircleNotePositions(cx, cy, r) {
+  const order = _getCircleOrder();
+  const topIdx = order.indexOf(noteCircleTopPc);
+  const positions = [];
+  for (let i = 0; i < 12; i++) {
+    const idx = (topIdx + i) % 12;
+    const pc = order[idx];
+    const angle = (i / 12) * Math.PI * 2 - Math.PI / 2;
+    positions.push({ pc, x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) });
+  }
+  return positions;
+}
+
 // ─── UI helpers ──────────────────────────────────────────────────────────────
 
 function toggleNoteCircle(active) {
